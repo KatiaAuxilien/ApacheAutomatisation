@@ -146,20 +146,15 @@ Listen 79
 	error_handler $(mkdir /etc/apache2/certificate) "La création du dossier /etc/apache2/certificate a échoué."
 	cd /etc/apache2/certificate
 	
-	error_handler $(openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out apache-certificate.crt -keyout apache.key) "Génération du certificat ssl a échoué."
-	#TODO : Ajouter en argument de génération de certificat les informations.
-	# Générer une clé privée
+	#error_handler $(openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out apache-certificate.crt -keyout apache.key) "Génération du certificat ssl a échoué."
+	
+	error_handler $(openssl genpkey -algorithm RSA -out private_key.pem -aes256) "La génération de la clé privée a échouée."
 
-openssl genpkey -algorithm RSA -out private_key.pem -aes256
+	error_handler $(openssl req -new -key private_key.pem -out cert_request.csr -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=auxilienk.com/emailAddress="$admin_address) "La génération de demande de signature de certifcat"
 
-# Générer une demande de signature de certificat (CSR)
-openssl req -new -key private_key.pem -out cert_request.csr -subj "/C=FR/ST=Ile-de-France/L=Paris/O=MyCompany/OU=MyDepartment/CN=mydomain.com/emailAddress=admin@mydomain.com"
+	error_handler $(openssl x509 -req -days 365 -in cert_request.csr -signkey private_key.pem -out certificate.crt) "La génération le certificat auto-signé"
 
-# Générer le certificat auto-signé
-openssl x509 -req -days 365 -in cert_request.csr -signkey private_key.pem -out certificate.crt
-
-# Vérifier le certificat
-openssl x509 -in certificate.crt -text -noout
+	error_handler $(openssl x509 -in certificate.crt -text -noout) "La vérification du certificat a échouée."
 
 	cd
 	
