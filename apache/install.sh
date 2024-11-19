@@ -148,7 +148,19 @@ Listen 79
 	
 	error_handler $(openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out apache-certificate.crt -keyout apache.key) "Génération du certificat ssl a échoué."
 	#TODO : Ajouter en argument de génération de certificat les informations.
-	
+	# Générer une clé privée
+
+openssl genpkey -algorithm RSA -out private_key.pem -aes256
+
+# Générer une demande de signature de certificat (CSR)
+openssl req -new -key private_key.pem -out cert_request.csr -subj "/C=FR/ST=Ile-de-France/L=Paris/O=MyCompany/OU=MyDepartment/CN=mydomain.com/emailAddress=admin@mydomain.com"
+
+# Générer le certificat auto-signé
+openssl x509 -req -days 365 -in cert_request.csr -signkey private_key.pem -out certificate.crt
+
+# Vérifier le certificat
+openssl x509 -in certificate.crt -text -noout
+
 	cd
 	
 #Sécurisation : .htaccess & masquage dans l'url des noms de dossier.
