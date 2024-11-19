@@ -229,18 +229,15 @@ Listen 79
 #Sécurisation : .htaccess & masquage dans l'url des noms de dossier.
 	
 	logs_info "Sécurisation du .htaccess ..."
-
-		mkdir /home/$USER/www/
-		error_handler $? "La création du dossier /home/"$USER"/www/ a échouée."
 		
-		touch /home/$USER/www/.htpasswd
-		error_handler $? "La création du fichier /home/"$USER"/www/.htpasswd a échouée."
+		touch /var/www/.htpasswd
+		error_handler $? "La création du fichier /var/www/.htpasswd a échouée."
 
 		echo -n "Pleaser enter an encrypted password: "
 		read password
 
-		echo "admin:"$password"" > /home/$USER/www/.htpasswd
-		error_handler $? "L'écriture dans le fichier /home/"$USER"/www/.htpasswd a échouée."
+		echo "admin:"$password"" > /var/www/.htpasswd
+		error_handler $? "L'écriture dans le fichier /var/www/.htpasswd a échouée."
 
 #Création et configuration de n sites
 	for site_name in siteA siteB
@@ -829,7 +826,7 @@ SecUnicodeMapFile unicode.mapping 20127
 # setting On, as there is no active receiver for the information.
 SecStatusEngine Off
 " > /etc/modsecurity/modsecurity.conf
-	error_handler $? "L'écriture du fichier  /etc/modsecurity/modsecurity.conf a échouée."
+	error_handler $? "L'écriture du fichier /etc/modsecurity/modsecurity.conf a échouée."
 	
 	sudo systemctl restart apache2
 	error_handler $? "Le rédémarrage du service apache2 a échoué."
