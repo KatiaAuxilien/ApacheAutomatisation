@@ -3,16 +3,16 @@
 admin_address="katiaauxilien@mail.fr"
 
 error_handler() {
-	if [$1 != 0 ]
+	if [$1 !-ne 0 ]
 	then
-		echo "Erreur : " $2 ""
+		echo "Erreur : $2 "
 		exit $1
 	fi
 }
 
 logs(){
-	date_formated=$(date +"%m-%d-%Y %H:%M:%S")
-	echo "[" $date_formated "] "$1""
+	date_formated=$(date +"%d-%m-%Y %H:%M:%S")
+	echo "[$date_formated] $1" | tee -a /var/log/apache_install.log
 }
 
 
@@ -21,9 +21,11 @@ logs(){
 logs "Installation du service apache en cours ..."
 
 sudo apt update -y
-error_handler $(sudo apt install -y apache2) "L'installation du service a échoué."
+sudo apt install -y apache2
+error_handler $? "L'installation du service a échoué."
 
-error_handler $(sudo ufw allow 'Apache') "L'autorisation du service apache auprès du pare-feu a échoué."
+sudo ufw allow 'Apache'
+error_handler $? "L'autorisation du service apache auprès du pare-feu a échoué."
 
 logs "Installation du service apache terminée."
 
@@ -31,21 +33,28 @@ logs "Installation du service apache terminée."
 
 logs "Lancement du service apache en cours..."
 
-error_handler $(sudo systemctl start apache2) "Le lancement du service apache a échoué."
+sudo systemctl start apache2
+error_handler $? "Le lancement du service apache a échoué."
 	
 logs "Service apache lancé."
 
 #Configuration du service (HTTPS, ModSecurity, ModEvasive, mod_ratelimit, .htaccess & masquage dans l'url des noms de dossier.)
 
 logs "Configuration du service apache en cours..."
+	
+	sudo chmod -R 755 /var/www
+	error_handler $? "Attribution des privilèges 755 au dossier /var/www a échoué."
 
-	error_handler $(sudo chmod -R 755 /var/www) "Attribution des privilèges 755 au dossier /var/www a échoué."
+	sudo apt-get install openssl
+	error_handler $? "L'installation d'openssl a échoué."
 
-	error_handler $(sudo apt-get install openssl) "L'installation d'openssl a échoué."
-	error_handler $(a2enmod ssl) "L'activation du module Mod_ssl a échoué."
-	error_handler $(a2enmod rewrite) "L'activation du module Mod_rewrite a échoué."
+	sudo a2enmod ssl
+	error_handler $? "L'activation du module Mod_ssl a échoué."
 
-	error_handler $(echo "
+	sudo a2enmod rewrite
+	error_handler $? "L'activation du module Mod_rewrite a échoué."
+
+	echo "
 ServerRoot \"/etc/apache2\"
 
 ServerName 127.0.0.1
@@ -109,9 +118,11 @@ LogFormat \"%{User-agent}i\" agent
 
 IncludeOptional conf-enabled/*.conf
 
-IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf ) "L'écriture du fichier de configuration apache a échoué."
+IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf
 
-	error_handler $(echo "
+	error_handler $? "L'écriture du fichier de configuration apache a échoué."
+
+	echo "
 <VirtualHost *:80>
 	Rewrite Engine On
 	RewriteCond %{HTTPS} !=on
@@ -126,9 +137,11 @@ IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf ) "L'écriture
 	SSLEngine on
 	SSLCertificateFile /etc/apache2/certificate/apache-certificate.crt
 	SSLCertificateKeyFile /etc/apache2/certificate/apache.key
-</VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf) "L'écriture du fichier de configuration du site par défaut a échoué."
+</VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf
+
+	error_handler $? "L'écriture du fichier de configuration du site par défaut a échoué."
 	
-	error_handler $(echo "
+	echo "
 # If you just change the port or add more ports here, you will likely also
 # have to change the VirtualHost statement in
 # /etc/apache2/sites-enabled/000-default.conf
@@ -141,46 +154,59 @@ Listen 79
 
 <IfModule mod_gnutls.c>
 	Listen 443
-</IfModule>" > /etc/apache2/ports.conf ) "L'écriture du fichier de configuration des ports a échoué."
+</IfModule>" > /etc/apache2/ports.conf 
+	error_handler $? "L'écriture du fichier de configuration des ports a échoué."
 
-	error_handler $(mkdir /etc/apache2/certificate) "La création du dossier /etc/apache2/certificate a échoué."
+	mkdir /etc/apache2/certificate
+	error_handler $? "La création du dossier /etc/apache2/certificate a échoué."
 	cd /etc/apache2/certificate
 	
-	#error_handler $(openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out apache-certificate.crt -keyout apache.key) "Génération du certificat ssl a échoué."
+	openssl genpkey -algorithm RSA -out private_key.pem -aes256
+	error_handler $? "La génération de la clé privée a échouée."
+
+	openssl req -new -key private_key.pem -out cert_request.csr -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=auxilienk.com/emailAddress="$admin_address
+	error_handler $? "La génération de demande de signature de certifcat"
+
+	openssl x509 -req -days 365 -in cert_request.csr -signkey private_key.pem -out certificate.crt
+	error_handler $? "La génération le certificat auto-signé"
+
+	openssl x509 -in certificate.crt -text -noout
+	error_handler $? "La vérification du certificat a échouée."
 	
-	error_handler $(openssl genpkey -algorithm RSA -out private_key.pem -aes256) "La génération de la clé privée a échouée."
-
-	error_handler $(openssl req -new -key private_key.pem -out cert_request.csr -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=auxilienk.com/emailAddress="$admin_address) "La génération de demande de signature de certifcat"
-
-	error_handler $(openssl x509 -req -days 365 -in cert_request.csr -signkey private_key.pem -out certificate.crt) "La génération le certificat auto-signé"
-
-	error_handler $(openssl x509 -in certificate.crt -text -noout) "La vérification du certificat a échouée."
-
 	cd
 	
 #Sécurisation : .htaccess & masquage dans l'url des noms de dossier.
 	
 	logs "Sécurisation du .htaccess ..."
 
-		error_handler $(mkdir /usr/home/$USER/www/) "La création du dossier /usr/home/"$USER"/www/ a échoué."
-		error_handler $(touch /usr/home/$USER/www/.htpasswd) "La création du fichier /usr/home/"$USER"/www/.htpasswd a échoué."
+		mkdir /usr/home/$USER/www/
+		error_handler $? "La création du dossier /usr/home/"$USER"/www/ a échoué."
+		
+		touch /usr/home/$USER/www/.htpasswd
+		error_handler $? "La création du fichier /usr/home/"$USER"/www/.htpasswd a échoué."
 
 		echo -n "Pleaser enter an encrypted password: "
 		read password
 
-		error_handler $(echo "admin:"$password"" > /usr/home/$USER/www/.htpasswd) "L'écriture dans le fichier /usr/home/"$USER"/www/.htpasswd a échoué."
+		echo "admin:"$password"" > /usr/home/$USER/www/.htpasswd
+		error_handler $? "L'écriture dans le fichier /usr/home/"$USER"/www/.htpasswd a échoué."
 
 #Création et configuration de n sites
 	for site_name in siteA siteB
 	do
 		
 		logs "Création du site " $site_name "..."
-
-		error_handler $(sudo mkdir /var/www/$site_name) "La création du dossier /var/www/"$site_name" a échoué."
-		error_handler $(sudo chown -R $USER:$USER /var/www/$site_name) "L'attribution des droits sur le dossier /var/www/"$site_name" a échoué."
-
-		error_handler $(sudo touch /var/www/$site_name/index.html) "La création du fichier /var/www/"$site_name"/index.html a échoué."
-		error_handler $(echo "
+		
+		sudo mkdir /var/www/$site_name
+		error_handler $? "La création du dossier /var/www/"$site_name" a échoué."
+		
+		sudo chown -R $USER:$USER /var/www/$site_name
+		error_handler $? "L'attribution des droits sur le dossier /var/www/"$site_name" a échoué."
+		
+		sudo touch /var/www/$site_name/index.html
+		error_handler $? "La création du fichier /var/www/"$site_name"/index.html a échoué."
+		
+		echo "
 <html>
 	<head>
 		<title>Bienvenue sur le " $site_name " !</title>
@@ -188,11 +214,14 @@ Listen 79
 	<body>
 		<h1> N'allez pas sur l'autre site, ce site est malveillant !</h1>
 	</body>
-</html>" > /var/www/$site_name/index.html) "L'écriture dans le fichier /var/www/"$site_name"/index.html a échoué."
+</html>" > /var/www/$site_name/index.html
+		error_handler $? "L'écriture dans le fichier /var/www/"$site_name"/index.html a échoué."
 
 		#Création des Virtual Host
-		error_handler $(touch /etc/apache2/site-available/$site_name.conf) "La création du fichier /etc/apache2/site-available/"$site_name".conf a échoué."
-		error_handler $(echo "
+		touch /etc/apache2/site-available/$site_name.conf
+		error_handler $? "La création du fichier /etc/apache2/site-available/"$site_name".conf a échoué."
+
+		echo "
 <VirtualHost *:80>
 	Rewrite Engine On
 	RewriteCond %{HTTPS} !=on
@@ -209,17 +238,22 @@ Listen 79
 	SSLCertificateFile /etc/apache2/certificate/apache-certificate.crt
 	SSLCertificateKeyFile /etc/apache2/certificate/apache.key
 </VirtualHost>
-		" > /etc/apache2/site-available/$site_name.conf) "L'écriture du fichier /etc/apache2/site-available/"$site_name".conf a échoué."
+		" > /etc/apache2/site-available/$site_name.conf
+		error_handler $? "L'écriture du fichier /etc/apache2/site-available/"$site_name".conf a échoué."
 
-		error_handler $(sudo a2ensite $site_name) "L'activation du fichier de configuration du site "$site_name" a échoué."
+		sudo a2ensite $site_name
+		error_handler $? "L'activation du fichier de configuration du site "$site_name" a échoué."
+		
+		sudo systemctl restart apache2
+		error_handler $? "Le redémarrage du service apache a échoué."
 
-		error_handler $(sudo systemctl restart apache2) "Le redémarrage du service apache a échoué."
+		echo "127.0.0.1 " $site_name "" >> /etc/hosts
+		error_handler $? "L'écriture du fichier /etc/hosts a échoué."
 
-		error_handler $(echo "127.0.0.1 " $site_name "" >> /etc/hosts) "L'écriture du fichier /etc/hosts a échoué."
-
-		error_handler $(touch /var/www/$site_name/confidential/confidential.html) "La création du fichier /var/www/"$site_name"/confidential/confidential.html a échoué."
-
-		error_handler $(echo "
+		touch /var/www/$site_name/confidential/confidential.html
+		error_handler $? "La création du fichier /var/www/"$site_name"/confidential/confidential.html a échoué."
+		
+		echo "
 <html>
 	<head>
 		<title>Page protégée du site "$site_name"</title>
@@ -227,15 +261,18 @@ Listen 79
 	<body>
 		<h1> SECRET IMPORTANT </h1>
 	</body>
-</html>" > /var/www/$site_name/confidential/confidential.html) "L'écriture dans le fichier /var/www/"$site_name"/confidential/confidential.html a échoué."
+</html>" > /var/www/$site_name/confidential/confidential.html
+		error_handler $? "L'écriture dans le fichier /var/www/"$site_name"/confidential/confidential.html a échoué."
 		
-		error_handler $(touch /var/www/$site_name/confidential/.htaccess) "La création du fichier /var/www/"$site_name"/confidential/.htaccess a échoué."
-error_handler $(echo "AuthType Basic
-AuthName \"Accès protégé\"
-AuthUserFile /usr/home/$USER/www/.htpasswd
-require valid-user
-Options -Indexes" > /var/www/$site_name/confidential/.htaccess) "L'écriture du fichier /var/www/"$site_name"/confidential/.htaccess a échoué."
+		touch /var/www/$site_name/confidential/.htaccess
+		error_handler $? "La création du fichier /var/www/"$site_name"/confidential/.htaccess a échoué."
 
+		echo "AuthType Basic
+		AuthName \"Accès protégé\"
+		AuthUserFile /usr/home/$USER/www/.htpasswd
+		require valid-user
+		Options -Indexes" > /var/www/$site_name/confidential/.htaccess
+		error_handler $? "L'écriture du fichier /var/www/"$site_name"/confidential/.htaccess a échoué."
 
 		logs ""$site_name " créé."
 	done
@@ -248,15 +285,17 @@ Options -Indexes" > /var/www/$site_name/confidential/.htaccess) "L'écriture du 
 	
 	logs "Installation et configuration de ModSecurity en cours..."
 		
-		error_handler $(sudo apt install -y libapache2-mod-security2) "L'installation de libapache2-mod-security2 a échoué."
+		sudo apt install -y libapache2-mod-security2 
+		error_handler $? "L'installation de libapache2-mod-security2 a échoué."
 		
 		#TODO trouver un moyen de vérifier la bonne installation de modsecurity avec un retour de variable.
 		# "security2_module (shared)"
 		apachectl -M | grep --color security
 		
-		error_handler $(sudo cp /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf) "Copie du fichier /etc/modsecurity/modsecurity.conf-recommended a échoué."
+		sudo cp /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf
+		error_handler $? "Copie du fichier /etc/modsecurity/modsecurity.conf-recommended a échoué."
 		
-		error_handler $(echo "
+		echo "
 # -- Rule engine initialization ----------------------------------------------
 
 # Enable ModSecurity, attaching it to every transaction. Use detection
@@ -735,18 +774,24 @@ SecUnicodeMapFile unicode.mapping 20127
 # NB: As of April 2022, there is no longer any advantage to turning this
 # setting On, as there is no active receiver for the information.
 SecStatusEngine Off
-" > /etc/modsecurity/modsecurity.conf) "L'écriture du fichier  /etc/modsecurity/modsecurity.conf a échoué."
-		error_handler $(sudo systemctl restart apache2) "Le rédémarrage du service apache2 a échoué."
-		
+" > /etc/modsecurity/modsecurity.conf
+	error_handler $? "L'écriture du fichier  /etc/modsecurity/modsecurity.conf a échoué."
+	
+	sudo systemctl restart apache2
+	error_handler $? "Le rédémarrage du service apache2 a échoué."
 	
 	logs "Installation et configuration de ModSecurity terminée."
 	
 	#ModEvasive
 	
 	logs "Installation et configuration de ModEvasive en cours..."
-		error_handler $(sudo apt install -y libapache2-mod-evasive) "L'installation du service libapache2-mod-evasive a échoué."
-		error_handler $(touch /etc/apache2/mods-available/evasive.conf) "La création /etc/apache2/mods-available/evasive.conf a échoué."
-		error_handler $(echo "
+		sudo apt install -y libapache2-mod-evasive
+		error_handler $? "L'installation du service libapache2-mod-evasive a échoué."
+		
+		touch /etc/apache2/mods-available/evasive.conf
+		error_handler $? "La création /etc/apache2/mods-available/evasive.conf a échoué."
+
+		echo "
 		<IfModule mod_evasive20.c>
 		    DOSHashTableSize    3097
 		    DOSPageCount        2
@@ -757,8 +802,13 @@ SecStatusEngine Off
 		    DOSEmailNotify      "$admin_address"
 		    DOSLogDir           \"/var/log/mod_evasive\"
 		</IfModule>
-		" > /etc/apache2/mods-available/evasive.conf) "L'écriture du fichier /etc/apache2/mods-available/evasive.conf a échoué."
-		error_handler $(sudo a2enmod evasive) "L'activation du ModEvasive a échoué."
-		error_handler $(sudo systemctl restart apache2) "Le redémarrage du service apache a échoué."
+		" > /etc/apache2/mods-available/evasive.conf
+		error_handler $? "L'écriture du fichier /etc/apache2/mods-available/evasive.conf a échoué."
+		
+		sudo a2enmod evasive
+		error_handler $? "L'activation du ModEvasive a échoué."
+		
+		sudo systemctl restart apache2
+		error_handler $? "Le redémarrage du service apache a échoué."
 	
 	logs "Installation et configuration de ModEvasive terminée."
