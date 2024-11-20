@@ -73,7 +73,6 @@ then
 	sudo rm -rf /var/log/apache2
 	error_handler $? "La suppression du dossier /var/log/apache2"
 
-
 	sudo rm -rf /var/www/siteA
 	error_handler $? "La suppression du dossier /var/www/siteA"
 

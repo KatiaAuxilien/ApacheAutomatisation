@@ -293,7 +293,7 @@ Listen 79
 		sudo a2ensite $site_name
 		error_handler $? "L'activation du fichier de configuration du site "$site_name" a échouée."
 		
-		sudo systemctl restart apache2
+		sudo systemctl reload apache2
 		error_handler $? "Le redémarrage du service apache a échouée."
 
 		echo "127.0.0.1 " $site_name "" >> /etc/hosts
