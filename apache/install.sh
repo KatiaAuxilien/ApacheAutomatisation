@@ -44,14 +44,15 @@ then
 	exit 1
 fi
 
-echo "Entrez l'adresse mail de votre administrateur :"
-read -s admin_address
-echo "Confirmez l'adresse mail :"
-read -s confirm_address
-if [ "$admin_address" != "$confirm_address" ]; then
-	echo "Les adresses ne correspondent pas."
-	exit 1
-fi
+#echo "Entrez l'adresse mail de votre administrateur :"
+#read -s admin_address
+#echo "Confirmez l'adresse mail :"
+#read -s confirm_address
+#if [ "$admin_address" != "$confirm_address" ]; then
+#	echo "Les adresses ne correspondent pas."
+#	exit 1
+#fi
+admin_address="katiaauxilien@mail.fr"
 logs_success "Adresse mail enregistrée."
 
 echo "Entrez un mot de passe pour protéger la clé privée :"
@@ -266,8 +267,8 @@ Listen 79
 		error_handler $? "L'écriture dans le fichier /var/www/"$site_name"/index.html a échouée."
 
 		#Création des Virtual Host
-		touch /etc/apache2/site-available/$site_name.conf
-		error_handler $? "La création du fichier /etc/apache2/site-available/"$site_name".conf a échouée."
+		touch /etc/apache2/sites-available/$site_name.conf
+		error_handler $? "La création du fichier /etc/apache2/sites-available/"$site_name".conf a échouée."
 
 		echo "
 <VirtualHost *:80>
@@ -286,8 +287,8 @@ Listen 79
 	SSLCertificateFile /etc/apache2/certificate/apache-certificate.crt
 	SSLCertificateKeyFile /etc/apache2/certificate/apache.key
 </VirtualHost>
-		" > /etc/apache2/site-available/$site_name.conf
-		error_handler $? "L'écriture du fichier /etc/apache2/site-available/"$site_name".conf a échouée."
+		" > /etc/apache2/sites-available/$site_name.conf
+		error_handler $? "L'écriture du fichier /etc/apache2/sites-available/"$site_name".conf a échouée."
 
 		sudo a2ensite $site_name
 		error_handler $? "L'activation du fichier de configuration du site "$site_name" a échouée."
