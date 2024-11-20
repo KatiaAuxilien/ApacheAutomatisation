@@ -110,20 +110,6 @@ then
 	sudo apt remove --purge libapache2-mod-evasive -y
 	error_handler $? "La désinstallation de libapache2-mod-evasive a échouée."
 
-	echo "Voulez-vous désinstaller openssl ? y/n"
-	read -r uninstall_openssl
-
-	if [[ "$uninstall_openssl" =~ ^[yY]$ ]] 
-	then
-		logs_info "Désintallation d'openssl en cours ..."
-		
-		sudo apt remove --purge openssl -y
-		error_handler $? "La désinstallation d'openssl a échouée."
-
-		logs_success "Désinstallation d'openssl terminée."
-	else
-		logs_success "La désintallation d'openssl a été annulée."
-	fi
 else
 	logs_success "La désintallation d'apache a été annulée."
 fi

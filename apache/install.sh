@@ -44,23 +44,33 @@ then
 	exit 1
 fi
 
-#echo "Entrez l'adresse mail de votre administrateur :"
-#read -s admin_address
-#echo "Confirmez l'adresse mail :"
-#read -s confirm_address
-#if [ "$admin_address" != "$confirm_address" ]; then
-#	echo "Les adresses ne correspondent pas."
-#	exit 1
-#fi
-admin_address="katiaauxilien@mail.fr"
+echo -n "Entrez le nom de domaine de votre site suivi de son extension de domaine : "
+read domain_name
+echo -n "Confirmez le nom de domaine : "
+read confirm_domain_name
+if [ "$domain_name" != "$confirm_domain_name" ]; then
+	echo "${RED}Les noms de domaine ne correspondent pas.${RESET}"
+	exit 1
+fi
+logs_success "Nom de domaine enregistré."
+
+echo -n "Entrez l'adresse mail de votre administrateur : "
+read admin_address
+echo -n "Confirmez l'adresse mail : "
+read confirm_address
+if [ "$admin_address" != "$confirm_address" ]; then
+	echo "${RED}Les adresses ne correspondent pas.${RESET}"
+	exit 1
+fi
+
 logs_success "Adresse mail enregistrée."
 
-echo "Entrez un mot de passe pour protéger la clé privée :"
+echo "Entrez un mot de passe pour protéger la clé privée : "
 read -s key_password
-echo "Confirmez le mot de passe :"
+echo "Confirmez le mot de passe : "
 read -s confirm_password
 if [ "$key_password" != "$confirm_password" ]; then
-	echo "Les mots de passe ne correspondent pas"
+	echo "${RED}Les mots de passe ne correspondent pas.${RESET}"
 	exit 1
 fi
 logs_success "Mot de passe enregistré."
@@ -102,6 +112,9 @@ logs_info "Configuration du service apache en cours..."
 
 	sudo a2enmod ssl
 	error_handler $? "L'activation du module Mod_ssl a échouée."
+
+	a2ensite default-ssl
+	error_handler $? "L'activation du module default_ssl a échouée."
 
 	sudo a2enmod rewrite
 	error_handler $? "L'activation du module Mod_rewrite a échouée."
@@ -176,20 +189,21 @@ IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf
 	error_handler $? "L'écriture du fichier de configuration apache a échouée."
 
 	echo "
-<VirtualHost *:80>
+<VirtualHost *:79>
 	RewriteEngine On
 	RewriteCond %{HTTPS} !=on
 	RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
 </VirtualHost>
-<VirtualHost *:79>
+<VirtualHost *:443>
 	ServerAdmin $admin_address
-	ServerName 127.0.0.1
+	ServerName $domain_name
+	ServerAlias localhost
 	DocumentRoot /var/www/html
 	ErrorLog \${APACHE_LOG_DIR}/error.log
 	CustomLog \${APACHE_LOG_DIR}/access.log combined
 	SSLEngine on
-	SSLCertificateFile /etc/apache2/certificate/server.crt
-	SSLCertificateKeyFile /etc/apache2/certificate/server.key
+	SSLCertificateFile /etc/apache2/certificate/"$domain_name"_server.crt
+	SSLCertificateKeyFile /etc/apache2/certificate/"$domain_name"_server.key
 </VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf
 
 	error_handler $? "L'écriture du fichier de configuration du site par défaut a échouée."
@@ -214,17 +228,17 @@ Listen 79
 	error_handler $? "La création du dossier /etc/apache2/certificate a échouée."
 	cd /etc/apache2/certificate
 	
-	sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/server.crt -keyout /etc/apache2/certificate/server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=auxilienk.com/emailAddress=$admin_address" -passin pass:"$key_password"
-	error_handler $? "La génération de demande de signature de certifcat"
+	sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$domain_name"_server.crt -keyout /etc/apache2/certificate/"$domain_name"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$domain_name/emailAddress=$admin_address" -passin pass:"$key_password"
+	error_handler $? "La génération de demande de signature de certifcat a échouée"
 
-	openssl x509 -in server.crt -text -noout
+	openssl x509 -in "$domain_name"_server.crt -text -noout
 	error_handler $? "La vérification du certificat a échouée."
 	
 	cd
 
-	sudo chmod 600 /etc/apache2/certificate/server.key
-	sudo chown root:root /etc/apache2/certificate/server.crt
-	sudo chmod 440 /etc/apache2/certificate/server.crt
+	sudo chmod 600 /etc/apache2/certificate/"$domain_name"_server.key
+	sudo chown root:root /etc/apache2/certificate/"$domain_name"_server.crt
+	sudo chmod 440 /etc/apache2/certificate/"$domain_name"_server.crt
 
 #Sécurisation : .htaccess & masquage dans l'url des noms de dossier.
 	
@@ -233,7 +247,7 @@ Listen 79
 		touch /var/www/.htpasswd
 		error_handler $? "La création du fichier /var/www/.htpasswd a échouée."
 
-		echo -n "Pleaser enter an encrypted password: "
+		echo -n "Entrez un mot de passe chiffré (.htpasswd) : "
 		read password
 
 		echo "admin:$password" > /var/www/.htpasswd
@@ -242,7 +256,6 @@ Listen 79
 #Création et configuration de n sites
 	for site_name in siteA siteB
 	do
-		
 		logs_info "Création du site " $site_name "..."
 		
 		sudo mkdir /var/www/$site_name
@@ -264,27 +277,47 @@ Listen 79
 	</body>
 </html>" > /var/www/$site_name/index.html
 		error_handler $? "L'écriture dans le fichier /var/www/$site_name/index.html a échouée."
+		cd /etc/apache2/certificate
+
+		sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt -keyout /etc/apache2/certificate/"$site_name"".""$domain_name"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$site_name.$domain_name/emailAddress=$admin_address" -passin pass:"$key_password"
+		error_handler $? "La génération de demande de signature de certifcat du site $site_name a échouée"
+
+		openssl x509 -in "$site_name"".""$domain_name"_server.crt -text -noout
+		error_handler $? "La vérification du certificat a échouée."
+		
+		cd
+
+		sudo chmod 600 /etc/apache2/certificate/"$site_name"".""$domain_name"_server.key
+		sudo chown root:root /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt
+		sudo chmod 440 /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt
 
 		#Création des Virtual Host
 		touch /etc/apache2/sites-available/$site_name.conf
 		error_handler $? "La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
 		echo "
-<VirtualHost *:80>
+<VirtualHost *:79>
 	RewriteEngine On
 	RewriteCond %{HTTPS} !=on
 	RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
 </VirtualHost>
-<VirtualHost *:79>
+<VirtualHost *:443>
 	ServerAdmin $admin_address
-	ServerName $site_name
-	ServerAlias $site_name.fr
+	ServerName $site_name.$domain_name
 	DocumentRoot /var/www/$site_name
+
+	SSLEngine on
+	SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt
+	SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$domain_name"_server.key
+
+	<Directory /var/www/$site_name>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
 	ErrorLog \${APACHE_LOG_DIR}/error.log
 	CustomLog \${APACHE_LOG_DIR}/access.log combined
-	SSLEngine on
-	SSLCertificateFile /etc/apache2/certificate/server.crt
-	SSLCertificateKeyFile /etc/apache2/certificate/server.key
 </VirtualHost>" > /etc/apache2/sites-available/$site_name.conf
 		error_handler $? "L'écriture du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
@@ -294,7 +327,7 @@ Listen 79
 		sudo systemctl reload apache2
 		error_handler $? "Le redémarrage du service apache a échouée."
 
-		echo "127.0.0.1 " $site_name "" >> /etc/hosts
+		echo "127.0.0.1 $site_name.$domain_name" >> /etc/hosts
 		error_handler $? "L'écriture du fichier /etc/hosts a échouée."
 
 		mkdir /var/www/$site_name/confidential
@@ -323,9 +356,6 @@ Listen 79
 		require valid-user
 		Options -Indexes" > /var/www/$site_name/confidential/.htaccess
 		error_handler $? "L'écriture du fichier /var/www/$site_name/confidential/.htaccess a échouée."
-#TODO : Corriger erreur : 
-# mkdir: cannot create directory ‘/usr/home/root/www/’: No such file or directory
-#Erreur : La création du dossier /usr/home/root/www/ a échouée. 
 
 		logs_success "site_name créé."
 	done
