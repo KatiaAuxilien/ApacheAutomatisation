@@ -67,8 +67,8 @@ then
 	sudo rm -rf /etc/apache2
 	error_handler $? "La suppression du dossier /etc/apache2"
 	
-	sudo rm -rf /var/www/html
-	error_handler $? "La suppression du dossier /var/www/html"
+	#sudo rm -rf /var/www/html
+	#error_handler $? "La suppression du dossier /var/www/html"
 	
 	sudo rm -rf /var/log/apache2
 	error_handler $? "La suppression du dossier /var/log/apache2"
@@ -119,18 +119,6 @@ then
 		
 		sudo apt remove --purge openssl -y
 		error_handler $? "La désinstallation d'openssl a échouée."
-
-		sudo rm -rf /usr/local/bin/openssl
-		error_handler $? "La suppression du dossier /usr/local/bin/openssl a échouée."
-
-		sudo rm -rf /usr/local/lib/libssl*
-		error_handler $? "La suppression du dossier /usr/local/lib/libssl* a échouée."
-
-		sudo rm -rf /usr/local/libcrypto*
-		error_handler $? "La suppression du dossier /usr/local/libcrypto* a échouée."
-
-		sudo rm -rf /usr/local/include/openssl
-		error_handler $? "La suppression du dossier /usr/local/include/openssl a échouée."
 
 		logs_success "Désinstallation d'openssl terminée."
 	else
