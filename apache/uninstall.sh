@@ -46,17 +46,27 @@ fi
 
 
 echo "Voulez-vous vraiment désinstaller le serveur apache et ses configurations ? y/n"
-read -r uninstall_openssl
+read -r uninstall_apache
 
-if [[ "$response" =~ ^[yY]$ ]] 
+if [[ "$uninstall_apache" =~ ^[yY]$ ]] 
 then
 	sudo systemctl stop apache2
+	error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
+	
 	sudo systemctl disable apache2
+	error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
+	
 	sudo apt remove --purge apache2 -y
+	error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
 
 	sudo rm -rf /etc/apache2
+	error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
+	
 	sudo rm -rf /var/www/html
+	error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
+	
 	sudo rm -rf/var/log/apache2
+	error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
 
 #apache2 -v
 #sudo find / -name "*apache*" -exec rm -rf {} \
@@ -81,11 +91,16 @@ then
 #/var/www/.htpasswd
 #/etc/apache2/mods-available/evasive.conf
 
+	sudo apt remove --purge libapache2-mod-security2 -y
+	error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
+	
+	sudo apt remove --purge libapache2-mod-evasive -y
+	error_handler $? "La désinstallation de libapache2-mod-evasive a échouée."
 	
 	echo "Voulez-vous désinstaller openssl ? y/n"
 	read -r uninstall_openssl
 
-	if [[ "$response" =~ ^[yY]$ ]] 
+	if [[ "$uninstall_openssl" =~ ^[yY]$ ]] 
 	then
 		logs_info "La désintallation d'openssl en cours ..."
 		
