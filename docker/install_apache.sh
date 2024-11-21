@@ -6,6 +6,11 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 RESET='\033[0m'
 
+DOMAIN_NAME="servicescomplexe.fr"
+ADMIN_ADDRESS="katiaauxilien@mail.fr"
+KEY_PASSWORD="0407"
+ENC_PASSWORD="$apr1$n76w8xsa$Djk9BnpiCHjne4yjczo401"
+
 error_handler()
 {
 	if [ $1 -ne 0 ]
@@ -44,52 +49,20 @@ then
 	exit 1
 fi
 
-echo -n "Entrez le nom de domaine de votre site suivi de son extension de domaine : "
-read domain_name
-echo -n "Confirmez le nom de domaine : "
-read confirm_domain_name
-if [ "$domain_name" != "$confirm_domain_name" ]; then
-	echo "${RED}Les noms de domaine ne correspondent pas.${RESET}"
-	exit 1
-fi
-logs_success "Nom de domaine enregistré."
-
-echo -n "Entrez l'adresse mail de votre administrateur : "
-read admin_address
-echo -n "Confirmez l'adresse mail : "
-read confirm_address
-if [ "$admin_address" != "$confirm_address" ]; then
-	echo "${RED}Les adresses ne correspondent pas.${RESET}"
-	exit 1
-fi
-
-logs_success "Adresse mail enregistrée."
-
-echo "Entrez un mot de passe pour protéger la clé privée : "
-read -s key_password
-echo "Confirmez le mot de passe : "
-read -s confirm_password
-if [ "$key_password" != "$confirm_password" ]; then
-	echo "${RED}Les mots de passe ne correspondent pas.${RESET}"
-	exit 1
-fi
-logs_success "Mot de passe enregistré."
-#TODO : Fonction pour gérer les entrées.
-
 #Installation du service
 
-logs_info "Installation du service apache en cours ..."
+logs_info "Configuration du service ufw en cours ..."
 
 ufw allow 'Apache'
 error_handler $? "L'autorisation du service apache auprès du pare-feu a échouée."
 
-logs_success "Installation du service apache terminée."
+logs_success "Configuration du service ufw terminée."
 
 #Lancement du service
 
 logs_info "Lancement du service apache en cours..."
 
-systemctl start apache2
+service apache2 start
 error_handler $? "Le lancement du service apache a échouée."
 	
 logs_success "Service apache lancé."
@@ -109,6 +82,7 @@ logs_info "Configuration du service apache en cours..."
 
 	a2enmod rewrite
 	error_handler $? "L'activation du module Mod_rewrite a échouée."
+	
 
 	echo "
 ServerRoot \"/etc/apache2\"
@@ -178,7 +152,7 @@ IncludeOptional conf-enabled/*.conf
 IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf
 
 	error_handler $? "L'écriture du fichier de configuration apache a échouée."
-
+	
 	echo "
 <VirtualHost *:79>
 	RewriteEngine On
@@ -186,7 +160,7 @@ IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf
 	RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
 </VirtualHost>
 <VirtualHost *:443>
-	ServerAdmin $admin_address
+	ServerAdmin $ADMIN_ADDRESS
 	ServerName $domain_name
 	ServerAlias localhost
 	DocumentRoot /var/www/html
@@ -219,17 +193,17 @@ Listen 79
 	error_handler $? "La création du dossier /etc/apache2/certificate a échouée."
 	cd /etc/apache2/certificate
 	
-	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$domain_name"_server.crt -keyout /etc/apache2/certificate/"$domain_name"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$domain_name/emailAddress=$admin_address" -passin pass:"$key_password"
+	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$DOMAIN_NAME"_server.crt -keyout /etc/apache2/certificate/"$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$ADMIN_ADDRESS" -passin pass:"$KEY_PASSWORD"
 	error_handler $? "La génération de demande de signature de certifcat a échouée"
 
-	openssl x509 -in "$domain_name"_server.crt -text -noout
+	openssl x509 -in "$DOMAIN_NAME"_server.crt -text -noout
 	error_handler $? "La vérification du certificat a échouée."
 	
 	cd
 
-	chmod 600 /etc/apache2/certificate/"$domain_name"_server.key
-	chown root:root /etc/apache2/certificate/"$domain_name"_server.crt
-	chmod 440 /etc/apache2/certificate/"$domain_name"_server.crt
+	chmod 600 /etc/apache2/certificate/"$DOMAIN_NAME"_server.key
+	chown root:root /etc/apache2/certificate/"$DOMAIN_NAME"_server.crt
+	chmod 440 /etc/apache2/certificate/"$DOMAIN_NAME"_server.crt
 
 #Sécurisation : .htaccess & masquage dans l'url des noms de dossier.
 	
@@ -238,10 +212,7 @@ Listen 79
 		touch /var/www/.htpasswd
 		error_handler $? "La création du fichier /var/www/.htpasswd a échouée."
 
-		echo -n "Entrez un mot de passe chiffré (.htpasswd) : "
-		read password
-
-		echo "admin:$password" > /var/www/.htpasswd
+		echo "admin:$ENC_PASSWORD" > /var/www/.htpasswd
 		error_handler $? "L'écriture dans le fichier /var/www/.htpasswd a échouée."
 
 #Création et configuration de n sites
@@ -270,17 +241,17 @@ Listen 79
 		error_handler $? "L'écriture dans le fichier /var/www/$site_name/index.html a échouée."
 		cd /etc/apache2/certificate
 
-		openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt -keyout /etc/apache2/certificate/"$site_name"".""$domain_name"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$site_name.$domain_name/emailAddress=$admin_address" -passin pass:"$key_password"
+		openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt -keyout /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$site_name.$DOMAIN_NAME/emailAddress=$ADMIN_ADDRESS" -passin pass:"$KEY_PASSWORD"
 		error_handler $? "La génération de demande de signature de certifcat du site $site_name a échouée"
 
-		openssl x509 -in "$site_name"".""$domain_name"_server.crt -text -noout
+		openssl x509 -in "$site_name"".""$DOMAIN_NAME"_server.crt -text -noout
 		error_handler $? "La vérification du certificat a échouée."
 		
 		cd
 
-		chmod 600 /etc/apache2/certificate/"$site_name"".""$domain_name"_server.key
-		chown root:root /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt
-		chmod 440 /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt
+		chmod 600 /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
+		chown root:root /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
+		chmod 440 /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
 
 		#Création des Virtual Host
 		touch /etc/apache2/sites-available/$site_name.conf
@@ -293,13 +264,13 @@ Listen 79
 	RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
 </VirtualHost>
 <VirtualHost *:443>
-	ServerAdmin $admin_address
-	ServerName $site_name.$domain_name
+	ServerAdmin $ADMIN_ADDRESS
+	ServerName "$site_name"."$DOMAIN_NAME"
 	DocumentRoot /var/www/$site_name
 
 	SSLEngine on
-	SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt
-	SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$domain_name"_server.key
+	SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
+	SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
 
 	<Directory /var/www/$site_name>
         Options Indexes FollowSymLinks
@@ -315,11 +286,11 @@ Listen 79
 		a2ensite $site_name
 		error_handler $? "L'activation du fichier de configuration du site $site_name a échouée."
 		
-		systemctl reload apache2
+		service apache2 reload
 		error_handler $? "Le redémarrage du service apache a échouée."
 
-		echo "127.0.0.1 $site_name.$domain_name" >> /etc/hosts
-		error_handler $? "L'écriture du fichier /etc/hosts a échouée."
+		#echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
+		#error_handler $? "L'écriture du fichier /etc/hosts a échouée."
 
 		mkdir /var/www/$site_name/confidential
 		error_handler $? "La création du dossier /var/www/$site_name/confidential a échouée."
@@ -353,7 +324,7 @@ Listen 79
 
 	logs_success "Sécurisation du .htaccess terminée."
 
-	systemctl restart apache2
+	service apache2 restart
 	
 	#ModSecurity
 	
@@ -597,7 +568,7 @@ SecUnicodeMapFile unicode.mapping 20127
 SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 	error_handler $? "L'écriture du fichier /etc/modsecurity/modsecurity.conf a échouée."
 	
-	systemctl restart apache2
+	service apache2 restart
 	error_handler $? "Le rédémarrage du service apache2 a échoué."
 	
 	logs_success "Installation et configuration de ModSecurity terminée."
@@ -617,7 +588,7 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 		    DOSPageInterval     1
 		    DOSSiteInterval     1
 		    DOSBlockingPeriod   10
-		    DOSEmailNotify      $admin_address
+		    DOSEmailNotify      $ADMIN_ADDRESS
 		    DOSLogDir           \"/var/log/mod_evasive\"
 		</IfModule>
 		" > /etc/apache2/mods-available/evasive.conf
@@ -626,7 +597,8 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 		a2enmod evasive
 		error_handler $? "L'activation du ModEvasive a échouée."
 		
-		systemctl restart apache2
+		service apache2 restart
 		error_handler $? "Le redémarrage du service apache a échouée."
 	
 	logs_success "Installation et configuration de ModEvasive terminée."
+logs_end "Installation terminée."

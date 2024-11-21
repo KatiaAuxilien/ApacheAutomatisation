@@ -1,21 +1,20 @@
-# Utiliser l'image Ubuntu officielle comme base
 FROM ubuntu:latest
 
-# Installer les dépendances nécessaires
 RUN apt-get update -y && \
-    apt-get install -y apache2 openssl libapache2-mod-security2 libapache2-mod-evasive
+    apt-get install -y apache2 openssl libapache2-mod-security2 libapache2-mod-evasive ufw
 
-# Copier le script d'installation et de configuration dans le conteneur
+# Copy the installation script
 COPY install_apache.sh /usr/local/bin/install_apache.sh
 
-# Rendre le script exécutable
+COPY hosts /etc/hosts
+
+# Make the script executable
 RUN chmod +x /usr/local/bin/install_apache.sh
 
-# Exécuter le script d'installation et de configuration
+# Run the installation script
 RUN /usr/local/bin/install_apache.sh
 
-# Exposer le port 80 pour Apache
-EXPOSE 79
+# Expose the necessary port
+EXPOSE 80
 
-# Démarrer Apache au démarrage du conteneur
 CMD ["apache2ctl", "-D", "FOREGROUND"]
