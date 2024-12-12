@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  web-container:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      - web-network
+    depends_on:
+      - db-container
+    ports:
+      - 7900:79
+  db-container:
+    image: mysql:8.3
+    environment:
+      MYSQL_ROOT_PASSWORD: $(DB_ROOT_PASSWORD)
+      MYSQL_DATABASE: $(DB_NAME)
+      MYSQL_USER: $(DB_USERNAME)
+      MYSQL_PASSWORD: $(DB_PASSWORD)
+    networks:
+      - web-network
+    ports:
+      - 3307:3307
+networks:
+  web-network:
+    driver: bridge
