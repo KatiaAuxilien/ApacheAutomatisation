@@ -92,7 +92,7 @@ logs_info "Désintallation d'apache en cours ..."
 	sudo rm -rf /var/www/.htpasswd
 	#TODO
 
-	sudo apt-get purge apache2 apache2-utils apache2-bin apache2.2-common
+	sudo apt-get purge apache2 apache2-utils apache2-bin apache2.2-common -y
 	error_handler $? "La désinstallation des services apache2 apache2-utils apache2-bin apache2.2-common a échouée."
 
 
