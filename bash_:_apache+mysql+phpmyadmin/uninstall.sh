@@ -45,7 +45,7 @@ then
 fi
 
 
-echo "Voulez-vous vraiment désinstaller le serveur apache et ses configurations ? y/n"
+echo "Voulez-vous vraiment désinstaller les services apache, php, phpmyadmin, mysql et ses configurations ? y/n"
 read -r uninstall_apache
 
 if [[ "$uninstall_apache" =~ ^[yY]$ ]] 
@@ -183,3 +183,4 @@ logs_end "Désinstallation complète des services de configurations. Tous les fi
 else
 	logs_success "La désintallation d'apache a été annulée."
 fi
+exit 0

@@ -824,3 +824,4 @@ Alias /phpmyadmin /usr/share/phpmyadmin
 	#TODO
 
 logs_success "Configuration du service phpmyadmin terminée."
+exit 0
