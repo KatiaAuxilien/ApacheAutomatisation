@@ -50,7 +50,8 @@ read -r uninstall_apache
 
 if [[ "$uninstall_apache" =~ ^[yY]$ ]] 
 then
-	logs_info "Désintallation d'apache en cours ..."
+
+logs_info "Désintallation d'apache en cours ..."
 
 	sudo systemctl stop apache2
 	error_handler $? "L'arrêt du service apache a échouée."
@@ -58,17 +59,26 @@ then
 	sudo systemctl disable apache2
 	error_handler $? "La désactivation d'apache a échouée."
 	
+	sudo a2dissite siteA.conf
+	#TODO
+
+	sudo a2dissite siteB.conf
+	#TODO
+
+	sudo a2dismod ssl headers rewrite evasive security2
+	#TODO
+
+	sudo rm -rf /etc/apache2/certificate/"$DOMAIN_NAME"_server.crt
+	#TODO
+
+	sudo rm -rf /etc/apache2/certificate/"$DOMAIN_NAME"_server.key
+	#TODO
+
 	sudo apt remove --purge apache2 -y
 	error_handler $? "La désinstallation d'apache a échouée."
 
-	sudo apt-get purge apache2 apache2-utils apache2-bin apache2.2-common
-	error_handler $? "La désinstallation des services apache2 apache2-utils apache2-bin apache2.2-common a échouée."
-
 	sudo rm -rf /etc/apache2
 	error_handler $? "La suppression du dossier /etc/apache2"
-	
-	#sudo rm -rf /var/www/html
-	#error_handler $? "La suppression du dossier /var/www/html"
 	
 	sudo rm -rf /var/log/apache2
 	error_handler $? "La suppression du dossier /var/log/apache2"
@@ -78,6 +88,13 @@ then
 
 	sudo rm -rf /var/www/siteB
 	error_handler $? "La suppression du dossier /var/www/siteB"
+
+	sudo rm -rf /var/www/.htpasswd
+	#TODO
+
+	sudo apt-get purge apache2 apache2-utils apache2-bin apache2.2-common
+	error_handler $? "La désinstallation des services apache2 apache2-utils apache2-bin apache2.2-common a échouée."
+
 
 #apache2 -v
 #sudo find / -name "*apache*" -exec rm -rf {} \
@@ -102,17 +119,67 @@ then
 #/var/www/.htpasswd
 #/etc/apache2/mods-available/evasive.conf
 
-	logs_success "Désinstallation d'apache terminée."
+# /etc/modsecurity/modsecurity.conf
+
+logs_success "Désinstallation d'apache terminée."
+
+logs_info "Désintallation de mod-security en cours ..."
 
 	sudo apt remove --purge libapache2-mod-security2 -y
 	error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
 	
+	sudo rm -rf /etc/apache2/mods-available/security2.conf
+	#TODO
+
+logs_success "Désinstallation de mod-security terminée."
+
+logs_info "Désintallation de mod-evasive en cours ..."
 	sudo apt remove --purge libapache2-mod-evasive -y
 	error_handler $? "La désinstallation de libapache2-mod-evasive a échouée."
+
+	sudo rm -rf /var/log/mod_evasive
+	#TODO
+
+	sudo rm -rf /etc/apache2/mods-available/evasive.conf
+	#TODO
+
+logs_success "Désinstallation de mod-evasive terminée."
+
+logs_info "Désintallation de phpmyadmin et php en cours ..."
+	sudo rm -rf /etc/phpmyadmin/.htpasswd
+	#TODO
+
+	sudo apt remove --purge phpmyadmin -y
+	#TODO
+
+	sudo apt remove --purge libapache2-mod-php -y
+	#TODO
+
+	sudo apt remove --purge php-mysql -y
+	#TODO
+logs_success "Désinstallation de phpmyadmin et php terminée."
+
+logs_info "Désintallation de mysql en cours ..."
+	sudo systemctl stop mysql
+	#TODO
+
+	sudo rm -rf /var/lib/mysql
+	#TODO
+	sudo rm -rf /var/lib/etc/mysql
+	#TODO
+	sudo deluser mysql-server
+	#TODO
+	sudo delgroup mysql
+	#TODO
+	sudo rm /usr/bin/mysql_secure_installation
+	#TODO
+	sudo apt remove --purge mysql-server -y
+	#TODO
+
+logs_success "Désinstallation de mysql terminée."
+
+logs_end "Désinstallation complète des services de configurations. Tous les fichiers et paramètres ont été supprimés."
 
 else
 	logs_success "La désintallation d'apache a été annulée."
 fi
-
-
-logs_end "Désinstallation terminée."

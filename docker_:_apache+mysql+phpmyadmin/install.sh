@@ -52,7 +52,6 @@ check_variable() {
 
 
 required_vars_start=(
-  "PROD"
   "DOMAIN_NAME"
   "WEB_ADMIN_ADDRESS"
   "PHP_ADMIN_ADDRESS"
@@ -66,7 +65,6 @@ required_vars_script=(
   "WEB_SERVICE_URL"
   "DB_HOST"
   "DB_SERVICE_URL"
-  "DB_TYPE"
   "DB_PORT"
   "DB_USERNAME"
   "DB_PASSWORD"

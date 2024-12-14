@@ -38,56 +38,74 @@ logs_end()
 	logs "$BLUE" "$*"
 }
 
+# Fonction pour vérifier si une variable est définie
+check_variable() {
+  local var_name=$1
+  if [ -z "${!var_name+x}" ]; then
+    echo "La variable $var_name n'est pas définie."
+    exit 2
+  fi
+}
+
+required_vars_start=(
+"DOMAIN_NAME"
+
+"WEB_ADMIN_ADDRESS"
+
+
+"SSL_KEY_PASSWORD"
+"HTACCESS_PASSWORD"
+
+"PHP_ROOT_PASSWORD"
+"PHP_HTACCESS_PASSWORD"
+"PHP_ADMIN_ADDRESS"
+"PHP_ADMIN_USERNAME"
+"PHP_ADMIN_PASSWORD"
+"PHP_PORT"
+
+"DB_HOST"
+"DB_PORT"
+"DB_ROOT_PASSWORD"
+
+"DB_ADMIN_USERNAME"
+"DB_ADMIN_PASSWORD"
+"DB_ADMIN_ADDRESS"
+
+"DB_NAME"
+)
+
+
 if [ "$EUID" -ne 0 ]
 then
 	echo -e "${RED}Ce script doit être exécuté avec des privilèges root.${RESET}"
 	exit 1
 fi
 
-echo -n "Entrez le nom de domaine de votre site suivi de son extension de domaine : "
-read domain_name
-echo -n "Confirmez le nom de domaine : "
-read confirm_domain_name
-if [ "$domain_name" != "$confirm_domain_name" ]; then
-	echo "${RED}Les noms de domaine ne correspondent pas.${RESET}"
-	exit 1
-fi
-logs_success "Nom de domaine enregistré."
 
-echo -n "Entrez l'adresse mail de votre administrateur : "
-read admin_address
-echo -n "Confirmez l'adresse mail : "
-read confirm_address
-if [ "$admin_address" != "$confirm_address" ]; then
-	echo "${RED}Les adresses ne correspondent pas.${RESET}"
-	exit 1
-fi
+#TODO : Vérifier le format valide des variables
 
-logs_success "Adresse mail enregistrée."
+logs_info "Vérification des variables .env..."
 
-echo "Entrez un mot de passe pour protéger la clé privée : "
-read -s key_password
-echo "Confirmez le mot de passe : "
-read -s confirm_password
-if [ "$key_password" != "$confirm_password" ]; then
-	echo "${RED}Les mots de passe ne correspondent pas.${RESET}"
-	exit 1
-fi
-logs_success "Mot de passe enregistré."
-#TODO : Fonction pour gérer les entrées.
+	source .env
+
+	for var in "${required_vars_start[@]}"; do
+	  check_variable "$var"
+	done
+
+logs_success "Les variables .env ont été vérifiées."
 
 #Installation du service
 
 logs_info "Installation du service apache en cours ..."
 
-sudo apt update -y
-error_handler $? "La mise à jour des paquets a échouée."
+	sudo apt update -y
+	error_handler $? "La mise à jour des paquets a échouée."
 
-sudo apt install -y apache2
-error_handler $? "L'installation du service a échouée."
+	sudo apt install -y apache2
+	error_handler $? "L'installation du service a échouée."
 
-sudo ufw allow 'Apache'
-error_handler $? "L'autorisation du service apache auprès du pare-feu a échouée."
+	sudo ufw allow 'Apache'
+	error_handler $? "L'autorisation du service apache auprès du pare-feu a échouée."
 
 logs_success "Installation du service apache terminée."
 
@@ -95,10 +113,59 @@ logs_success "Installation du service apache terminée."
 
 logs_info "Lancement du service apache en cours..."
 
-sudo systemctl start apache2
-error_handler $? "Le lancement du service apache a échouée."
+	sudo systemctl start apache2
+	error_handler $? "Le lancement du service apache a échouée."
 	
 logs_success "Service apache lancé."
+
+
+logs_info "Installation du service mysql en cours..."
+
+	sudo apt install mysql-server 
+	error_handler $? "L'installation du service mysql a échouée."
+
+	sudo /usr/bin/mysql_secure_installation 
+	#Ce script supprime certains paramètres par défaut peu sûrs et vérouillera l'accès à la bdd.
+	error_handler $? "Le lancement du script de sécurisation mysql a échoué."
+#--password="$DB_PASSWORD" --user="$DB_USERNAME" --port="$DB_PORT" --host="$DB_HOST"
+
+logs_success "Le service mysql est installé."
+
+logs_info "Configuration du service mysql en cours..."
+
+	sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_ROOT_PASSWORD';"
+
+	sudo mysql -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$PHP_ROOT_PASSWORD';"
+
+	sudo mysql -e "CREATE DATABASE $DB_NAME; "
+	error_handler $? "La création de la base de données $DB_NAME a échouée."
+
+	sudo mysql -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_PASSWORD';GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'@'localhost';"
+	error_handler $? "La création de l'utilisateur administrateur $DB_ADMIN_USERNAME a échouée."
+
+	mysql -u "$DB_USERNAME" -p "$DB_PASSWORD" -e "SHOW DATABASES; CREATE TABLE $DB_NAME.todo_list (item_id INT AUTO_INCREMENT, content VARCHAR(255), PRIMARY KEY (item_id)); INSERT INTO $DB_NAME.todo_list (content) VALUES (\"Sécuriser le site web.\"); SELECT * FROM $DB_NAME.todo_list;"
+	error_handler $? "La création de la table $DB_NAME.todo_list a échouée."
+
+logs_success "La configuration mysql est terminée."
+
+logs_info "Installation du service php en cours..."
+
+	sudo apt install php libapache2-mod-php php-mysql
+	error_handler $? "L'installation du service php a échouée."
+
+logs_success "Le service php est installé."
+
+
+logs_info "Installation du service phpmyadmin en cours..."
+
+	sudo apt-get install phpmyadmin
+	error_handler $? "L'installation du service phpmyadmin a échouée."
+
+	sudo phpenmod mcrypt sudo phenmod mbstring
+	error_handler $? "La configuration du service phpmyadmin a échouée."
+
+logs_success "Le service phpmyadmin est installé."
+
 
 #Configuration du service (HTTPS, ModSecurity, ModEvasive, mod_ratelimit, .htaccess & masquage dans l'url des noms de dossier.)
 
@@ -118,6 +185,10 @@ logs_info "Configuration du service apache en cours..."
 
 	sudo a2enmod rewrite
 	error_handler $? "L'activation du module Mod_rewrite a échouée."
+
+	sudo a2enmod headers
+	error_handler $? "L'activation du module Mod_headers a échouée."
+
 
 	echo "
 ServerRoot \"/etc/apache2\"
@@ -202,15 +273,17 @@ IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf
 	RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
 </VirtualHost>
 <VirtualHost *:443>
-	ServerAdmin $admin_address
-	ServerName $domain_name
+	ServerAdmin $WEB_ADMIN_ADDRESS
+	ServerName $DOMAIN_NAME
 	ServerAlias localhost
 	DocumentRoot /var/www/html
 	ErrorLog \${APACHE_LOG_DIR}/error.log
 	CustomLog \${APACHE_LOG_DIR}/access.log combined
 	SSLEngine on
-	SSLCertificateFile /etc/apache2/certificate/"$domain_name"_server.crt
-	SSLCertificateKeyFile /etc/apache2/certificate/"$domain_name"_server.key
+	SSLCertificateFile /etc/apache2/certificate/"$DOMAIN_NAME"_server.crt
+	SSLCertificateKeyFile /etc/apache2/certificate/"$DOMAIN_NAME"_server.key
+
+	Header set Strict-Transport-Security \"max-age=31536000; includeSubDomains\"
 </VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf
 
 	error_handler $? "L'écriture du fichier de configuration du site par défaut a échouée."
@@ -235,17 +308,17 @@ Listen 79
 	error_handler $? "La création du dossier /etc/apache2/certificate a échouée."
 	cd /etc/apache2/certificate
 	
-	sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$domain_name"_server.crt -keyout /etc/apache2/certificate/"$domain_name"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$domain_name/emailAddress=$admin_address" -passin pass:"$key_password"
+	sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$DOMAIN_NAME"_server.crt -keyout /etc/apache2/certificate/"$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
 	error_handler $? "La génération de demande de signature de certifcat a échouée"
 
-	openssl x509 -in "$domain_name"_server.crt -text -noout
+	openssl x509 -in "$DOMAIN_NAME"_server.crt -text -noout
 	error_handler $? "La vérification du certificat a échouée."
 	
 	cd
 
-	sudo chmod 600 /etc/apache2/certificate/"$domain_name"_server.key
-	sudo chown root:root /etc/apache2/certificate/"$domain_name"_server.crt
-	sudo chmod 440 /etc/apache2/certificate/"$domain_name"_server.crt
+	sudo chmod 600 /etc/apache2/certificate/"$DOMAIN_NAME"_server.key
+	sudo chown root:root /etc/apache2/certificate/"$DOMAIN_NAME"_server.crt
+	sudo chmod 440 /etc/apache2/certificate/"$DOMAIN_NAME"_server.crt
 
 #Sécurisation : .htaccess & masquage dans l'url des noms de dossier.
 	
@@ -254,10 +327,7 @@ Listen 79
 		touch /var/www/.htpasswd
 		error_handler $? "La création du fichier /var/www/.htpasswd a échouée."
 
-		echo -n "Entrez un mot de passe chiffré (.htpasswd) : "
-		read password
-
-		echo "admin:$password" > /var/www/.htpasswd
+		htpasswd -c -n /var/www/.htpasswd admin \${HTACCESS_PASSWORD}
 		error_handler $? "L'écriture dans le fichier /var/www/.htpasswd a échouée."
 
 #Création et configuration de n sites
@@ -286,17 +356,17 @@ Listen 79
 		error_handler $? "L'écriture dans le fichier /var/www/$site_name/index.html a échouée."
 		cd /etc/apache2/certificate
 
-		sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt -keyout /etc/apache2/certificate/"$site_name"".""$domain_name"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$site_name.$domain_name/emailAddress=$admin_address" -passin pass:"$key_password"
+		sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt -keyout /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$site_name.$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
 		error_handler $? "La génération de demande de signature de certifcat du site $site_name a échouée"
 
-		openssl x509 -in "$site_name"".""$domain_name"_server.crt -text -noout
+		openssl x509 -in "$site_name"".""$DOMAIN_NAME"_server.crt -text -noout
 		error_handler $? "La vérification du certificat a échouée."
 		
 		cd
 
-		sudo chmod 600 /etc/apache2/certificate/"$site_name"".""$domain_name"_server.key
-		sudo chown root:root /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt
-		sudo chmod 440 /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt
+		sudo chmod 600 /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
+		sudo chown root:root /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
+		sudo chmod 440 /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
 
 		#Création des Virtual Host
 		touch /etc/apache2/sites-available/$site_name.conf
@@ -309,13 +379,15 @@ Listen 79
 	RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
 </VirtualHost>
 <VirtualHost *:443>
-	ServerAdmin $admin_address
-	ServerName $site_name.$domain_name
+	ServerAdmin $WEB_ADMIN_ADDRESS
+	ServerName $site_name.$DOMAIN_NAME
 	DocumentRoot /var/www/$site_name
 
 	SSLEngine on
-	SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$domain_name"_server.crt
-	SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$domain_name"_server.key
+	SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
+	SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
+
+	Header set Strict-Transport-Security \"max-age=31536000; includeSubDomains\"
 
 	<Directory /var/www/$site_name>
         Options Indexes FollowSymLinks
@@ -330,18 +402,18 @@ Listen 79
 
 		sudo a2ensite $site_name
 		error_handler $? "L'activation du fichier de configuration du site $site_name a échouée."
-		
+
 		sudo systemctl reload apache2
 		error_handler $? "Le redémarrage du service apache a échouée."
 
-		echo "127.0.0.1 $site_name.$domain_name" >> /etc/hosts
+		echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
 		error_handler $? "L'écriture du fichier /etc/hosts a échouée."
 
 		mkdir /var/www/$site_name/confidential
 		error_handler $? "La création du dossier /var/www/$site_name/confidential a échouée."
 
-		touch /var/www/$site_name/confidential/confidential.html
-		error_handler $? "La création du fichier /var/www/$site_name/confidential/confidential.html a échouée."
+		touch /var/www/$site_name/confidential/confidential.php
+		error_handler $? "La création du fichier /var/www/$site_name/confidential/confidential.php a échouée."
 		
 		echo "
 <html>
@@ -349,7 +421,25 @@ Listen 79
 		<title>Page protégée du site $site_name</title>
 	</head>
 	<body>
-		<h1> SECRET IMPORTANT </h1>
+		<h1> TOP SECRET </h1>
+<?php
+	\$user = \""$DB_USERNAME"\";
+	\$password = \""DB_PASSWORD"\";
+	\$database = \""$DB_NAME"\";
+	\$table = \"todo_list\";
+	try
+	{	\$db = new PDO("",$,\$password);
+		echo \"<h2>TODO</h2> <ol>\";
+		foreach(\$db->query(\"SELECT content FROM \$tabe\") as \$row)
+		 { echo \"<li>\" .\$row['content'] . \"</li>\";
+		 }
+		echo \"</ol>\";
+	} 
+	catch (PDOException \$e)
+	{	print \"ERROR ! : \" . \$e->getMessage() . \"<br/>\";
+		die();
+	}
+?>
 	</body>
 </html>" > /var/www/$site_name/confidential/confidential.html
 		error_handler $? "L'écriture dans le fichier /var/www/$site_name/confidential/confidential.html a échouée."
@@ -366,6 +456,9 @@ Listen 79
 
 		logs_success "site_name créé."
 	done
+	
+	sudo apache2ctl configtest
+	error_handler $? "La vérification de la configuration du service apache a échouée."
 
 	logs_success "Sécurisation du .htaccess terminée."
 
@@ -378,6 +471,9 @@ Listen 79
 		sudo apt install -y libapache2-mod-security2 
 		error_handler $? "L'installation de libapache2-mod-security2 a échouée."
 		
+		sudo a2enmod security2
+		error_handler $? "L'activation de libapache2-mod-security2 a échouée."
+
 		#TODO trouver un moyen de vérifier la bonne installation de modsecurity avec un retour de variable.
 		# "security2_module (shared)"
 		apachectl -M | grep --color security
@@ -630,18 +726,24 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 		sudo apt install -y libapache2-mod-evasive
 		error_handler $? "L'installation du service libapache2-mod-evasive a échouée."
 		
+		sudo mkdir -p /var/log/mod_evasive
+		#TODO
+
+		sudo chown -R www-data:www-data /var/log/mod_evasive
+		#TODO
+
 		touch /etc/apache2/mods-available/evasive.conf
 		error_handler $? "La création /etc/apache2/mods-available/evasive.conf a échouée."
 
 		echo "
 		<IfModule mod_evasive20.c>
-		    DOSHashTableSize    3097
-		    DOSPageCount        2
+		    DOSHashTableSize    496
+		    DOSPageCount        20
 		    DOSSiteCount        50
 		    DOSPageInterval     1
 		    DOSSiteInterval     1
 		    DOSBlockingPeriod   10
-		    DOSEmailNotify      $admin_address
+		    DOSEmailNotify      $WEB_ADMIN_ADDRESS
 		    DOSLogDir           \"/var/log/mod_evasive\"
 		</IfModule>
 		" > /etc/apache2/mods-available/evasive.conf
@@ -654,3 +756,71 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 		error_handler $? "Le redémarrage du service apache a échouée."
 	
 	logs_success "Installation et configuration de ModEvasive terminée."
+
+logs_success "Configuration du service apache terminée."
+
+logs_info "Configuration du service phpmyadmin en cours..."
+
+	echo "
+# phpMyAdmin default Apache configuration
+
+Alias /phpmyadmin /usr/share/phpmyadmin
+
+<Directory /usr/share/phpmyadmin>
+    Options SymLinksIfOwnerMatch
+    DirectoryIndex index.php
+    AllowOverride All
+
+    # limit libapache2-mod-php to files and directories necessary by pma
+    <IfModule mod_php7.c>
+        php_admin_value upload_tmp_dir /var/lib/phpmyadmin/tmp
+        php_admin_value open_basedir /usr/share/phpmyadmin/:/usr/share/doc/phpmyadmin/:/etc/phpmyadmin/:/var/lib/phpmyadmin/:/usr/share/php/:/usr/share/javascript/
+    </IfModule>
+
+    # PHP 8+
+    <IfModule mod_php.c>
+        php_admin_value upload_tmp_dir /var/lib/phpmyadmin/tmp
+        php_admin_value open_basedir /usr/share/phpmyadmin/:/usr/share/doc/phpmyadmin/:/etc/phpmyadmin/:/var/lib/phpmyadmin/:/usr/share/php/:/usr/share/javascript/
+    </IfModule>
+
+</Directory>
+
+# Disallow web access to directories that don't need it
+<Directory /usr/share/phpmyadmin/templates>
+    Require all denied
+</Directory>
+<Directory /usr/share/phpmyadmin/libraries>
+    Require all denied
+</Directory>
+	" > /etc/phpmyadmin/apache.conf
+	#TODO
+
+	sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
+	#TODO
+
+	sudo a2enconf phpmyadmin.conf
+	#TODO
+
+	sudo systemctl restart apache2
+	#TODO
+
+	sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
+	#TODO
+
+	echo "AuthType Basic
+	AuthName \"Accès protégé\"
+	AuthUserFile /etc/phpmyadmin/.htpasswd
+	require valid-user
+	Options -Indexes" > /www/html/phpmyadmin/.htaccess
+	#TODO
+
+	touch /etc/phpmyadmin/.htpasswd
+	error_handler $? "La création du fichier /etc/phpmyadmin/.htpasswd a échouée."
+
+	htpasswd -c -n /etc/phpmyadmin/.htpasswd admin \${PHP_HTACCESS_PASSWORD}
+	error_handler $? "L'écriture dans le fichier /etc/phpmyadmin/.htpasswd a échouée."
+
+	sudo systemctl restart apache2
+	#TODO
+
+logs_success "Configuration du service phpmyadmin terminée."
