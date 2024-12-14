@@ -11,7 +11,7 @@
 
 > Two different scripts to install (on host or on docker containers) and configure apache + php + phpmyadmin + mysql with advanced security.
 
-### 🏠 [Homepage](https://github.com/KatiaAuxilien/ApacheAutomatisation/edit/main/README.md)
+### 🏠 [Homepage](https://github.com/KatiaAuxilien/ApacheAutomatisation)
 
 ### ✨ [Demo](https://katiaauxilien.github.io/projets/) 
 
