@@ -31,7 +31,7 @@ TODO
 
 👤 **Katia Auxilien**
 
-* Website: [MyPortfolio](https://katiaauxilien.github.io/)
+* Website: [My portfolio](https://katiaauxilien.github.io/projets.html)
 * Github: [@KatiaAuxilien](https://github.com/KatiaAuxilien)
 * LinkedIn: [@TODO](https://linkedin.com/in/TODO)
 
