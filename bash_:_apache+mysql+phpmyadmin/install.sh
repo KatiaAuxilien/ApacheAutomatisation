@@ -121,17 +121,38 @@ logs_success "Service apache lancé."
 
 logs_info "Installation du service mysql en cours..."
 
-	sudo apt install mysql-server 
+	sudo apt install -y mysql-server 
 	error_handler $? "L'installation du service mysql a échouée."
 
-	sudo /usr/bin/mysql_secure_installation 
+	sudo systemctl start mysql.service
+	error_handler $? "Le lancement mysql a échouée."
+
+
+#sudo apt autoremove --purge mysql-server\* mariadb-server\*
+#sudo rm -rf /var/lib/mysql
+#sudo rm -rf /etc/mysql/
+#sudo mkdir -p /etc/mysql/conf.d
+#sudo apt install mysql-server
+
+	sudo /usr/bin/mysql_secure_installation <<EOF
+n
+$DB_ROOT_PASSWORD
+$DB_ROOT_PASSWORD
+y
+y
+y
+y
+EOF
+#--password="$DB_PASSWORD" --user="$DB_USERNAME" --port="$DB_PORT" --host="$DB_HOST"
 	#Ce script supprime certains paramètres par défaut peu sûrs et vérouillera l'accès à la bdd.
 	error_handler $? "Le lancement du script de sécurisation mysql a échoué."
-#--password="$DB_PASSWORD" --user="$DB_USERNAME" --port="$DB_PORT" --host="$DB_HOST"
+
 
 logs_success "Le service mysql est installé."
 
 logs_info "Configuration du service mysql en cours..."
+	
+#	sudo mysqladmin -u root password $DB_ROOT_PASSWORD
 
 	sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_ROOT_PASSWORD';"
 
@@ -150,7 +171,7 @@ logs_success "La configuration mysql est terminée."
 
 logs_info "Installation du service php en cours..."
 
-	sudo apt install php libapache2-mod-php php-mysql
+	sudo apt install -y php libapache2-mod-php php-mysql
 	error_handler $? "L'installation du service php a échouée."
 
 logs_success "Le service php est installé."
@@ -158,7 +179,7 @@ logs_success "Le service php est installé."
 
 logs_info "Installation du service phpmyadmin en cours..."
 
-	sudo apt-get install phpmyadmin
+	sudo apt-get install -y phpmyadmin
 	error_handler $? "L'installation du service phpmyadmin a échouée."
 
 	sudo phpenmod mcrypt sudo phenmod mbstring
