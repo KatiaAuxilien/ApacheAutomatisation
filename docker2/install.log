@@ -1,0 +1,61 @@
+[0;33m[15-12-2024 17:30:44] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:30:44] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:32:59] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:32:59] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:33:01] Création du site  siteA ... [0m
+[0;33m[15-12-2024 17:34:07] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:34:07] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:34:09] Création du site  siteA ... [0m
+[0;33m[15-12-2024 17:35:31] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:35:31] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:35:33] Création du site  siteA ... [0m
+[0;33m[15-12-2024 17:38:23] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:38:23] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:38:25] Création du site  siteA ... [0m
+[0;33m[15-12-2024 17:39:10] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:39:10] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:39:12] Création du site  siteA ... [0m
+[0;33m[15-12-2024 17:39:22] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:39:22] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:39:26] Création du site  siteA ... [0m
+[0;32m[15-12-2024 17:39:26] siteA créé. [0m
+[0;33m[15-12-2024 17:39:26] Création du site  siteB ... [0m
+[0;32m[15-12-2024 17:39:27] siteB créé. [0m
+[0;33m[15-12-2024 17:49:55] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:49:55] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:49:57] Création du site  siteA ... [0m
+[0;32m[15-12-2024 17:49:57] siteA créé. [0m
+[0;33m[15-12-2024 17:49:57] Création du site  siteB ... [0m
+[0;32m[15-12-2024 17:49:58] siteB créé. [0m
+[0;33m[15-12-2024 17:49:58] Configuration du service mysql en cours... [0m
+[0;33m[15-12-2024 17:52:20] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:52:20] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:52:22] Création du site  siteA ... [0m
+[0;32m[15-12-2024 17:52:23] siteA créé. [0m
+[0;33m[15-12-2024 17:52:23] Création du site  siteB ... [0m
+[0;32m[15-12-2024 17:52:24] siteB créé. [0m
+[0;33m[15-12-2024 17:52:24] Configuration du service mysql en cours... [0m
+[0;33m[15-12-2024 17:52:39] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:52:39] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:52:41] Création du site  siteA ... [0m
+[0;32m[15-12-2024 17:52:41] siteA créé. [0m
+[0;33m[15-12-2024 17:52:41] Création du site  siteB ... [0m
+[0;32m[15-12-2024 17:52:42] siteB créé. [0m
+[0;33m[15-12-2024 17:52:42] Configuration du service mysql en cours... [0m
+[0;33m[15-12-2024 17:56:19] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:56:19] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:56:20] Création du site  siteA ... [0m
+[0;33m[15-12-2024 17:56:36] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:56:36] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:56:39] Création du site  siteA ... [0m
+[0;32m[15-12-2024 17:56:40] siteA créé. [0m
+[0;33m[15-12-2024 17:56:40] Création du site  siteB ... [0m
+[0;32m[15-12-2024 17:56:40] siteB créé. [0m
+[0;33m[15-12-2024 17:56:40] Configuration du service mysql en cours... [0m
+[0;33m[15-12-2024 17:57:12] Vérification des variables .env... [0m
+[0;32m[15-12-2024 17:57:12] Les variables .env ont été vérifiées. [0m
+[0;33m[15-12-2024 17:57:14] Création du site  siteA ... [0m
+[0;32m[15-12-2024 17:57:15] siteA créé. [0m
+[0;33m[15-12-2024 17:57:15] Création du site  siteB ... [0m
+[0;32m[15-12-2024 17:57:16] siteB créé. [0m
+[0;34m[15-12-2024 17:57:16] Installation et configuration des services apache, mysql, php et phpmyadmin sous docker terminée. [0m

@@ -1,67 +1,71 @@
 version: '3.8'
 
 services:
+  php:
+    image: php:7.4-apache
+    container_name: ${PHP_CONTAINER_NAME}
+    ports:
+      - "${PHP_PORT}:9000"
+    volumes:
+      - ./sites:/var/www/html
+      - ./php/conf:/usr/local/etc/php
+      - ./php/logs:/var/log/php
+    networks:
+      - servicescomplexe-network
+
   apache:
     image: httpd:latest
-    container_name: apache
+    container_name: ${WEB_CONTAINER_NAME}
     ports:
-      - "${APACHE_PORT}:80"
+      - "${WEB_PORT}:80"
     volumes:
       - ./apache/conf:/usr/local/apache2/conf
       - ./apache/html:/usr/local/apache2/htdocs
       - ./apache/logs:/var/log/apache2
     environment:
-      - DOMAINE_NAME=${DOMAINE_NAME}
-      - APACHE_ADMIN_USER=${APACHE_ADMIN_USER}
-      - APACHE_ADMIN_PASSWORD=${APACHE_ADMIN_PASSWORD}
+      - DOMAINE_NAME=${DOMAIN_NAME}
+      - APACHE_ADMIN_USER=${WEB_ADMIN_USER}
+      - APACHE_ADMIN_PASSWORD=${WEB_ADMIN_PASSWORD}
     depends_on:
+      - php
       - mysql
     networks:
-      - web-network
+      - servicescomplexe-network
 
   mysql:
     image: mysql:latest
-    container_name: mysql
+    container_name: ${DB_CONTAINER_NAME}
     ports:
-      - "${MYSQL_PORT}:3306"
+      - "${DB_PORT}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_ADMIN_USERNAME}
+      MYSQL_PASSWORD: ${DB_ADMIN_PASSWORD}
     networks:
-      - web-network
+      - servicescomplexe-network
 
-  php:
-    image: php:7.4-fpm
-    container_name: php
-    ports:
-      - "${PHP_PORT}:9000"
-    volumes:
-      - ./php/conf:/usr/local/etc/php
-      - ./php/logs:/var/log/php
-    networks:
-      - web-network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
+    container_name: ${PHPMYADMIN_CONTAINER_NAME}
     ports:
       - "${PHPMYADMIN_PORT}:80"
     environment:
-      PMA_HOST: mysql
-      PMA_USER: ${PHPMYADMIN_ADMIN_USER}
-      PMA_PASSWORD: ${PHPMYADMIN_ADMIN_PASSWORD}
+      PMA_HOST: ${DB_CONTAINER_NAME}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      PMA_USER: ${PHP_ADMIN_USERNAME}
+      PMA_PASSWORD: ${PHP_ADMIN_PASSWORD}
     depends_on:
       - mysql
     networks:
-      - web-network
+      - servicescomplexe-network
 
 volumes:
   mysql_data:
 
 networks:
-  web-network:
+  servicescomplexe-network:
     external: true

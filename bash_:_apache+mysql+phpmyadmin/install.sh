@@ -141,7 +141,7 @@ logs_info "Installation du service mysql en cours..."
 #y
 #y
 #EOF
-#--password="$DB_PASSWORD" --user="$DB_USERNAME" --port="$DB_PORT" --host="$DB_HOST"
+#--password="$DB_ADMIN_PASSWORD" --user="$DB_ADMIN_USERNAME" --port="$DB_PORT" --host="$DB_HOST"
 	#Ce script supprime certains paramètres par défaut peu sûrs et vérouillera l'accès à la bdd.
 	#error_handler $? "Le lancement du script de sécurisation mysql a échoué."
 
@@ -182,10 +182,10 @@ logs_info "Configuration du service mysql en cours..."
   	sudo mysql -e "FLUSH PRIVILEGES;"
 	error_handler $? "L'actualisation des privilèges mysql a échouée."
  
- 	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+ 	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "CREATE USER '$DB_ADMIN_USERNAME'@'localhost' IDENTIFIED BY '$DB_ADMIN_PASSWORD';"
 	error_handler $? "La création de l'utilisateur administrateur $DB_ADMIN_USERNAME a échouée."
  
-	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'@'localhost' WITH GRANT OPTION;"
+	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO '$DB_ADMIN_USERNAME'@'localhost' WITH GRANT OPTION;"
 	
  	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
  
@@ -229,7 +229,7 @@ logs_info "Configuration du service apache en cours..."
 	echo "
 ServerRoot \"/etc/apache2\"
 
-ServerName 127.0.0.1
+ServerName $DOMAIN_NAME
 
 #Mutex file:\${APACHE_LOCK_DIR} default
 
@@ -303,7 +303,7 @@ IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf
 	error_handler $? "L'écriture du fichier de configuration apache /etc/apache2/mods-enabled/dir.conf a échouée."
 
 	echo "
-<VirtualHost *:79>
+<VirtualHost *:$WEB_PORT>
 	RewriteEngine On
 	RewriteCond %{HTTPS} !=on
 	RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
@@ -329,7 +329,7 @@ IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf
 # have to change the VirtualHost statement in
 # /etc/apache2/sites-enabled/000-default.conf
 
-Listen 79
+Listen $WEB_PORT
 
 <IfModule ssl_module>
 	Listen 443
@@ -409,7 +409,7 @@ Listen 79
 		error_handler $? "La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
 		echo "
-<VirtualHost *:79>
+<VirtualHost *:$WEB_PORT>
 	RewriteEngine On
 	RewriteCond %{HTTPS} !=on
 	RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
@@ -429,7 +429,7 @@ Listen 79
         Options Indexes FollowSymLinks
         AllowOverride All
         Require all granted
-    </Directory>
+  </Directory>
 
 	ErrorLog \${APACHE_LOG_DIR}/error.log
 	CustomLog \${APACHE_LOG_DIR}/access.log combined
@@ -459,14 +459,14 @@ Listen 79
 	<body>
 		<h1> TOP SECRET </h1>
 <?php
-	\$user = \""$DB_USERNAME"\";
-	\$password = \""DB_PASSWORD"\";
+	\$user = \""$DB_ADMIN_USERNAME"\";
+	\$password = \""DB_ADMIN_PASSWORD"\";
 	\$database = \""$DB_NAME"\";
 	\$table = \"todo_list\";
 	try
 	{	\$db = new PDO("",$,\$password);
 		echo \"<h2>TODO</h2> <ol>\";
-		foreach(\$db->query(\"SELECT content FROM \$tabe\") as \$row)
+		foreach(\$db->query(\"SELECT content FROM \$table\") as \$row)
 		 { echo \"<li>\" .\$row['content'] . \"</li>\";
 		 }
 		echo \"</ol>\";
@@ -490,7 +490,7 @@ Listen 79
 		Options -Indexes" > /var/www/$site_name/confidential/.htaccess
 		error_handler $? "L'écriture du fichier /var/www/$site_name/confidential/.htaccess a échouée."
 
-		logs_success "site_name créé."
+		logs_success "$site_name créé."
 	done
 	
 	sudo apache2ctl configtest
@@ -860,4 +860,6 @@ Alias /phpmyadmin /usr/share/phpmyadmin
 	#TODO
 
 logs_success "Configuration du service phpmyadmin terminée."
+
+logs_end "Installation et configuration des services apache, mysql, php et phpmyadmin terminée."
 exit 0

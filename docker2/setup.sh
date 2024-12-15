@@ -20,7 +20,7 @@ logs()
     local color="$1"
     shift
     date_formated=$(date +"%d-%m-%Y %H:%M:%S")
-    echo -e "${color}[$date_formated] $1 ${RESET}" | tee -a /var/log/apache_install.log
+    echo -e "${color}[$date_formated] $1 ${RESET}" | tee -a install.log
 }
 
 logs_info()
@@ -128,23 +128,21 @@ logs_success "Les variables .env ont été vérifiées."
 
 
 # Créer les répertoires nécessaires
-mkdir -p apache/conf apache/html apache/logs php/conf php/logs apache/certs
+mkdir -p apache/conf apache/html apache/logs apache/conf/certs php/conf php/logs
 
 
-    sudo apt-get install -y openssl
-    error_handler $? "L'installation d'openssl a échouée."
+sudo apt-get install -y openssl
+error_handler $? "L'installation d'openssl a échouée."
 
-    sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out apache/certs/"$DOMAIN_NAME"_server.crt -keyout apache/certs/"$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
-    error_handler $? "La génération de demande de signature de certifcat a échouée"
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out apache/conf/certs/certificate_web_server.crt -keyout apache/conf/certs/key_web_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
+error_handler $? "La génération de demande de signature de certifcat a échouée"
 
-    openssl x509 -in apache/certs/"$DOMAIN_NAME"_server.crt -text -noout
-    error_handler $? "La vérification du certificat a échouée."
-    
-    cd
+openssl x509 -in apache/conf/certs/certificate_web_server.crt -text -noout
+error_handler $? "La vérification du certificat a échouée."
 
-    sudo chmod 600 apache/certs/"$DOMAIN_NAME"_server.key
-    sudo chown root:root apache/certs/"$DOMAIN_NAME"_server.crt
-    sudo chmod 440 apache/certs/"$DOMAIN_NAME"_server.crt
+sudo chmod 600 apache/conf/certs/key_web_server.key
+sudo chown root:root apache/conf/certs/certificate_web_server.crt
+sudo chmod 440 apache/conf/certs/certificate_web_server.crt
 
 
 #======================================================================#
@@ -172,7 +170,7 @@ services:
     image: httpd:latest
     container_name: \${WEB_CONTAINER_NAME}
     ports:
-      - "\${APACHE_PORT}:80"
+      - "\${WEB_PORT}:80"
     volumes:
       - ./apache/conf:/usr/local/apache2/conf
       - ./apache/html:/usr/local/apache2/htdocs
@@ -197,8 +195,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: \${DB_NAME}
-      MYSQL_USER: \${DB_USER}
-      MYSQL_PASSWORD: \${DB_PASSWORD}
+      MYSQL_USER: \${DB_ADMIN_USERNAME}
+      MYSQL_PASSWORD: \${DB_ADMIN_PASSWORD}
     networks:
       - $NETWORK_NAME
 
@@ -211,8 +209,8 @@ services:
     environment:
       PMA_HOST: \${DB_CONTAINER_NAME}
       MYSQL_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
-      PMA_USER: \${PHPMYADMIN_ADMIN_USER}
-      PMA_PASSWORD: \${PHPMYADMIN_ADMIN_PASSWORD}
+      PMA_USER: \${PHP_ADMIN_USERNAME}
+      PMA_PASSWORD: \${PHP_ADMIN_PASSWORD}
     depends_on:
       - mysql
     networks:
@@ -239,6 +237,8 @@ LoadModule rewrite_module modules/mod_rewrite.so
 # Configuration de base
 ServerName $DOMAIN_NAME
 Listen $WEB_PORT
+ServerAdmin $WEB_ADMIN_ADDRESS
+ServerAlias localhost
 
 # Configuration de ModSecurity
 <IfModule security2_module>
@@ -269,11 +269,16 @@ Listen $WEB_PORT
 <VirtualHost *:443>
     ServerName $DOMAIN_NAME
     DocumentRoot "/usr/local/apache2/htdocs"
+    ServerName $DOMAIN_NAME
+    Listen 443
+    ServerAdmin $WEB_ADMIN_ADDRESS
+    ServerAlias localhost
 
     SSLEngine on
-    SSLCertificateFile /usr/local/apache2/conf/certs/certificate.crt
-    SSLCertificateKeyFile /usr/local/apache2/conf/certs/private.key
-    SSLCertificateChainFile /usr/local/apache2/conf/certs/chain.crt
+    SSLCertificateFile /usr/local/apache2/conf/certs/certificate_web_server.crt
+    SSLCertificateKeyFile /usr/local/apache2/conf/certs/key_web_server.key
+
+    Header set Strict-Transport-Security \"max-age=31536000; includeSubDomains\"
 
     # Masquage des fichiers dans l'URL
     RewriteEngine On
@@ -286,107 +291,158 @@ Listen $WEB_PORT
 Include conf/extra/httpd-vhosts.conf
 EOF
 
-#Configuration des sites
-cat > apache/conf/httpd.conf <<EOF
-# Site A
+    htpasswd -cb apache/html/.htpasswd $WEB_ADMIN_USER $WEB_ADMIN_PASSWORD
+
+    touch apache/conf/httpd-vhosts.conf
+    error_handler $? "La création du fichier apache/conf/httpd-vhosts.conf a échouée."
+
+#Création et configuration de n sites
+    for site_name in siteA siteB
+    do
+        logs_info "Création du site " $site_name "..."
+        
+        sudo mkdir apache/html/$site_name
+        error_handler $? "La création du dossier apache/html/$site_name a échouée."
+        
+        sudo chown -R $USER:$USER apache/html/$site_name
+        error_handler $? "L'attribution des droits sur le dossier apache/html/$site_name a échouée."
+        
+        sudo touch apache/html/$site_name/index.html
+        error_handler $? "La création du fichier apache/html/$site_name/index.html a échouée."
+        
+        echo "
+<html>
+    <head>
+        <title>Bienvenue sur le " $site_name " !</title>
+    </head>
+    <body>
+        <h1> N'allez pas sur l'autre site, ce site est malveillant !</h1>
+    </body>
+</html>" > apache/html/$site_name/index.html
+        error_handler $? "L'écriture dans le fichier apache/html/$site_name/index.html a échouée."
+
+        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out apache/conf/certs/"$site_name".certificate_web_server.crt -keyout apache/conf/certs/"$site_name".key_web_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$site_name.$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
+        error_handler $? "La génération de demande de signature de certifcat du site $site_name a échouée"
+
+        openssl x509 -in apache/conf/certs/"$site_name".certificate_web_server.crt -text -noout
+        error_handler $? "La vérification du certificat a échouée."
+        
+        sudo chmod 600 apache/conf/certs/"$site_name".key_web_server.key
+        sudo chown root:root apache/conf/certs/"$site_name".certificate_web_server.crt
+        sudo chmod 440 apache/conf/certs/"$site_name".certificate_web_server.crt
+
+        #Création des Virtual Host
+        echo "
+# $site_name
+# Masquage des fichiers dans l'URL
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+<VirtualHost *:79>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
+</VirtualHost>
 <VirtualHost *:443>
-    ServerName siteA.$DOMAIN_NAME
-    DocumentRoot "/usr/local/apache2/htdocs/siteA"
+    ServerAdmin $WEB_ADMIN_ADDRESS
+    ServerName $site_name.$DOMAIN_NAME
+    DocumentRoot \"/usr/local/apache2/htdocs/$site_name\"
 
     SSLEngine on
-    SSLCertificateFile /usr/local/apache2/conf/certs/siteA_certificate.crt
-    SSLCertificateKeyFile /usr/local/apache2/conf/certs/siteA_private.key
-    SSLCertificateChainFile /usr/local/apache2/conf/certs/siteA_chain.crt
+    SSLCertificateFile /usr/local/apache2/conf/certs/"$site_name".certificate_web_server.crt
+    SSLCertificateKeyFile /usr/local/apache2/conf/certs/"$site_name".key_web_server.key
 
-    # Masquage des fichiers dans l'URL
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
-</VirtualHost>
+    Header set Strict-Transport-Security \"max-age=31536000; includeSubDomains\"
 
-# Site B
-<VirtualHost *:443>
-    ServerName siteB.$DOMAIN_NAME
-    DocumentRoot "/usr/local/apache2/htdocs/siteB"
+    <Directory /usr/local/apache2/htdocs/$site_name>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+  </Directory>
+</VirtualHost>" >> apache/conf/httpd-vhosts.conf
+        error_handler $? "L'écriture du fichier apache/conf/httpd-vhosts.conf a échouée."
 
-    SSLEngine on
-    SSLCertificateFile /usr/local/apache2/conf/certs/siteB_certificate.crt
-    SSLCertificateKeyFile /usr/local/apache2/conf/certs/siteB_private.key
-    SSLCertificateChainFile /usr/local/apache2/conf/certs/siteB_chain.crt
+        echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
+        error_handler $? "L'écriture du fichier /etc/hosts a échouée."
 
-    # Masquage des fichiers dans l'URL
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
-</VirtualHost>
-EOF
+        mkdir apache/html/$site_name/confidential
+        error_handler $? "La création du dossier apache/html/$site_name/confidential a échouée."
 
-# Créer les fichiers index.html et confidential.php
-
-mkdir -p apache/html/siteA apache/html/siteB
-echo "<html><body><h1>Welcome to SiteA</h1></body></html>" > apache/html/siteA/index.html
-echo "<html><body><h1>Welcome to SiteB</h1></body></html>" > apache/html/siteB/index.html
-
-cat > apache/html/siteA/confidential.php <<EOF
+        touch apache/html/$site_name/confidential/confidential.php
+        error_handler $? "La création du fichier /apache/html/$site_name/confidential/confidential.php a échouée."
+        
+        echo "
+<html>
+    <head>
+        <title>Page protégée du site $site_name</title>
+    </head>
+    <body>
+        <h1> TOP SECRET </h1>
 <?php
-\$db = new mysqli('mysql', '$DB_ADMIN_USERNAME', '$DB_ADMIN_PASSWORD', '$DB_NAME');
-if (\$db->connect_error) {
-    die("Connection failed: " . \$db->connect_error);
-}
-\$result = \$db->query("SELECT * FROM todolist");
-while (\$row = \$result->fetch_assoc()) {
-    echo "Task: " . \$row['task'] . "<br>";
-}
-\$db->close();
+    \$user = \""$DB_USERNAME"\";
+    \$password = \""DB_PASSWORD"\";
+    \$database = \""$DB_NAME"\";
+    \$table = \"todo_list\";
+    try
+    {   \$db = new PDO("",$,\$password);
+        echo \"<h2>TODO</h2> <ol>\";
+        foreach(\$db->query(\"SELECT content FROM \$table\") as \$row)
+         { echo \"<li>\" .\$row['content'] . \"</li>\";
+         }
+        echo \"</ol>\";
+    } 
+    catch (PDOException \$e)
+    {   print \"ERROR ! : \" . \$e->getMessage() . \"<br/>\";
+        die();
+    }
 ?>
-EOF
+    </body>
+</html>" > apache/html/$site_name/confidential/confidential.php
+        error_handler $? "L'écriture dans le fichier /apache/html/$site_name/confidential/confidential.php a échouée."
+        
+        touch apache/html/$site_name/confidential/.htaccess
+        error_handler $? "La création du fichier apache/html/$site_name/confidential/.htaccess a échouée."
 
-cat > apache/html/siteB/confidential.php <<EOF
-<?php
-\$db = new mysqli('mysql', '$DB_ADMIN_USERNAME', '$DB_ADMIN_PASSWORD', '$DB_NAME');
-if (\$db->connect_error) {
-    die("Connection failed: " . \$db->connect_error);
-}
-\$result = \$db->query("SELECT * FROM todolist");
-while (\$row = \$result->fetch_assoc()) {
-    echo "Task: " . \$row['task'] . "<br>";
-}
-\$db->close();
-?>
-EOF
+        echo "AuthType Basic
+        AuthName \"Accès protégé\"
+        AuthUserFile /usr/local/apache2/htdocs/.htpasswd
+        require valid-user
+        Options -Indexes" > apache/html/$site_name/confidential/.htaccess
+        error_handler $? "L'écriture du fichier /apache/html/$site_name/confidential/.htaccess a échouée."
 
-# Créer les fichiers .htaccess pour l'authentification
-log_message INFO "Creating .htaccess files..."
-htpasswd -cb apache/html/.htpasswd $WEB_ADMIN_USER $WEB_ADMIN_PASSWORD
+        logs_success "$site_name créé."
+    done
 
-cat > apache/html/siteA/.htaccess <<EOF
-AuthType Basic
-AuthName "Restricted Area"
-AuthUserFile /usr/local/apache2/htdocs/.htpasswd
-Require valid-user
-EOF
-
-cat > apache/html/siteB/.htaccess <<EOF
-AuthType Basic
-AuthName "Restricted Area"
-AuthUserFile /usr/local/apache2/htdocs/.htpasswd
-Require valid-user
-EOF
 
 # Configurer MySQL
-log_message INFO "Configuring MySQL..."
-docker-compose up -d mysql
-sleep 10
 
-#TODO : CREER LE COMPTE 
-docker exec -i mysql mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "CREATE DATABASE $DB_NAME;"
-docker exec -i mysql mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "USE $DB_NAME; CREATE TABLE todolist (id INT AUTO_INCREMENT PRIMARY KEY, task VARCHAR(255) NOT NULL);"
-docker exec -i mysql mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "USE $DB_NAME; INSERT INTO todolist (task) VALUES ('Task 1'), ('Task 2'), ('Task 3');"
+logs_info "Configuration du service mysql en cours..."
+docker-compose up -d $DB_CONTAINER_NAME
+sleep 50
 
-# Démarrer les autres services
-log_message INFO "Starting other services..."
-docker-compose up -d
+# docker exec -i $DB_CONTAINER_NAME mysql -uroot -p$DB_ROOT_PASSWORD -e "CREATE USER '$DB_ADMIN_USERNAME'@'localhost' IDENTIFIED BY '$DB_ADMIN_PASSWORD';"
+# error_handler $? "La création de l'utilisateur administrateur $DB_ADMIN_USERNAME a échouée."
+ 
+# docker exec -i $DB_CONTAINER_NAME mysql -uroot -p$DB_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO '$DB_ADMIN_USERNAME'@'localhost' WITH GRANT OPTION;"
 
-log_message INFO "Setup completed successfully."
+# docker exec -i $DB_CONTAINER_NAME mysql -uroot -p$DB_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
+
+# docker exec -i $DB_CONTAINER_NAME mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "CREATE DATABASE $DB_NAME;"
+# error_handler $? "La création de la base de données $DB_NAME a échouée."
+
+# docker exec -i $DB_CONTAINER_NAME mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "USE $DB_NAME; CREATE TABLE todolist (item_id INT AUTO_INCREMENT, content VARCHAR(255), PRIMARY KEY (item_id));"
+# error_handler $? "Création de la table todolist a échouée."
+
+# docker exec -i $DB_CONTAINER_NAME mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "USE $DB_NAME; INSERT INTO todolist (task) VALUES ('Task 1'), ('Task 2'), ('Task 3');"
+# error_handler $? "Insertion des données dans la table todolist a échouée."
+
+# logs_success "Configuration du service mysql terminée."
+# # Démarrer les autres services
+
+# docker-compose up -d
+
+
+logs_end "Installation et configuration des services apache, mysql, php et phpmyadmin sous docker terminée."
+exit 0
