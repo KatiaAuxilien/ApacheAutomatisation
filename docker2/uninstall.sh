@@ -14,6 +14,9 @@ log_message() {
     echo -e "${COLOR}[$(date +'%Y-%m-%d %H:%M:%S')] [$TYPE] $MESSAGE\033[0m" | tee -a uninstall.log
 }
 
+sudo apt remove --purge apache2-utils -y
+
+
 # Arrêter et supprimer les conteneurs Docker
 log_message INFO "Stopping and removing Docker containers..."
 docker-compose down
