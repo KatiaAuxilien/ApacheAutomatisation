@@ -86,6 +86,11 @@ fi
 
 logs_info "Vérification des variables .env..."
 
+	# Charger les variables depuis le fichier .env
+	if [ ! -f .env ]; then
+	    echo "Erreur : fichier .env non trouvé."
+	    exit 1
+	fi
 	source .env
 
 	for var in "${required_vars_start[@]}"; do

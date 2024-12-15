@@ -8,7 +8,6 @@ fi
 source .env
 
 # Créer un réseau Docker
-NETWORK_NAME="web_network"
 docker network create $NETWORK_NAME
 
 # Dossier de configuration et certificats
@@ -19,6 +18,15 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout certs/apache-selfsigned.key \
     -out certs/apache-selfsigned.crt \
     -subj "/C=FR/ST=Paris/L=Paris/O=Example/OU=IT Department/CN=$DOMAIN_NAME"
+
+	
+	sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out certs/"$DOMAIN_NAME"_server.crt -keyout certs/"$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
+	error_handler $? "La génération de demande de signature de certifcat a échouée"
+
+	openssl x509 -in "$DOMAIN_NAME"_server.crt -text -noout
+	error_handler $? "La vérification du certificat a échouée."
+	
+
 
 # Configuration de Apache avec ModSecurity et ModEvasive
 cat > conf/httpd.conf <<EOL
@@ -43,8 +51,8 @@ IncludeOptional conf/extra/httpd-ssl.conf
     ServerName $DOMAIN_NAME
 
     SSLEngine on
-    SSLCertificateFile "/etc/apache2/certs/apache-selfsigned.crt"
-    SSLCertificateKeyFile "/etc/apache2/certs/apache-selfsigned.key"
+    SSLCertificateFile "/etc/apache2/certs/"$DOMAIN_NAME"_server.crt"
+    SSLCertificateKeyFile "/etc/apache2/certs/"$DOMAIN_NAME"_server.key"
 
     <Directory "/var/www/html">
         AllowOverride All
@@ -59,13 +67,13 @@ version: '3.8'
 services:
   apache:
     image: httpd:latest
-    container_name: \${APACHE_CONTAINER_NAME}
+    container_name: \${WEB_CONTAINER_NAME}
     volumes:
       - ./conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
       - ./certs:/etc/apache2/certs
       - ./sites:/var/www/html
     ports:
-      - "\${APACHE_PORT}:443"
+      - "\${WEB_PORT}:443"
     depends_on:
       - php
     networks:
@@ -83,10 +91,10 @@ services:
     image: phpmyadmin/phpmyadmin
     container_name: \${PHPMYADMIN_CONTAINER_NAME}
     environment:
-      PMA_HOST: \${MYSQL_CONTAINER_NAME}
-      MYSQL_ROOT_PASSWORD: \${MYSQL_ROOT_PASSWORD}
+      PMA_HOST: \${DB_CONTAINER_NAME}
+      MYSQL_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
     ports:
-      - "\${PHPMYADMIN_PORT}:80"
+      - "\${PHP_PORT}:80"
     depends_on:
       - mysql
     networks:
@@ -94,16 +102,16 @@ services:
 
   mysql:
     image: mysql:5.7
-    container_name: \${MYSQL_CONTAINER_NAME}
+    container_name: \${DB_CONTAINER_NAME}
     environment:
-      MYSQL_ROOT_PASSWORD: \${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: \${MYSQL_DATABASE}
-      MYSQL_USER: \${MYSQL_USER}
-      MYSQL_PASSWORD: \${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: \${DB_NAME}
+      MYSQL_USER: \${DB_ADMIN_USERNAME}
+      MYSQL_PASSWORD: \${DB_ADMIN_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
     ports:
-      - "\${MYSQL_PORT}:3306"
+      - "\${DB_PORT}:3306"
     networks:
       - $NETWORK_NAME
 
@@ -126,9 +134,9 @@ EOL
 cat > sites/siteB/index.php <<EOL
 <?php
 \$servername = "mysql";
-\$username = "\${MYSQL_USER}";
-\$password = "\${MYSQL_PASSWORD}";
-\$dbname = "\${MYSQL_DATABASE}";
+\$username = "\${DB_ADMIN_USER}";
+\$password = "\${DB_ADMIN_PASSWORD}";
+\$dbname = "\${DB_NAME}";
 
 \$conn = new mysqli(\$servername, \$username, \$password, \$dbname);
 if (\$conn->connect_error) {
@@ -163,8 +171,8 @@ Require valid-user
 EOL
 
 # Créer utilisateurs .htpasswd
-htpasswd -c -b sites/siteA/confidential/.htpasswd \${HTACCESS_USER} \${HTACCESS_PASSWORD}
-htpasswd -c -b sites/siteB/confidential/.htpasswd \${HTACCESS_USER} \${HTACCESS_PASSWORD}
+htpasswd -c -b sites/siteA/confidential/.htpasswd admin \${HTACCESS_PASSWORD}
+htpasswd -c -b sites/siteB/confidential/.htpasswd admin \${HTACCESS_PASSWORD}
 
 # Lancer les services
 sudo docker-compose up -d
