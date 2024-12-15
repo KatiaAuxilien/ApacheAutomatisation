@@ -108,6 +108,9 @@ logs_info "Installation du service apache en cours ..."
 
 	sudo apt install -y apache2
 	error_handler $? "L'installation du service a échouée."
+	
+	sudo apt install apache2-utils -y
+	error_handler $? "Installation d'apache2-utils a échouée."
 
 	sudo ufw allow 'Apache'
 	error_handler $? "L'autorisation du service apache auprès du pare-feu a échouée."
