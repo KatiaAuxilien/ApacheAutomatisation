@@ -750,9 +750,9 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
 
 #======================================================================#
 
-logs_info "Lancement du conteneur $WEB_CONTAINER_NAME en cours..."
-docker-compose up -d $WEB_CONTAINER_NAME
-sleep 60
+logs_info "Lancement du docker-compose en cours..."
+docker-compose up -d
+sleep 300
 
 # Chargement des sites
     for site_name in siteA siteB
@@ -760,8 +760,6 @@ sleep 60
         docker exec -i $WEB_CONTAINER_NAME a2ensite $site_name
         error_handler $? "L'activation du fichier de configuration du site $site_name a échouée."
     done
-
-
 
 #======================================================================#
 # Activation des modules ssl et apache                                 #
