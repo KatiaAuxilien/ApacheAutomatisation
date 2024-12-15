@@ -127,15 +127,15 @@ logs_info "Installation du service mysql en cours..."
 	sudo systemctl start mysql.service
 	error_handler $? "Le lancement mysql a échouée."
 
-	sudo /usr/bin/mysql_secure_installation <<EOF
-n
-$DB_ROOT_PASSWORD
-$DB_ROOT_PASSWORD
-y
-y
-y
-y
-EOF
+#	sudo /usr/bin/mysql_secure_installation <<EOF
+#n
+#$DB_ROOT_PASSWORD
+#$DB_ROOT_PASSWORD
+#y
+#y
+#y
+#y
+#EOF
 #--password="$DB_PASSWORD" --user="$DB_USERNAME" --port="$DB_PORT" --host="$DB_HOST"
 	#Ce script supprime certains paramètres par défaut peu sûrs et vérouillera l'accès à la bdd.
 	#error_handler $? "Le lancement du script de sécurisation mysql a échoué."
@@ -164,8 +164,8 @@ logs_info "Configuration du service mysql en cours..."
 	sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '$DB_ROOT_PASSWORD';"
 	error_handler $? "La configuration du compte root mysql a échouée."
  
-	sudo mysql -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$PHP_ROOT_PASSWORD';"
-	error_handler $? "La configuration du compte root phpmyadmin a échouée."
+	#sudo mysql -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$PHP_ROOT_PASSWORD';"
+	#error_handler $? "La configuration du compte root phpmyadmin a échouée."
  
  	sudo mysql -e "DELETE FROM mysql.user WHERE User='';DROP DATABASE IF EXISTS test;"
   	error_handler $? "La suppression des éléments par défaut a échouée."

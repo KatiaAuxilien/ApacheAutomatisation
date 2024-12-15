@@ -162,7 +162,6 @@ logs_success "Désinstallation de phpmyadmin et php terminée."
 logs_info "Désintallation de mysql en cours ..."
 	sudo systemctl stop mysql
 	#TODO
-
 	sudo rm -rf /var/lib/mysql
 	#TODO
 	sudo rm -rf /var/lib/etc/mysql
@@ -171,14 +170,11 @@ logs_info "Désintallation de mysql en cours ..."
 	#TODO
 	sudo delgroup mysql
 	#TODO
-<<<<<<< HEAD
-=======
 	sudo rm -rf /var/lib/mysql
 	#TODO
 	sudo rm -rf /etc/mysql/
-
 	#TODO
->>>>>>> dd3e68ead83ae00a2b22b43e0b9cc91d05ef890b
+
 	sudo apt remove --purge mysql-server -y
 	#TODO
 
