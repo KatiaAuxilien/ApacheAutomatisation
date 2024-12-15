@@ -616,7 +616,7 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
         touch /var/www/.htpasswd
         error_handler $? "La création du fichier /var/www/.htpasswd a échouée."
 
-        htpasswd -c -n /var/www/.htpasswd admin \${HTACCESS_PASSWORD}
+        htpasswd -cb /var/www/.htpasswd admin \${HTACCESS_PASSWORD}
         error_handler $? "L'écriture dans le fichier /var/www/.htpasswd a échouée."
 
 #======================================================================#
