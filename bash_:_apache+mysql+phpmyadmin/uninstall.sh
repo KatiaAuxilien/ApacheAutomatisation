@@ -92,7 +92,7 @@ logs_info "Désintallation d'apache en cours ..."
 	sudo rm -rf /var/www/.htpasswd
 	#TODO
 
-	sudo apt-get purge apache2 apache2-utils apache2-bin apache2.2-common
+	sudo apt-get purge apache2 apache2-utils apache2-bin apache2.2-common -y
 	error_handler $? "La désinstallation des services apache2 apache2-utils apache2-bin apache2.2-common a échouée."
 
 
@@ -171,6 +171,14 @@ logs_info "Désintallation de mysql en cours ..."
 	#TODO
 	sudo delgroup mysql
 	#TODO
+<<<<<<< HEAD
+=======
+	sudo rm -rf /var/lib/mysql
+	#TODO
+	sudo rm -rf /etc/mysql/
+
+	#TODO
+>>>>>>> dd3e68ead83ae00a2b22b43e0b9cc91d05ef890b
 	sudo apt remove --purge mysql-server -y
 	#TODO
 
