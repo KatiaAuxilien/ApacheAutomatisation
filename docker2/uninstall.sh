@@ -16,7 +16,6 @@ log_message() {
 
 sudo apt remove --purge apache2-utils -y
 
-
 # Arrêter et supprimer les conteneurs Docker
 log_message INFO "Stopping and removing Docker containers..."
 docker-compose down
@@ -31,6 +30,7 @@ docker network rm $(docker network ls -q)
 
 # Supprimer les fichiers de configuration et les logs
 log_message INFO "Removing configuration files and logs..."
-rm -rf apache2/certificate apache2/mods-available /www phpmyadmin/ apache2
+
+rm -rf apache2/certificate /www phpmyadmin/
 
 log_message INFO "Uninstallation completed successfully."

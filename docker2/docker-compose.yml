@@ -1,63 +1,45 @@
+
 version: '3.8'
 
 services:
-  php:
-    image: php:7.4-apache
-    container_name: ${PHP_CONTAINER_NAME}
-    ports:
-      - "${PHP_PORT}:9000"
-    volumes:
-      - ./sites:/var/www/html
-      - ./php/conf:/usr/local/etc/php
-      - ./php/logs:/var/log/php
-    networks:
-      - servicescomplexe-network
-
-  apache:
-    image: httpd:latest
-    container_name: ${WEB_CONTAINER_NAME}
-    ports:
-      - "${WEB_PORT}:80"
-    volumes:
-      - ./apache/conf:/usr/local/apache2/conf
-      - ./apache/html:/usr/local/apache2/htdocs
-      - ./apache/logs:/var/log/apache2
-    environment:
-      - DOMAINE_NAME=${DOMAIN_NAME}
-      - APACHE_ADMIN_USER=${WEB_ADMIN_USER}
-      - APACHE_ADMIN_PASSWORD=${WEB_ADMIN_PASSWORD}
-    depends_on:
-      - php
-      - mysql
-    networks:
-      - servicescomplexe-network
-
   mysql:
     image: mysql:latest
-    container_name: ${DB_CONTAINER_NAME}
+    container_name: servicescomplexe-db-container
     ports:
-      - "${DB_PORT}:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_ADMIN_USERNAME}
-      MYSQL_PASSWORD: ${DB_ADMIN_PASSWORD}
+      MYSQL_ROOT_PASSWORD: changeme
+      MYSQL_DATABASE: servicescomplexe-database
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: changeme
     networks:
       - servicescomplexe-network
 
-
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: ${PHPMYADMIN_CONTAINER_NAME}
+    container_name: servicescomplexe-phpmyadmin-container
     ports:
-      - "${PHPMYADMIN_PORT}:80"
+      - "81:80"
     environment:
-      PMA_HOST: ${DB_CONTAINER_NAME}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      PMA_USER: ${PHP_ADMIN_USERNAME}
-      PMA_PASSWORD: ${PHP_ADMIN_PASSWORD}
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: changeme
+      PMA_USER: admin
+      PMA_PASSWORD: changeme
+    depends_on:
+      - mysql
+    networks:
+      - servicescomplexe-network
+      
+  web:
+    image: php:7.4-apache
+    container_name: servicescomplexe-web-container
+    ports:
+      - "79:9000"
+    volumes:
+      - ./www:/var/www/html
+      - ./apache2:/etc/apache2/
     depends_on:
       - mysql
     networks:

@@ -120,7 +120,7 @@ logs_success "Les variables .env ont été vérifiées."
 #===================================================================#
 
 # Créer les répertoires nécessaires
-mkdir -p apache2/certificate apache2/mods-available www/ phpmyadmin/
+mkdir -p apache2/certificate www/ phpmyadmin/
 error_handler $? "Création des dossiers a échouée."
 
 sudo apt install apache2-utils -y
@@ -220,8 +220,8 @@ logs_info "Configuration du service apache en cours..."
 
 # Configuration apache
 
-    touch apache2/apache2.conf
-    error_handler $? "  a échouée."
+    #touch apache2/apache2.conf
+    #error_handler $? "  a échouée."
 
     echo "
 ServerRoot \"/etc/apache2\"
@@ -293,7 +293,7 @@ error_handler $? "  a échouée."
 
 #Configuration pour php
 
-    mkdir apache2/mods-enabled/
+    #mkdir apache2/mods-enabled/
     error_handler $? "  a échouée."
 
     touch apache2/mods-enabled/dir.conf
@@ -308,8 +308,8 @@ error_handler $? "  a échouée."
 
 #Configuration de la page web par défaut.
 
-    mkdir apache2/sites-enabled/
-    touch apache2/sites-enabled/000-default.conf
+    #mkdir apache2/sites-enabled/
+    #touch apache2/sites-enabled/000-default.conf
 
     echo "
 <VirtualHost *:$WEB_PORT>
@@ -335,8 +335,8 @@ error_handler $? "  a échouée."
 
 # Configuration du port du service apache
 
-    touch apache2/ports.conf 
-    error_handler $? "La création du fichier de configuration des ports a échouée."
+    #touch apache2/ports.conf 
+    #error_handler $? "La création du fichier de configuration des ports a échouée."
 
     echo "
 # If you just change the port or add more ports here, you will likely also
@@ -356,7 +356,7 @@ Listen $WEB_PORT
 
 # Configuration ModSecurity
 
-    touch /apache2/modsecurity.conf
+    touch /apache2/mods-available/modsecurity.conf
     error_handler $? "La création du fichier /apache2/modsecurity.conf a échouée."
 
     echo "
@@ -590,7 +590,7 @@ SecUnicodeMapFile unicode.mapping 20127
 # version, Anonymous unique id for host.
 # NB: As of April 2022, there is no longer any advantage to turning this
 # setting On, as there is no active receiver for the information.
-SecStatusEngine Off" > /apache2/modsecurity.conf
+SecStatusEngine Off" > /apache2/mods-available/modsecurity.conf
     error_handler $? "L'écriture du fichier /apache2/modsecurity.conf a échouée."
     
 # Configuration ModEvasive
@@ -634,7 +634,7 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
         logs_info "Création du site " $site_name "..."
         
         mkdir www/$site_name
-        error_handler $? "La création du dossier www/$site_name a échouée."
+        #error_handler $? "La création du dossier www/$site_name a échouée."
         
         sudo chown -R $USER:$USER www/$site_name
         error_handler $? "L'attribution des droits sur le dossier www/$site_name a échouée."
@@ -648,6 +648,7 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
         <title>Bienvenue sur le " $site_name " !</title>
     </head>
     <body>
+    	<h1>$site_name</h1>
         <h1> N'allez pas sur l'autre site, ce site est malveillant !</h1>
     </body>
 </html>" > www/$site_name/index.html
@@ -796,7 +797,7 @@ logs_info "Installation de ModSecurity en cours..."
     # "security2_module (shared)"
     docker exec -i $WEB_CONTAINER_NAME apachectl -M | grep --color security
     
-    docker exec -i $WEB_CONTAINER_NAME mv /etc/apache2/modsecurity/modsecurity.conf /etc/modsecurity/modsecurity.conf
+    docker exec -i $WEB_CONTAINER_NAME mv /etc/apache2/mods-available/modsecurity.conf /etc/modsecurity/modsecurity.conf
     error_handler $? "Déplacement du fichier /etc/apache2/modsecurity/modsecurity.conf a échouée."
 
     # sudo cp /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf

@@ -1,1 +1,10 @@
-[0;32m[2024-12-15 22:09:53] [INFO] Uninstallation completed successfully.[0m
+[0;32m[2024-12-16 00:27:53] [INFO] Stopping and removing Docker containers...[0m
+[0;32m[2024-12-16 00:28:04] [INFO] Removing Docker volumes...[0m
+[0;32m[2024-12-16 00:28:04] [INFO] Removing Docker networks...[0m
+[0;32m[2024-12-16 00:28:04] [INFO] Removing configuration files and logs...[0m
+[0;32m[2024-12-16 00:28:04] [INFO] Uninstallation completed successfully.[0m
+[0;32m[2024-12-16 00:29:01] [INFO] Stopping and removing Docker containers...[0m
+[0;32m[2024-12-16 00:29:01] [INFO] Removing Docker volumes...[0m
+[0;32m[2024-12-16 00:29:01] [INFO] Removing Docker networks...[0m
+[0;32m[2024-12-16 00:29:02] [INFO] Removing configuration files and logs...[0m
+[0;32m[2024-12-16 00:29:02] [INFO] Uninstallation completed successfully.[0m
