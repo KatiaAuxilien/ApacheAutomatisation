@@ -120,7 +120,7 @@ logs_success "Les variables .env ont été vérifiées."
 #===================================================================#
 
 # Créer les répertoires nécessaires
-mkdir -p /apache2/certificate /apache2/mods-available /www
+mkdir -p /apache2/certificate /apache2/mods-available /www phpmyadmin/
 error_handler $? "  a échouée."
 
 #===================================================================#
@@ -743,6 +743,7 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
         logs_success "$site_name créé."
     done
 
+
 #======================================================================#
 
 logs_info "Lancement du conteneur $WEB_CONTAINER_NAME en cours..."
@@ -830,6 +831,24 @@ logs_info "Installation de ModEvasive en cours..."
     # error_handler $? "Le redémarrage du service apache a échouée."
 
 logs_success "Installation de ModEvasive terminée."
+
+
+#======================================================================#
+# Configuration de phpmyadmin                                          #
+#======================================================================#
+
+# Sécuriser phpMyAdmin avec .htaccess
+htpasswd -cb phpmyadmin/.htpasswd $PHP_ADMIN_USERNAME $PHP_ADMIN_PASSWORD
+error_handler $? "La création du fichier .htpasswd a échouée."
+
+touch phpmyadmin/.htaccess
+error_handler $? "La création du fichier phpmyadmin/.htaccess a échouée."
+
+echo "AuthType Basic
+AuthName \"Accès protégé\"
+AuthUserFile /usr/local/apache2/htdocs/.htpasswd
+require valid-user" > phpmyadmin/.htaccess
+error_handler $? "L'écriture du fichier phpmyadmin/.htaccess a échouée."
 
 #======================================================================#
 # Configuration de MySQL                                               #
