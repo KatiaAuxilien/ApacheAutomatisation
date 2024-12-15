@@ -891,12 +891,21 @@ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $WE
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $PHP_CONTAINER_NAME
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $PHPMYADMIN_CONTAINER_NAME
 
+# Récupérer les adresses IP des conteneurs
+WEB_CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $WEB_CONTAINER_NAME)
+PHP_CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $PHP_CONTAINER_NAME)
+PHPMYADMIN_CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $PHPMYADMIN_CONTAINER_NAME)
 
-# for site_name in siteA siteB
-# do
-# # echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
-# # error_handler $? "L'écriture du fichier /etc/hosts a échouée."
-# done
+# Mettre à jour le fichier /etc/hosts
+echo "$WEB_CONTAINER_IP siteA.$DOMAIN_NAME" | sudo tee -a /etc/hosts
+echo "$WEB_CONTAINER_IP siteB.$DOMAIN_NAME" | sudo tee -a /etc/hosts
+echo "$PHPMYADMIN_CONTAINER_IP phpmyadmin.$DOMAIN_NAME" | sudo tee -a /etc/hosts
+
+# Afficher les adresses IP des conteneurs
+logs_info "Adresses IP des conteneurs :"
+logs_info "Apache (siteA et siteB) : $WEB_CONTAINER_IP siteA.$DOMAIN_NAME siteB.$DOMAIN_NAME"
+logs_info "PHP : $PHP_CONTAINER_IP phpmyadmin.$DOMAIN_NAME"
+logs_info "phpMyAdmin : $PHPMYADMIN_CONTAINER_IP"
 
 
 #======================================================================#
