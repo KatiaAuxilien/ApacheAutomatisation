@@ -156,7 +156,8 @@ logs_success "Le service php est installé."
 
 logs_info "Installation du service phpmyadmin en cours..."
 
-	sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/dbconfig-install boolean true' && sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/app-password-confirm password your_password' && sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password your_password' && sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password your_password' && sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' && sudo apt-get install -y phpmyadmin
+	export DEBIAN_FRONTEND=noninteractive
+
 	#sudo apt-get install -y phpmyadmin
 	error_handler $? "L'installation du service phpmyadmin a échouée."
 
