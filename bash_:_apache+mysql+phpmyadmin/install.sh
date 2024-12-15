@@ -142,37 +142,12 @@ EOF
 
 logs_success "Le service mysql est installé."
 
-logs_info "Configuration du service mysql en cours..."
-	
-	sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_ROOT_PASSWORD';
-DELETE FROM mysql.user WHERE User='';
-DROP DATABASE IF EXISTS test; FLUSH PRIVILEGES;"
-	error_handler $? "La suppression des éléments par défaut a échouée."
-
-#	sudo mysql -u"root" -p"$DB_ROOT_PASSWORD" -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$PHP_ROOT_PASSWORD';"
-
-	sudo mysql -e "CREATE DATABASE $DB_NAME;"
-	error_handler $? "La création de la base de données $DB_NAME a échouée."
-
-	sudo mysql -u"root" -p"$DB_ROOT_PASSWORD" -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_PASSWORD';
-GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USERNAME'@'localhost';"
-	error_handler $? "La création de l'utilisateur administrateur $DB_ADMIN_USERNAME a échouée."
-
-	sudo mysql -u"root" -p"$DB_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
-	error_handler $? "L'actualisation des privilèges mysql a échouée."
-
-	sudo mysql -u"$DB_USERNAME" -p"$DB_PASSWORD" -e "CREATE TABLE $DB_NAME.todo_list (item_id INT AUTO_INCREMENT, content VARCHAR(255), PRIMARY KEY (item_id)); INSERT INTO $DB_NAME.todo_list (content) VALUES (\"Sécuriser le site web.\"); SELECT * FROM $DB_NAME.todo_list;"
-	error_handler $? "La création de la table $DB_NAME.todo_list a échouée."
-
-logs_success "La configuration mysql est terminée."
-
 logs_info "Installation du service php en cours..."
 
 	sudo apt install -y php libapache2-mod-php php-mysql
 	error_handler $? "L'installation du service php a échouée."
 
 logs_success "Le service php est installé."
-
 
 logs_info "Installation du service phpmyadmin en cours..."
 
@@ -185,20 +160,38 @@ logs_info "Installation du service phpmyadmin en cours..."
 logs_success "Le service phpmyadmin est installé."
 
 logs_info "Configuration du service mysql en cours..."
-
-	sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_ROOT_PASSWORD';"
-
+	
+	sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '$DB_ROOT_PASSWORD';"
+	error_handler $? "La configuration du compte root mysql a échouée."
+ 
 	sudo mysql -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$PHP_ROOT_PASSWORD';"
-
-	sudo mysql -e "CREATE DATABASE $DB_NAME; "
-	error_handler $? "La création de la base de données $DB_NAME a échouée."
-
-	sudo mysql -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_PASSWORD';GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'@'localhost';"
+	error_handler $? "La configuration du compte root phpmyadmin a échouée."
+ 
+ 	sudo mysql -e "DELETE FROM mysql.user WHERE User='';DROP DATABASE IF EXISTS test;"
+  	error_handler $? "La suppression des éléments par défaut a échouée."
+ 	
+  	sudo mysql -e "FLUSH PRIVILEGES;"
+	error_handler $? "L'actualisation des privilèges mysql a échouée."
+ 
+ 	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
 	error_handler $? "La création de l'utilisateur administrateur $DB_ADMIN_USERNAME a échouée."
-
-	mysql -u "$DB_USERNAME" -p "$DB_PASSWORD" -e "SHOW DATABASES; CREATE TABLE $DB_NAME.todo_list (item_id INT AUTO_INCREMENT, content VARCHAR(255), PRIMARY KEY (item_id)); INSERT INTO $DB_NAME.todo_list (content) VALUES (\"Sécuriser le site web.\"); SELECT * FROM $DB_NAME.todo_list;"
+ 
+	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'@'localhost' WITH GRANT OPTION;"
+	
+ 	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
+ 
+	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "CREATE DATABASE $DB_NAME;"
+	error_handler $? "La création de la base de données $DB_NAME a échouée."
+ 
+	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "USE $DB_NAME; CREATE TABLE todo_list (
+		item_id INT AUTO_INCREMENT, 
+  		content VARCHAR(255), 
+    		PRIMARY KEY (item_id));"
 	error_handler $? "La création de la table $DB_NAME.todo_list a échouée."
 
+	sudo mysql -uroot -p$DB_ROOT_PASSWORD -e "INSERT INTO $DB_NAME.todo_list (content) VALUES (\"Sécuriser le site web.\"); SELECT * FROM $DB_NAME.todo_list;"
+ 	error_handler $? "L'insertion dans la table $DB_NAME.todo_list a échouée."
+  
 logs_success "La configuration mysql est terminée."
 
 #Configuration du service (HTTPS, ModSecurity, ModEvasive, mod_ratelimit, .htaccess & masquage dans l'url des noms de dossier.)
