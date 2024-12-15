@@ -127,22 +127,15 @@ logs_info "Installation du service mysql en cours..."
 	sudo systemctl start mysql.service
 	error_handler $? "Le lancement mysql a échouée."
 
-
-#sudo apt autoremove --purge mysql-server\* mariadb-server\*
-#sudo rm -rf /var/lib/mysql
-#sudo rm -rf /etc/mysql/
-#sudo mkdir -p /etc/mysql/conf.d
-#sudo apt install mysql-server
-
-#	sudo /usr/bin/mysql_secure_installation <<EOF
-#n
-#$DB_ROOT_PASSWORD
-#$DB_ROOT_PASSWORD
-#y
-#y
-#y
-#y
-#EOF
+	sudo /usr/bin/mysql_secure_installation <<EOF
+n
+$DB_ROOT_PASSWORD
+$DB_ROOT_PASSWORD
+y
+y
+y
+y
+EOF
 #--password="$DB_PASSWORD" --user="$DB_USERNAME" --port="$DB_PORT" --host="$DB_HOST"
 	#Ce script supprime certains paramètres par défaut peu sûrs et vérouillera l'accès à la bdd.
 	#error_handler $? "Le lancement du script de sécurisation mysql a échoué."
@@ -156,19 +149,19 @@ DELETE FROM mysql.user WHERE User='';
 DROP DATABASE IF EXISTS test; FLUSH PRIVILEGES;"
 	error_handler $? "La suppression des éléments par défaut a échouée."
 
-#	sudo mysql -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$PHP_ROOT_PASSWORD';"
+#	sudo mysql -u"root" -p"$DB_ROOT_PASSWORD" -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$PHP_ROOT_PASSWORD';"
 
 	sudo mysql -e "CREATE DATABASE $DB_NAME;"
 	error_handler $? "La création de la base de données $DB_NAME a échouée."
 
-	sudo mysql -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_PASSWORD';
+	sudo mysql -u"root" -p"$DB_ROOT_PASSWORD" -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_PASSWORD';
 GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USERNAME'@'localhost';"
-	sudo mysql -e "FLUSH PRIVILEGES;"
-
-	sudo mysql -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_PASSWORD'; GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'@'localhost'; FLUSH PRIVILEGES;"
 	error_handler $? "La création de l'utilisateur administrateur $DB_ADMIN_USERNAME a échouée."
 
-	mysql -u "$DB_USERNAME" -p "$DB_PASSWORD" -e "CREATE TABLE $DB_NAME.todo_list (item_id INT AUTO_INCREMENT, content VARCHAR(255), PRIMARY KEY (item_id)); INSERT INTO $DB_NAME.todo_list (content) VALUES (\"Sécuriser le site web.\"); SELECT * FROM $DB_NAME.todo_list;"
+	sudo mysql -u"root" -p"$DB_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
+	error_handler $? "L'actualisation des privilèges mysql a échouée."
+
+	sudo mysql -u"$DB_USERNAME" -p"$DB_PASSWORD" -e "CREATE TABLE $DB_NAME.todo_list (item_id INT AUTO_INCREMENT, content VARCHAR(255), PRIMARY KEY (item_id)); INSERT INTO $DB_NAME.todo_list (content) VALUES (\"Sécuriser le site web.\"); SELECT * FROM $DB_NAME.todo_list;"
 	error_handler $? "La création de la table $DB_NAME.todo_list a échouée."
 
 logs_success "La configuration mysql est terminée."
