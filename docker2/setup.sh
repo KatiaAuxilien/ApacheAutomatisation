@@ -121,7 +121,10 @@ logs_success "Les variables .env ont été vérifiées."
 
 # Créer les répertoires nécessaires
 mkdir -p apache2/certificate apache2/mods-available /www phpmyadmin/
-error_handler $? "  a échouée."
+error_handler $? "Création des dossiers a échouée."
+
+sudo apt install apache2-utils
+error_handler $? "Installation d'apache2-utils a échouée."
 
 #===================================================================#
 # Création du docker_compose.yml avec les varaibles d'environnement #
