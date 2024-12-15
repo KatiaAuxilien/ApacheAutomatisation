@@ -183,7 +183,7 @@ logs_info "Désintallation de mysql en cours ..."
 	sudo apt remove --purge mysql-server -y
 	#TODO
  
-	sudo apt-get purge mysql-server mysql-client mysql-common mysql-server-core-* mysql-client-core-*
+	sudo apt-get purge mysql-server mysql-client mysql-common mysql-server-core-* mysql-client-core-* -y
  	#TODO
 
 logs_success "Désinstallation de mysql terminée."
