@@ -137,17 +137,6 @@ cat > docker-compose.yml <<EOF
 version: '3.8'
 
 services:
-  web:
-    image: php:7.4-apache
-    container_name: \${WEB_CONTAINER_NAME}
-    ports:
-      - "\${WEB_PORT}:9000"
-    volumes:
-      - ./www:/var/www/html
-      - ./apache2:/etc/apache2/
-    networks:
-      - $NETWORK_NAME
-
   mysql:
     image: mysql:latest
     container_name: \${DB_CONTAINER_NAME}
@@ -169,10 +158,23 @@ services:
     ports:
       - "\${PHPMYADMIN_PORT}:80"
     environment:
-      PMA_HOST: \${DB_CONTAINER_NAME}
+      PMA_HOST: mysql
       MYSQL_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
       PMA_USER: \${PHPMYADMIN_ADMIN_USERNAME}
       PMA_PASSWORD: \${PHPMYADMIN_ADMIN_PASSWORD}
+    depends_on:
+      - mysql
+    networks:
+      - $NETWORK_NAME
+      
+  web:
+    image: php:7.4-apache
+    container_name: \${WEB_CONTAINER_NAME}
+    ports:
+      - "\${WEB_PORT}:9000"
+    volumes:
+      - ./www:/var/www/html
+      - ./apache2:/etc/apache2/
     depends_on:
       - mysql
     networks:
@@ -864,13 +866,18 @@ error_handler $? "L a échouée." #TODO
 
 
 
+# Afficher les adresses IP des conteneurs
+logs_info "Adresses IP des conteneurs :"
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $WEB_CONTAINER_NAME
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $PHP_CONTAINER_NAME
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $PHPMYADMIN_CONTAINER_NAME
 
-    # for site_name in siteA siteB
-    # do
-    # # echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
-    # # error_handler $? "L'écriture du fichier /etc/hosts a échouée."
-    # done
 
+# for site_name in siteA siteB
+# do
+# # echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
+# # error_handler $? "L'écriture du fichier /etc/hosts a échouée."
+# done
 
 
 #======================================================================#
