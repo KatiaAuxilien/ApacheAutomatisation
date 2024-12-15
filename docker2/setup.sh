@@ -217,7 +217,7 @@ logs_info "Configuration du service apache en cours..."
 
 # Configuration apache
 
-    touch apache2/conf/apache2.conf
+    touch apache2/apache2.conf
     error_handler $? "  a échouée."
 
     echo "
