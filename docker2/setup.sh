@@ -617,7 +617,7 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
     
     logs_info "Sécurisation du .htaccess ..."
         
-        touch /www/.htpasswd
+        sudo touch /www/.htpasswd
         error_handler $? "La création du fichier /www/.htpasswd a échouée."
 
         htpasswd -cb /www/.htpasswd admin \${HTACCESS_PASSWORD}
