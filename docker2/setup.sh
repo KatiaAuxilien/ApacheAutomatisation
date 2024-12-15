@@ -617,11 +617,11 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
     
     logs_info "Sécurisation du .htaccess ..."
         
-        sudo touch /www/.htpasswd
-        error_handler $? "La création du fichier /www/.htpasswd a échouée."
+        sudo touch www/.htpasswd
+        error_handler $? "La création du fichier www/.htpasswd a échouée."
 
-        htpasswd -cb /www/.htpasswd admin \${HTACCESS_PASSWORD}
-        error_handler $? "L'écriture dans le fichier /www/.htpasswd a échouée."
+        htpasswd -cb www/.htpasswd admin \${HTACCESS_PASSWORD}
+        error_handler $? "L'écriture dans le fichier www/.htpasswd a échouée."
 
 #======================================================================#
 # Création et configuration de n sites-enabled                         #
