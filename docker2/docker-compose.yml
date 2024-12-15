@@ -16,6 +16,8 @@ services:
       - APACHE_ADMIN_PASSWORD=${APACHE_ADMIN_PASSWORD}
     depends_on:
       - mysql
+    networks:
+      - web-network
 
   mysql:
     image: mysql:latest
@@ -29,6 +31,8 @@ services:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - web-network
 
   php:
     image: php:7.4-fpm
@@ -38,6 +42,8 @@ services:
     volumes:
       - ./php/conf:/usr/local/etc/php
       - ./php/logs:/var/log/php
+    networks:
+      - web-network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -50,6 +56,12 @@ services:
       PMA_PASSWORD: ${PHPMYADMIN_ADMIN_PASSWORD}
     depends_on:
       - mysql
+    networks:
+      - web-network
 
 volumes:
   mysql_data:
+
+networks:
+  web-network:
+    external: true
