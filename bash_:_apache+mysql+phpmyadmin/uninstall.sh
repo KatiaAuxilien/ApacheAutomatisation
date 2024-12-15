@@ -171,8 +171,6 @@ logs_info "Désintallation de mysql en cours ..."
 	#TODO
 	sudo delgroup mysql
 	#TODO
-	sudo rm /usr/bin/mysql_secure_installation
-	#TODO
 	sudo apt remove --purge mysql-server -y
 	#TODO
 

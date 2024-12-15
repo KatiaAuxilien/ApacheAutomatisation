@@ -131,22 +131,6 @@ logs_info "Installation du service mysql en cours..."
 
 logs_success "Le service mysql est installé."
 
-logs_info "Configuration du service mysql en cours..."
-
-	sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_ROOT_PASSWORD';"
-
-	sudo mysql -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$PHP_ROOT_PASSWORD';"
-
-	sudo mysql -e "CREATE DATABASE $DB_NAME; "
-	error_handler $? "La création de la base de données $DB_NAME a échouée."
-
-	sudo mysql -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_PASSWORD';GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'@'localhost';"
-	error_handler $? "La création de l'utilisateur administrateur $DB_ADMIN_USERNAME a échouée."
-
-	mysql -u "$DB_USERNAME" -p "$DB_PASSWORD" -e "SHOW DATABASES; CREATE TABLE $DB_NAME.todo_list (item_id INT AUTO_INCREMENT, content VARCHAR(255), PRIMARY KEY (item_id)); INSERT INTO $DB_NAME.todo_list (content) VALUES (\"Sécuriser le site web.\"); SELECT * FROM $DB_NAME.todo_list;"
-	error_handler $? "La création de la table $DB_NAME.todo_list a échouée."
-
-logs_success "La configuration mysql est terminée."
 
 logs_info "Installation du service php en cours..."
 
@@ -166,6 +150,22 @@ logs_info "Installation du service phpmyadmin en cours..."
 
 logs_success "Le service phpmyadmin est installé."
 
+logs_info "Configuration du service mysql en cours..."
+
+	sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_ROOT_PASSWORD';"
+
+	sudo mysql -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$PHP_ROOT_PASSWORD';"
+
+	sudo mysql -e "CREATE DATABASE $DB_NAME; "
+	error_handler $? "La création de la base de données $DB_NAME a échouée."
+
+	sudo mysql -e "CREATE USER '$DB_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_PASSWORD';GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'@'localhost';"
+	error_handler $? "La création de l'utilisateur administrateur $DB_ADMIN_USERNAME a échouée."
+
+	mysql -u "$DB_USERNAME" -p "$DB_PASSWORD" -e "SHOW DATABASES; CREATE TABLE $DB_NAME.todo_list (item_id INT AUTO_INCREMENT, content VARCHAR(255), PRIMARY KEY (item_id)); INSERT INTO $DB_NAME.todo_list (content) VALUES (\"Sécuriser le site web.\"); SELECT * FROM $DB_NAME.todo_list;"
+	error_handler $? "La création de la table $DB_NAME.todo_list a échouée."
+
+logs_success "La configuration mysql est terminée."
 
 #Configuration du service (HTTPS, ModSecurity, ModEvasive, mod_ratelimit, .htaccess & masquage dans l'url des noms de dossier.)
 
