@@ -229,72 +229,101 @@ EOF
 
 
 cat > apache/conf/httpd.conf <<EOF
+# Chargement des modules nécessaires
+LoadModule ssl_module modules/mod_ssl.so
 LoadModule security2_module modules/mod_security2.so
 LoadModule evasive20_module modules/mod_evasive20.so
-IncludeOptional conf/extra/httpd-ssl.conf
+LoadModule ratelimit_module modules/mod_ratelimit.so
+LoadModule rewrite_module modules/mod_rewrite.so
 
+# Configuration de base
 ServerName $DOMAIN_NAME
 Listen $WEB_PORT
 
-<VirtualHost *:$WEB_PORT>
+# Configuration de ModSecurity
+<IfModule security2_module>
+    SecRuleEngine On
+    Include conf/modsecurity.d/modsecurity_crs_10_setup.conf
+    Include conf/modsecurity.d/base_rules/*.conf
+</IfModule>
+
+# Configuration de ModEvasive
+<IfModule mod_evasive20.c>
+    DOSHashTableSize    3097
+    DOSPageCount        2
+    DOSPageInterval     1
+    DOSSiteCount        50
+    DOSSiteInterval     1
+    DOSBlockingPeriod   10
+</IfModule>
+
+# Configuration de ModRateLimit
+<IfModule mod_ratelimit.c>
+    <Location />
+        SetEnvIf Request_URI "^/.*$" ratelimit:10
+        SetEnvIf Request_URI "^/.*$" ratelimit:10
+    </Location>
+</IfModule>
+
+# Configuration de HTTPS
+<VirtualHost *:443>
+    ServerName $DOMAIN_NAME
+    DocumentRoot "/usr/local/apache2/htdocs"
+
+    SSLEngine on
+    SSLCertificateFile /usr/local/apache2/conf/certs/certificate.crt
+    SSLCertificateKeyFile /usr/local/apache2/conf/certs/private.key
+    SSLCertificateChainFile /usr/local/apache2/conf/certs/chain.crt
+
+    # Masquage des fichiers dans l'URL
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</VirtualHost>
+
+# Configuration des sites virtuels
+Include conf/extra/httpd-vhosts.conf
+EOF
+
+#Configuration des sites
+cat > apache/conf/httpd.conf <<EOF
+# Site A
+<VirtualHost *:443>
     ServerName siteA.$DOMAIN_NAME
     DocumentRoot "/usr/local/apache2/htdocs/siteA"
-    <Directory "/usr/local/apache2/htdocs/siteA">
-        Options Indexes FollowSymLinks
-        AllowOverride All
-        Require all granted
-    </Directory>
-    ErrorLog "/var/log/apache2/siteA_error.log"
-    CustomLog "/var/log/apache2/siteA_access.log" common
+
+    SSLEngine on
+    SSLCertificateFile /usr/local/apache2/conf/certs/siteA_certificate.crt
+    SSLCertificateKeyFile /usr/local/apache2/conf/certs/siteA_private.key
+    SSLCertificateChainFile /usr/local/apache2/conf/certs/siteA_chain.crt
+
+    # Masquage des fichiers dans l'URL
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 </VirtualHost>
 
-<VirtualHost *:$WEB_PORT>
+# Site B
+<VirtualHost *:443>
     ServerName siteB.$DOMAIN_NAME
     DocumentRoot "/usr/local/apache2/htdocs/siteB"
-    <Directory "/usr/local/apache2/htdocs/siteB">
-        Options Indexes FollowSymLinks
-        AllowOverride All
-        Require all granted
-    </Directory>
-    ErrorLog "/var/log/apache2/siteB_error.log"
-    CustomLog "/var/log/apache2/siteB_access.log" common
+
+    SSLEngine on
+    SSLCertificateFile /usr/local/apache2/conf/certs/siteB_certificate.crt
+    SSLCertificateKeyFile /usr/local/apache2/conf/certs/siteB_private.key
+    SSLCertificateChainFile /usr/local/apache2/conf/certs/siteB_chain.crt
+
+    # Masquage des fichiers dans l'URL
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 </VirtualHost>
-
-<IfModule mod_ssl.c>
-    <VirtualHost *:443>
-        ServerName siteA.$DOMAIN_NAME
-        DocumentRoot "/usr/local/apache2/htdocs/siteA"
-        SSLEngine on
-        SSLCertificateFile /usr/local/apache2/conf/server.crt
-        SSLCertificateKeyFile /usr/local/apache2/conf/server.key
-        <Directory "/usr/local/apache2/htdocs/siteA">
-            Options Indexes FollowSymLinks
-            AllowOverride All
-            Require all granted
-        </Directory>
-        ErrorLog "/var/log/apache2/siteA_error.log"
-        CustomLog "/var/log/apache2/siteA_access.log" common
-    </VirtualHost>
-
-    <VirtualHost *:443>
-        ServerName siteB.$DOMAIN_NAME
-        DocumentRoot "/usr/local/apache2/htdocs/siteB"
-        SSLEngine on
-        SSLCertificateFile /usr/local/apache2/conf/server.crt
-        SSLCertificateKeyFile /usr/local/apache2/conf/server.key
-        <Directory "/usr/local/apache2/htdocs/siteB">
-            Options Indexes FollowSymLinks
-            AllowOverride All
-            Require all granted
-        </Directory>
-        ErrorLog "/var/log/apache2/siteB_error.log"
-        CustomLog "/var/log/apache2/siteB_access.log" common
-    </VirtualHost>
-</IfModule>
 EOF
 
 # Créer les fichiers index.html et confidential.php
-
 
 mkdir -p apache/html/siteA apache/html/siteB
 echo "<html><body><h1>Welcome to SiteA</h1></body></html>" > apache/html/siteA/index.html
