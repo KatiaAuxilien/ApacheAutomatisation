@@ -751,13 +751,13 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
 #======================================================================#
 
 logs_info "Lancement du conteneur $WEB_CONTAINER_NAME en cours..."
-docker-compose up -d web
+docker-compose up -d $WEB_CONTAINER_NAME
 sleep 60
 
 # Chargement des sites
     for site_name in siteA siteB
     do
-        docker exec -i web a2ensite $site_name
+        docker exec -i $WEB_CONTAINER_NAME a2ensite $site_name
         error_handler $? "L'activation du fichier de configuration du site $site_name a échouée."
     done
 
@@ -768,16 +768,16 @@ sleep 60
 #======================================================================#
 logs_info "Activation des modules pour apache en cours..."
 
-    docker exec -i web a2enmod ssl
+    docker exec -i $WEB_CONTAINER_NAME a2enmod ssl
     error_handler $? "L'activation du module Mod_ssl a échouée."
 
-    docker exec -i web a2ensite default-ssl
+    docker exec -i $WEB_CONTAINER_NAME a2ensite default-ssl
     error_handler $? "L'activation du module default_ssl a échouée."
 
-    docker exec -i web a2enmod rewrite
+    docker exec -i $WEB_CONTAINER_NAME a2enmod rewrite
     error_handler $? "L'activation du module Mod_rewrite a échouée."
 
-    docker exec -i web a2enmod headers
+    docker exec -i $WEB_CONTAINER_NAME a2enmod headers
     error_handler $? "L'activation du module Mod_headers a échouée."
 
 logs_success "Activation des modules pour apache terminée."
@@ -788,17 +788,17 @@ logs_success "Activation des modules pour apache terminée."
 
 logs_info "Installation de ModSecurity en cours..."
     
-    docker exec -i web apt install -y libapache2-mod-security2 
+    docker exec -i $WEB_CONTAINER_NAME apt install -y libapache2-mod-security2 
     error_handler $? "L'installation de libapache2-mod-security2 a échouée."
     
-    docker exec -i web a2enmod security2
+    docker exec -i $WEB_CONTAINER_NAME a2enmod security2
     error_handler $? "L'activation de libapache2-mod-security2 a échouée."
 
     #TODO trouver un moyen de vérifier la bonne installation de modsecurity avec un retour de variable.
     # "security2_module (shared)"
-    docker exec -i web apachectl -M | grep --color security
+    docker exec -i $WEB_CONTAINER_NAME apachectl -M | grep --color security
     
-    docker exec -i web mv /etc/apache2/modsecurity/modsecurity.conf /etc/modsecurity/modsecurity.conf
+    docker exec -i $WEB_CONTAINER_NAME mv /etc/apache2/modsecurity/modsecurity.conf /etc/modsecurity/modsecurity.conf
     error_handler $? "Déplacement du fichier /etc/apache2/modsecurity/modsecurity.conf a échouée."
 
     # sudo cp /etc/modsecurity/modsecurity.conf-recommended /etc/modsecurity/modsecurity.conf
@@ -827,7 +827,7 @@ logs_info "Installation de ModEvasive en cours..."
     # sudo chown -R www-data:www-data /var/log/mod_evasive
     #TODO
 
-    docker exec -i web a2enmod evasive
+    docker exec -i $DB_CONTAINER_NAME a2enmod evasive
     error_handler $? "L'activation du ModEvasive a échouée."
     
     #TODO :
