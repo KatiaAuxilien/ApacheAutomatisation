@@ -149,8 +149,6 @@ logs_info "Installation du service mysql en cours..."
 
 logs_success "Le service mysql est installé."
 
-<<<<<<< HEAD
-=======
 logs_info "Configuration du service mysql en cours..."
 	
 	sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_ROOT_PASSWORD';
@@ -174,7 +172,6 @@ GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USERNAME'@'localhost';"
 	error_handler $? "La création de la table $DB_NAME.todo_list a échouée."
 
 logs_success "La configuration mysql est terminée."
->>>>>>> dd3e68ead83ae00a2b22b43e0b9cc91d05ef890b
 
 logs_info "Installation du service php en cours..."
 
