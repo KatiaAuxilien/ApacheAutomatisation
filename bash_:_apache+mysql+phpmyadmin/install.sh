@@ -874,7 +874,7 @@ Alias /phpmyadmin /usr/share/phpmyadmin
 	sudo a2enconf phpmyadmin.conf
 	error_handler $? "L a échouée." #TODO
 
-	sudo systemctl restart apache2 phpmyadmin
+	sudo systemctl restart apache2
 	error_handler $? "L a échouée." #TODO
 
 	sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
@@ -893,7 +893,7 @@ Alias /phpmyadmin /usr/share/phpmyadmin
 	htpasswd -cb /etc/phpmyadmin/.htpasswd admin \${PHP_HTACCESS_PASSWORD}
 	error_handler $? "L'écriture dans le fichier /etc/phpmyadmin/.htpasswd a échouée."
 
-	sudo systemctl restart apache2 phpmyadmin
+	sudo systemctl restart apache2
 	error_handler $? "L a échouée." #TODO
 
 logs_success "Configuration du service phpmyadmin terminée."
