@@ -160,12 +160,16 @@ logs_info "Installation du service phpmyadmin en cours..."
 logs_success "Le service phpmyadmin est installé."
 
 logs_info "Configuration du service mysql en cours..."
-	
+	#caching_sha2_password
 	sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '$DB_ROOT_PASSWORD';"
 	error_handler $? "La configuration du compte root mysql a échouée."
  
-	#sudo mysql -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$PHP_ROOT_PASSWORD';"
-	#error_handler $? "La configuration du compte root phpmyadmin a échouée."
+	sudo mysql -e "SELECT User FROM mysql.user WHERE User = 'phpmyadmin';" | grep -q 'phpmyadmin'
+	if [ $? -ne 0 ]; then
+	    sudo mysql -e "CREATE USER 'phpmyadmin'@'localhost' IDENTIFIED BY '$PHP_ROOT_PASSWORD';"
+	fi
+	sudo mysql -e "ALTER USER 'phpmyadmin'@'localhost' IDENTIFIED WITH mysql_native_password BY '$PHP_ROOT_PASSWORD';"
+	error_handler $? "La configuration de l'utilisateur phpmyadmin a échouée."
  
  	sudo mysql -e "DELETE FROM mysql.user WHERE User='';DROP DATABASE IF EXISTS test;"
   	error_handler $? "La suppression des éléments par défaut a échouée."
