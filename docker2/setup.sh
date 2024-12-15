@@ -120,7 +120,7 @@ logs_success "Les variables .env ont été vérifiées."
 #===================================================================#
 
 # Créer les répertoires nécessaires
-mkdir -p /apache2/certificate /apache2/mods-available /www phpmyadmin/
+mkdir -p apache2/certificate apache2/mods-available /www phpmyadmin/
 error_handler $? "  a échouée."
 
 #===================================================================#
@@ -202,22 +202,22 @@ logs_info "Configuration du service apache en cours..."
         sudo apt-get install -y openssl
         error_handler $? "L'installation d'openssl a échouée."
 
-        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out apache2/certificate/"$DOMAIN_NAME"_server.crt -keyout /apache2/certificate/"$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
+        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out apache2/certificate/"$DOMAIN_NAME"_server.crt -keyout apache2/certificate/"$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
         error_handler $? "La génération de demande de signature de certifcat a échouée"
 
         openssl x509 -in apache2/certificate/"$DOMAIN_NAME"_server.crt -text -noout
         error_handler $? "La vérification du certificat a échouée."
 
-        sudo chmod 600 /apache2/certificate/"$DOMAIN_NAME"_server.key
-        sudo chown root:root /apache2/certificate/"$DOMAIN_NAME"_server.crt
-        sudo chmod 440 /apache2/certificate/"$DOMAIN_NAME"_server.crt
+        sudo chmod 600 apache2/certificate/"$DOMAIN_NAME"_server.key
+        sudo chown root:root apache2/certificate/"$DOMAIN_NAME"_server.crt
+        sudo chmod 440 apache2/certificate/"$DOMAIN_NAME"_server.crt
 
     logs_success "Génération du certificat et de la clé privée terminée."
 
 
 # Configuration apache
 
-    touch apache/conf/apache2.conf
+    touch apache2/conf/apache2.conf
     error_handler $? "  a échouée."
 
     echo "
@@ -285,28 +285,28 @@ LogFormat \"%{User-agent}i\" agent
 
 IncludeOptional conf-enabled/*.conf
 
-IncludeOptional sites-enabled/*.conf" > /apache2/apache2.conf
+IncludeOptional sites-enabled/*.conf" > apache2/apache2.conf
 error_handler $? "  a échouée."
 
 #Configuration pour php
 
-    mkdir /apache2/mods-enabled/
+    mkdir apache2/mods-enabled/
     error_handler $? "  a échouée."
 
-    touch /apache2/mods-enabled/dir.conf
+    touch apache2/mods-enabled/dir.conf
     error_handler $? "  a échouée."
 
     echo "
 <IfModule mod_dir.c>
         DirectoryIndex index.html index.cgi index.pl index.php index.xhtml index.htm
-</IfModule>" > /apache2/mods-enabled/dir.conf
+</IfModule>" > apache2/mods-enabled/dir.conf
 
-    error_handler $? "L'écriture du fichier de configuration apache /apache2/mods-enabled/dir.conf a échouée."
+    error_handler $? "L'écriture du fichier de configuration apache apache2/mods-enabled/dir.conf a échouée."
 
 #Configuration de la page web par défaut.
 
-    mkdir /apache2/sites-enabled/
-    touch /apache2/sites-enabled/000-default.conf
+    mkdir apache2/sites-enabled/
+    touch apache2/sites-enabled/000-default.conf
 
     echo "
 <VirtualHost *:$WEB_PORT>
@@ -326,13 +326,14 @@ error_handler $? "  a échouée."
     SSLCertificateKeyFile /etc/apache2/certificate/"$DOMAIN_NAME"_server.key
 
     Header set Strict-Transport-Security \"max-age=31536000; includeSubDomains\"
-</VirtualHost>" > /apache2/sites-enabled/000-default.conf
+</VirtualHost>" > apache2/sites-enabled/000-default.conf
 
     error_handler $? "L'écriture du fichier de configuration du site par défaut a échouée."
 
 # Configuration du port du service apache
 
-    touch /apache2/ports.conf 
+    touch apache2/ports.conf 
+    error_handler $? "La création du fichier de configuration des ports a échouée."
 
     echo "
 # If you just change the port or add more ports here, you will likely also
