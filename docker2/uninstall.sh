@@ -28,6 +28,6 @@ docker network rm $(docker network ls -q)
 
 # Supprimer les fichiers de configuration et les logs
 log_message INFO "Removing configuration files and logs..."
-rm -rf apache/conf apache/html apache/logs php/conf php/logs setup.log uninstall.log
+rm -rf apache2/certificate apache2/mods-available /www phpmyadmin/ apache2
 
 log_message INFO "Uninstallation completed successfully."
