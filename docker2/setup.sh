@@ -353,8 +353,8 @@ Listen $WEB_PORT
 
 # Configuration ModSecurity
 
-    touch /apache2/modsecurity/modsecurity.conf
-    error_handler $? "La création du fichier /apache2/modsecurity/modsecurity.conf a échouée."
+    touch /apache2/modsecurity.conf
+    error_handler $? "La création du fichier /apache2/modsecurity.conf a échouée."
 
     echo "
 # -- Rule engine initialization ----------------------------------------------
