@@ -156,9 +156,7 @@ logs_success "Le service php est installé."
 
 logs_info "Installation du service phpmyadmin en cours..."
 
-	export DEBIAN_FRONTEND=noninteractive
-
-	#sudo apt-get install -y phpmyadmin
+	sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq phpmyadmin
 	error_handler $? "L'installation du service phpmyadmin a échouée."
 
 	sudo phpenmod mcrypt sudo phenmod mbstring
@@ -867,36 +865,38 @@ Alias /phpmyadmin /usr/share/phpmyadmin
     Require all denied
 </Directory>
 	" > /etc/phpmyadmin/apache.conf
-	error_handler $? "L a échouée." #TODO
+	error_handler $? "Configuration de /etc/phpmyadmin/apache.conf a échouée." #TODO
 
 	sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
-	error_handler $? "L a échouée." #TODO
-
+	error_handler $? "Le symlink /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf a échouée." #TODO
 
 	sudo a2enconf phpmyadmin.conf
-	error_handler $? "L a échouée." #TODO
+	error_handler $? "Le chargement de la configuration phpmyadmin.conf a échouée." #TODO
 
 	sudo systemctl restart apache2
-	error_handler $? "L a échouée." #TODO
+	error_handler $? "Le redémarrage de apache a échouée." #TODO
 
-	sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
-	error_handler $? "L a échouée." #TODO
+	# sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
+	# error_handler $? "Le symlink de /usr/share/phpmyadmin /var/www/html/phpmyadmin a échouée." #TODO
+
+	sudo touch var/www/html/phpmyadmin/.htaccess
+	error_handler $? "La création du fichier var/www/html/phpmyadmin/.htaccess a échouée." #TODO
 
 	echo "AuthType Basic
 	AuthName \"Accès protégé\"
 	AuthUserFile /etc/phpmyadmin/.htpasswd
 	require valid-user
-	Options -Indexes" > /www/html/phpmyadmin/.htaccess
-	error_handler $? "L a échouée." #TODO
+	Options -Indexes" > var/www/html/phpmyadmin/.htaccess
+	error_handler $? "L'écriture dans var/www/html/phpmyadmin/.htaccess a échouée." #TODO
 
-	touch /etc/phpmyadmin/.htpasswd
+	sudo touch /etc/phpmyadmin/.htpasswd
 	error_handler $? "La création du fichier /etc/phpmyadmin/.htpasswd a échouée."
 
 	htpasswd -cb /etc/phpmyadmin/.htpasswd admin \${PHP_HTACCESS_PASSWORD}
 	error_handler $? "L'écriture dans le fichier /etc/phpmyadmin/.htpasswd a échouée."
 
 	sudo systemctl restart apache2
-	error_handler $? "L a échouée." #TODO
+	error_handler $? "Le rédémarrage de apache a échouée." #TODO
 
 logs_success "Configuration du service phpmyadmin terminée."
 

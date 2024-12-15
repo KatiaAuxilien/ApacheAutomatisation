@@ -149,7 +149,7 @@ logs_info "Désintallation de phpmyadmin et php en cours ..."
 	sudo rm -rf /etc/phpmyadmin/.htpasswd
 	#TODO
 
-	sudo apt remove --purge phpmyadmin -y
+	sudo DEBIAN_FRONTEND=noninteractive apt remove --purge phpmyadmin -y
 	#TODO
 
 	sudo apt remove --purge libapache2-mod-php -y
