@@ -1,38 +1,149 @@
 #!/bin/bash
 
-# Charger les variables depuis le fichier .env
-if [ ! -f .env ]; then
-    echo "Erreur : fichier .env non trouvé."
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+RESET='\033[0m'
+
+error_handler()
+{
+	if [ $1 -ne 0 ]
+	then
+		echo -e "${RED}Erreur : $2 ${RESET}"
+		exit $1
+	fi
+}
+
+logs()
+{
+	local color="$1"
+	shift
+	date_formated=$(date +"%d-%m-%Y %H:%M:%S")
+	echo -e "${color}[$date_formated] $1 ${RESET}" | tee -a /var/log/apache_install.log
+}
+
+logs_info()
+{
+	logs "$YELLOW" "$*"
+}
+
+logs_success()
+{
+	logs "$GREEN" "$*"
+}
+
+logs_end()
+{
+	logs "$BLUE" "$*"
+}
+
+# Fonction pour vérifier si une variable est définie
+check_variable() {
+  local var_name=$1
+  if [ -z "${!var_name+x}" ]; then
+    echo "La variable $var_name n'est pas définie."
+    exit 2
+  fi
+}
+
+required_vars_start=(
+"DOMAIN_NAME"
+
+"WEB_ADMIN_ADDRESS"
+"WEB_PORT"
+
+"SSL_KEY_PASSWORD"
+"HTACCESS_PASSWORD"
+
+"PHP_ROOT_PASSWORD"
+"PHP_HTACCESS_PASSWORD"
+"PHP_ADMIN_ADDRESS"
+"PHP_ADMIN_USERNAME"
+"PHP_ADMIN_PASSWORD"
+"PHP_PORT"
+
+"DB_HOST"
+"DB_PORT"
+"DB_ROOT_PASSWORD"
+
+"DB_ADMIN_USERNAME"
+"DB_ADMIN_PASSWORD"
+"DB_ADMIN_ADDRESS"
+
+"DB_NAME"
+
+"NETWORK_NAME"
+"WEB_CONTAINER_NAME"
+"PHP_CONTAINER_NAME"
+"PHPMYADMIN_CONTAINER_NAME"
+"DB_CONTAINER_NAME"
+)
+
+
+if [ "$EUID" -ne 0 ]
+then
+	echo -e "${RED}Ce script doit être exécuté avec des privilèges root.${RESET}"
+	exit 1
+fi
+
+if ! command -v docker &> /dev/null; then
+    echo -e "${RED}Docker n'est pas installé. Veuillez l'installer avant de continuer.${RESET}"
     exit 1
 fi
-source .env
+
+if ! command -v docker-compose &> /dev/null; then
+    echo -e "${RED}Docker n'est pas installé. Veuillez l'installer avant de continuer.${RESET}"
+    exit 1
+fi
+
+#TODO : Vérifier le format valide des variables
+
+logs_info "Vérification des variables .env..."
+
+	# Charger les variables depuis le fichier .env
+	if [ ! -f .env ]; then
+	    echo "Erreur : fichier .env non trouvé."
+	    exit 1
+	fi
+	source .env
+
+	for var in "${required_vars_start[@]}"; do
+	  check_variable "$var"
+	done
+
+logs_success "Les variables .env ont été vérifiées."
+
 
 # Créer un réseau Docker
 docker network create $NETWORK_NAME
 
 # Dossier de configuration et certificats
-mkdir -p certs conf/sites
+  mkdir certs 
+  mkdir conf
+  mkdir conf/sites
+
+	sudo apt-get install -y openssl
+	error_handler $? "L'installation d'openssl a échouée."
 
 # Génération de certificats auto-signés
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout certs/apache-selfsigned.key \
-    -out certs/apache-selfsigned.crt \
-    -subj "/C=FR/ST=Paris/L=Paris/O=Example/OU=IT Department/CN=$DOMAIN_NAME"
-
-	
 	sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out certs/"$DOMAIN_NAME"_server.crt -keyout certs/"$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
 	error_handler $? "La génération de demande de signature de certifcat a échouée"
 
-	openssl x509 -in "$DOMAIN_NAME"_server.crt -text -noout
+	openssl x509 -in certs/"$DOMAIN_NAME"_server.crt -text -noout
 	error_handler $? "La vérification du certificat a échouée."
 	
-
+	sudo chmod 600 certs/"$DOMAIN_NAME"_server.key
+	sudo chown root:root certs/"$DOMAIN_NAME"_server.crt
+	sudo chmod 440 certs/"$DOMAIN_NAME"_server.crt
 
 # Configuration de Apache avec ModSecurity et ModEvasive
 cat > conf/httpd.conf <<EOL
 LoadModule security2_module modules/mod_security2.so
 LoadModule evasive20_module modules/mod_evasive20.so
 IncludeOptional conf/extra/httpd-ssl.conf
+
+ServerName 127.0.0.1
 
 <IfModule security2_module>
     SecRuleEngine On
@@ -156,6 +267,8 @@ EOL
 
 # Configurer .htaccess pour protéger /confidential
 mkdir -p sites/siteA/confidential sites/siteB/confidential
+
+
 cat > sites/siteA/confidential/.htaccess <<EOL
 AuthType Basic
 AuthName "Restricted Content"
@@ -176,3 +289,4 @@ htpasswd -c -b sites/siteB/confidential/.htpasswd admin \${HTACCESS_PASSWORD}
 
 # Lancer les services
 sudo docker-compose up -d
+# sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin

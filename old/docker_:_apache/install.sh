@@ -51,6 +51,11 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
+if ! command -v docker-compose &> /dev/null; then
+    echo -e "${RED}Docker n'est pas installé. Veuillez l'installer avant de continuer.${RESET}"
+    exit 1
+fi
+
 
 if [ "$EUID" -ne 0 ]
 then
