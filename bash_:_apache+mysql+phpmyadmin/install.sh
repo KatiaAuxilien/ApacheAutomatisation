@@ -664,7 +664,7 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 		touch /var/www/.htpasswd
 		error_handler $? "La création du fichier /var/www/.htpasswd a échouée."
 
-		htpasswd -c -n /var/www/.htpasswd admin \${HTACCESS_PASSWORD}
+		htpasswd -cb /var/www/.htpasswd admin \${HTACCESS_PASSWORD}
 		error_handler $? "L'écriture dans le fichier /var/www/.htpasswd a échouée."
 
 
@@ -890,7 +890,7 @@ Alias /phpmyadmin /usr/share/phpmyadmin
 	touch /etc/phpmyadmin/.htpasswd
 	error_handler $? "La création du fichier /etc/phpmyadmin/.htpasswd a échouée."
 
-	htpasswd -c -n /etc/phpmyadmin/.htpasswd admin \${PHP_HTACCESS_PASSWORD}
+	htpasswd -cb /etc/phpmyadmin/.htpasswd admin \${PHP_HTACCESS_PASSWORD}
 	error_handler $? "L'écriture dans le fichier /etc/phpmyadmin/.htpasswd a échouée."
 
 	sudo systemctl restart apache2 phpmyadmin
