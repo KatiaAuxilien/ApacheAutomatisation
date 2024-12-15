@@ -614,10 +614,10 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
     
     logs_info "Sécurisation du .htaccess ..."
         
-        touch /var/www/.htpasswd
+        touch /www/.htpasswd
         error_handler $? "La création du fichier /var/www/.htpasswd a échouée."
 
-        htpasswd -cb /var/www/.htpasswd admin \${HTACCESS_PASSWORD}
+        htpasswd -cb /www/.htpasswd admin \${HTACCESS_PASSWORD}
         error_handler $? "L'écriture dans le fichier /var/www/.htpasswd a échouée."
 
 #======================================================================#
