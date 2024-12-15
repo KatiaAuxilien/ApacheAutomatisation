@@ -234,7 +234,7 @@ logs_info "Configuration du service apache en cours..."
   logs_info "Génération du certificat et de la clé privée pour une configuration en HTTPS..."
 
 		mkdir /etc/apache2/certificate
-		error_handler $? "La création du dossier /etc/apache2/certificate a échouée."
+		# error_handler $? "La création du dossier /etc/apache2/certificate a échouée."
 		cd /etc/apache2/certificate
 		
 		sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$DOMAIN_NAME"_server.crt -keyout /etc/apache2/certificate/"$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
@@ -636,7 +636,7 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 		#TODO
 
 		touch /etc/apache2/mods-available/evasive.conf
-		error_handler $? "La création /etc/apache2/mods-available/evasive.conf a échouée."
+		# error_handler $? "La création /etc/apache2/mods-available/evasive.conf a échouée."
 
 		echo "
 		<IfModule mod_evasive20.c>
@@ -665,10 +665,19 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 	logs_info "Sécurisation du .htaccess ..."
 		
 		touch /var/www/.htpasswd
-		error_handler $? "La création du fichier /var/www/.htpasswd a échouée."
+		# error_handler $? "La création du fichier /var/www/.htpasswd a échouée."
 
-		htpasswd -cb /var/www/.htpasswd admin \${HTACCESS_PASSWORD}
+		# htpasswd -cb /var/www/.htpasswd admin \${HTACCESS_PASSWORD}
+		# error_handler $? "L'écriture dans le fichier /var/www/.htpasswd a échouée."
+#TODO : DEBUG
+
+		
+		touch /var/www/.htpasswd
+		# error_handler $? "La création du fichier /var/www/.htpasswd a échouée."
+
+		echo "admin:$HTACCESS_PASSWORD" > /var/www/.htpasswd
 		error_handler $? "L'écriture dans le fichier /var/www/.htpasswd a échouée."
+
 
 
 #======================================================================#
@@ -680,13 +689,13 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 		logs_info "Création du site " $site_name "..."
 		
 		sudo mkdir /var/www/$site_name
-		error_handler $? "La création du dossier /var/www/$site_name a échouée."
+		# error_handler $? "La création du dossier /var/www/$site_name a échouée."
 		
 		sudo chown -R $USER:$USER /var/www/$site_name
 		error_handler $? "L'attribution des droits sur le dossier /var/www/$site_name a échouée."
 		
 		sudo touch /var/www/$site_name/index.html
-		error_handler $? "La création du fichier /var/www/$site_name/index.html a échouée."
+		# error_handler $? "La création du fichier /var/www/$site_name/index.html a échouée."
 		
 		echo "
 <html>
@@ -723,7 +732,7 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 # Configuration des Virtual Host
 
 		touch /etc/apache2/sites-available/$site_name.conf
-		error_handler $? "La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
+		# error_handler $? "La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
 		echo "
 <VirtualHost *:$WEB_PORT>
@@ -766,10 +775,10 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 # Création de la page confidentielle
 
 		mkdir /var/www/$site_name/confidential
-		error_handler $? "La création du dossier /var/www/$site_name/confidential a échouée."
+		# error_handler $? "La création du dossier /var/www/$site_name/confidential a échouée."
 
 		touch /var/www/$site_name/confidential/confidential.php
-		error_handler $? "La création du fichier /var/www/$site_name/confidential/confidential.php a échouée."
+		# error_handler $? "La création du fichier /var/www/$site_name/confidential/confidential.php a échouée."
 		
 		echo "
 <html>
@@ -801,7 +810,7 @@ SecStatusEngine Off" > /etc/modsecurity/modsecurity.conf
 		error_handler $? "L'écriture dans le fichier /var/www/$site_name/confidential/confidential.html a échouée."
 		
 		touch /var/www/$site_name/confidential/.htaccess
-		error_handler $? "La création du fichier /var/www/$site_name/confidential/.htaccess a échouée."
+		# error_handler $? "La création du fichier /var/www/$site_name/confidential/.htaccess a échouée."
 
 		echo "AuthType Basic
 		AuthName \"Accès protégé\"
@@ -872,7 +881,7 @@ Alias /phpmyadmin /usr/share/phpmyadmin
 	error_handler $? "Configuration de /etc/phpmyadmin/apache.conf a échouée." #TODO
 
 	sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
-	error_handler $? "Le symlink /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf a échouée." #TODO
+	# error_handler $? "Le symlink /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf a échouée." #TODO
 
 	sudo a2enconf phpmyadmin.conf
 	error_handler $? "Le chargement de la configuration phpmyadmin.conf a échouée." #TODO
