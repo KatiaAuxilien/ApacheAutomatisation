@@ -120,7 +120,7 @@ logs_success "Les variables .env ont été vérifiées."
 #===================================================================#
 
 # Créer les répertoires nécessaires
-mkdir -p apache2/certificate apache2/mods-available /www phpmyadmin/
+mkdir -p apache2/certificate apache2/mods-available www/ phpmyadmin/
 error_handler $? "Création des dossiers a échouée."
 
 sudo apt install apache2-utils -y
@@ -633,7 +633,7 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
     do
         logs_info "Création du site " $site_name "..."
         
-        sudo mkdir www/$site_name
+        mkdir www/$site_name
         error_handler $? "La création du dossier www/$site_name a échouée."
         
         sudo chown -R $USER:$USER www/$site_name
