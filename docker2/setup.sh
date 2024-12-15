@@ -136,35 +136,36 @@ error_handler $? "  a échouée."
 #TODO : VOLUMES APACHE
 # error_handler $? "  a échouée."
 
-cat > docker-compose.yml <<EOF
+touch docker-compose.yml
+echo "
 version: '3.8'
 
 services:
   mysql:
     image: mysql:latest
-    container_name: \${DB_CONTAINER_NAME}
+    container_name: $DB_CONTAINER_NAME
     ports:
-      - "\${DB_PORT}:3306"
+      - \"$DB_PORT:3306\"
     volumes:
       - mysql_data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: \${DB_NAME}
-      MYSQL_USER: \${DB_ADMIN_USERNAME}
-      MYSQL_PASSWORD: \${DB_ADMIN_PASSWORD}
+      MYSQL_ROOT_PASSWORD: $DB_ROOT_PASSWORD
+      MYSQL_DATABASE: $DB_NAME
+      MYSQL_USER: $DB_ADMIN_USERNAME
+      MYSQL_PASSWORD: $DB_ADMIN_PASSWORD
     networks:
       - $NETWORK_NAME
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: \${PHPMYADMIN_CONTAINER_NAME}
+    container_name: $PHPMYADMIN_CONTAINER_NAME
     ports:
-      - "\${PHPMYADMIN_PORT}:80"
+      - \"$PHPMYADMIN_PORT:80\"
     environment:
       PMA_HOST: mysql
-      MYSQL_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
-      PMA_USER: \${PHPMYADMIN_ADMIN_USERNAME}
-      PMA_PASSWORD: \${PHPMYADMIN_ADMIN_PASSWORD}
+      MYSQL_ROOT_PASSWORD: $DB_ROOT_PASSWORD
+      PMA_USER: $PHPMYADMIN_ADMIN_USERNAME
+      PMA_PASSWORD: $PHPMYADMIN_ADMIN_PASSWORD
     depends_on:
       - mysql
     networks:
@@ -172,9 +173,9 @@ services:
       
   web:
     image: php:7.4-apache
-    container_name: \${WEB_CONTAINER_NAME}
+    container_name: $WEB_CONTAINER_NAME
     ports:
-      - "\${WEB_PORT}:9000"
+      - \"$WEB_PORT:9000\"
     volumes:
       - ./www:/var/www/html
       - ./apache2:/etc/apache2/
@@ -188,8 +189,7 @@ volumes:
 
 networks:
   $NETWORK_NAME:
-    external: true
-EOF
+    external: true" > docker-compose.yml
 error_handler $? "  a échouée."
 
 #================================================================================================================================#
@@ -751,7 +751,7 @@ SecStatusEngine Off" > /apache2/modsecurity.conf
 #======================================================================#
 
 logs_info "Lancement du conteneur $WEB_CONTAINER_NAME en cours..."
-docker-compose up -d $WEB_CONTAINER_NAME
+docker-compose up -d web
 sleep 60
 
 # Chargement des sites
