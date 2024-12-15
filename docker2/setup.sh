@@ -123,7 +123,7 @@ logs_success "Les variables .env ont été vérifiées."
 mkdir -p apache2/certificate apache2/mods-available /www phpmyadmin/
 error_handler $? "Création des dossiers a échouée."
 
-sudo apt install apache2-utils
+sudo apt install apache2-utils -y
 error_handler $? "Installation d'apache2-utils a échouée."
 
 #===================================================================#
