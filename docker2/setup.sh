@@ -121,7 +121,7 @@ logs_success "Les variables .env ont été vérifiées."
 
 # Créer les répertoires nécessaires
 mkdir -p apache2/certificate www/ phpmyadmin/
-error_handler $? "Création des dossiers a échouée."
+# error_handler $? "Création des dossiers a échouée."
 
 sudo apt install apache2-utils -y
 error_handler $? "Installation d'apache2-utils a échouée."
@@ -137,6 +137,7 @@ error_handler $? "  a échouée."
 # error_handler $? "  a échouée."
 
 touch docker-compose.yml
+
 echo "
 version: '3.8'
 
@@ -220,7 +221,7 @@ logs_info "Configuration du service apache en cours..."
 
 # Configuration apache
 
-    #touch apache2/apache2.conf
+    touch apache2/apache2.conf
     #error_handler $? "  a échouée."
 
     echo "
@@ -294,10 +295,10 @@ error_handler $? "  a échouée."
 #Configuration pour php
 
     #mkdir apache2/mods-enabled/
-    error_handler $? "  a échouée."
+    # error_handler $? "  a échouée."
 
     touch apache2/mods-enabled/dir.conf
-    error_handler $? "  a échouée."
+    # error_handler $? "  a échouée."
 
     echo "
 <IfModule mod_dir.c>
@@ -308,8 +309,11 @@ error_handler $? "  a échouée."
 
 #Configuration de la page web par défaut.
 
-    #mkdir apache2/sites-enabled/
-    #touch apache2/sites-enabled/000-default.conf
+    mkdir apache2/sites-enabled/
+    # error_handler $? "  a échouée."
+
+    touch apache2/sites-enabled/000-default.conf
+    # error_handler $? "  a échouée."
 
     echo "
 <VirtualHost *:$WEB_PORT>
@@ -335,7 +339,7 @@ error_handler $? "  a échouée."
 
 # Configuration du port du service apache
 
-    #touch apache2/ports.conf 
+    touch apache2/ports.conf 
     #error_handler $? "La création du fichier de configuration des ports a échouée."
 
     echo "
@@ -357,7 +361,7 @@ Listen $WEB_PORT
 # Configuration ModSecurity
 
     touch /apache2/mods-available/modsecurity.conf
-    error_handler $? "La création du fichier /apache2/modsecurity.conf a échouée."
+    # error_handler $? "La création du fichier /apache2/modsecurity.conf a échouée."
 
     echo "
 # -- Rule engine initialization ----------------------------------------------
@@ -596,7 +600,7 @@ SecStatusEngine Off" > /apache2/mods-available/modsecurity.conf
 # Configuration ModEvasive
 
     touch /apache2/mods-available/evasive.conf
-    error_handler $? "La création /apache2/mods-available/evasive.conf a échouée."
+    # error_handler $? "La création /apache2/mods-available/evasive.conf a échouée."
 
     echo "
     <IfModule mod_evasive20.c>
@@ -618,7 +622,7 @@ SecStatusEngine Off" > /apache2/mods-available/modsecurity.conf
     logs_info "Sécurisation du .htaccess ..."
         
         sudo touch www/.htpasswd
-        error_handler $? "La création du fichier www/.htpasswd a échouée."
+        # error_handler $? "La création du fichier www/.htpasswd a échouée."
 
         htpasswd -cb www/.htpasswd admin \${HTACCESS_PASSWORD}
         error_handler $? "L'écriture dans le fichier www/.htpasswd a échouée."
@@ -640,7 +644,7 @@ SecStatusEngine Off" > /apache2/mods-available/modsecurity.conf
         error_handler $? "L'attribution des droits sur le dossier www/$site_name a échouée."
         
         sudo touch www/$site_name/index.html
-        error_handler $? "La création du fichier www/$site_name/index.html a échouée."
+        # error_handler $? "La création du fichier www/$site_name/index.html a échouée."
         
         echo "
 <html>
@@ -669,7 +673,7 @@ SecStatusEngine Off" > /apache2/mods-available/modsecurity.conf
 # Configuration des Virtual Host
 
         touch /apache2/sites-available/$site_name.conf
-        error_handler $? "La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
+        # error_handler $? "La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
         echo "
 <VirtualHost *:$WEB_PORT>
@@ -702,10 +706,10 @@ SecStatusEngine Off" > /apache2/mods-available/modsecurity.conf
 # Création de la page confidentielle
 
         mkdir www/$site_name/confidential
-        error_handler $? "La création du dossier www/$site_name/confidential a échouée."
+        # error_handler $? "La création du dossier www/$site_name/confidential a échouée."
 
         touch www/$site_name/confidential/confidential.php
-        error_handler $? "La création du fichier /www/$site_name/confidential/confidential.php a échouée."
+        # error_handler $? "La création du fichier /www/$site_name/confidential/confidential.php a échouée."
         
         echo "
 <html>
@@ -737,7 +741,8 @@ SecStatusEngine Off" > /apache2/mods-available/modsecurity.conf
         error_handler $? "L'écriture dans le fichier /www/$site_name/confidential/confidential.php a échouée."
         
         touch www/$site_name/confidential/.htaccess
-        error_handler $? "La création du fichier www/$site_name/confidential/.htaccess a échouée."
+        # error_handler $? "La création du fichier www/$site_name/confidential/.htaccess a échouée."
+
         echo "AuthType Basic
         AuthName \"Accès protégé\"
         AuthUserFile /var/www/.htpasswd
@@ -753,7 +758,7 @@ SecStatusEngine Off" > /apache2/mods-available/modsecurity.conf
 
 logs_info "Lancement du docker-compose en cours..."
 docker-compose up -d
-sleep 300
+sleep 30
 
 # Chargement des sites
     for site_name in siteA siteB
@@ -845,7 +850,7 @@ htpasswd -cb phpmyadmin/.htpasswd $PHP_ADMIN_USERNAME $PHP_ADMIN_PASSWORD
 error_handler $? "La création du fichier .htpasswd a échouée."
 
 touch phpmyadmin/.htaccess
-error_handler $? "La création du fichier phpmyadmin/.htaccess a échouée."
+# error_handler $? "La création du fichier phpmyadmin/.htaccess a échouée."
 
 echo "AuthType Basic
 AuthName \"Accès protégé\"
