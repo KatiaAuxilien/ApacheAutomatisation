@@ -1,6 +1,7 @@
 #TODO : Messages de logs
-
+#TODO : Vérification du lancement en droits admin
 #TODO : Vérification des variables fournies dans le .env
+#TODO : Vérification de l'installation de docker
 
 #TODO : Installation de Apache
 #TODO : Configuration de Apache
