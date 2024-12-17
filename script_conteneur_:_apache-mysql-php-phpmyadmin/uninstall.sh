@@ -37,32 +37,49 @@ required_vars_start=(
 source ./.common.sh
 
 #===================================================================#
-# Prépartion de l'arborescence                                      #
+# Suppression et arrêts Docker                                      #
 #===================================================================#
 
+# Arrêt de tout les services
+docker stop $PHPMYADMIN_CONTAINER_NAME
+docker stop $DB_CONTAINER_NAME
+docker stop $WEB_CONTAINER_NAME
 
-#TODO : Messages de logs
-#TODO : Vérification du lancement en droits admin
+#TODO : Suppression des images des services
 
-#TODO : Arrêt de tout les services
 
-#TODO : Suppression des fichiers de configuration de Apache
+# Suppression du conteneur PhpMyAdmin
+docker rm -f $PHPMYADMIN_CONTAINER_NAME
+
+# Suppression du conteneur mysql
+docker rm -f $DB_CONTAINER_NAME
+
+# Suppression du conteneur Apache et PHP
+docker rm -f $WEB_CONTAINER_NAME
+
+#TODO : Suppression du network docker
+docker network rm $NETWORK_NAME
+
 #TODO : Suppression des fichiers de configuration HTTPS
 #TODO : Suppression des fichiers de configuration de ModSecurity
 #TODO : Suppression des fichiers de configuration  de ModEvasive
 #TODO : Suppression des fichiers de configuration de ModRatelimit
-#TODO : Suppression de la configuration des deux sites (siteA, siteB)
-#TODO : Suppression de la configuration de la page confidentielle (.htaccess et .htpasswd)
-#TODO : Désinstallation de Apache
+#TODO : Suppression des fichiers de configuration des deux sites (siteA, siteB)
+#TODO : Suppression des fichiers de configuration de la page confidentielle (.htaccess et .htpasswd)
 
-#TODO : Désinstallation PHP
-#TODO : Suppression des fichiers de configuration de PHP
+# Suppression des fichiers de configuration de Apache
+sudo rm -rf www
+sudo rm -rf apache2
 
-#TODO : Désinstallation mysql
-#TODO : Suppression des fichiers de configuration de mysql
+# Suppression des fichiers de configuration de mysql
+sudo rm -rf mysql_data
 
-#TODO : Désinstallation PhpMyAdmin
 #TODO : Suppression des fichiers de configuration de PhpMyAdmin
 
+# Suppression des fichiers de configuration de PHP
+sudo rm -rf docker-compose.yml
 
 #TODO : Suppression de la base de données d'intro
+
+sudo rm -rf manage_services.sh
+sudo rm -rf Dockerfile
