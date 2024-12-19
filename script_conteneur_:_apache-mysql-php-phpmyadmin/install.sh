@@ -100,8 +100,7 @@ echo "services:
     ports:
       - "3306:3306"
     volumes:
-      - ./bdd/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./bdd/mysql_data/:/bitnami/mysql/data/
+      - mysql_data:/bitnami/mysql/data/
     networks:
       - $NETWORK_NAME
 
@@ -367,23 +366,22 @@ table {
 
 #TODO : Créer une base de données d'intro
 
-touch bdd/init.sql
 
-echo "USE $DB_NAME;
+SQL_QUERIES=$(cat <<EOF
 CREATE TABLE IF NOT EXISTS todo_list
 (
     id INT AUTO_INCREMENT PRIMARY KEY,
     content VARCHAR(255) NOT NULL,
     statut INT DEFAULT 0
 );
+
 INSERT INTO todo_list (content, statut) VALUES
 ('Sécuriser le site A.',0),
 ('Sécuriser le site B.',0),
 ('Créer une page secrète.',1),
-('Faire fonctionner les services php, phpmyadmin, mysql et apache.',2);" > bdd/init.sql
-
-chmod 644 bdd/init.sql
-
+('Faire fonctionner les services php, phpmyadmin, mysql et apache.',2);
+EOF
+)
 
 #TODO : Configuration de PhpMyAdmin
 
@@ -423,26 +421,13 @@ error_handler $? "Le lancement de $WEB_CONTAINER_NAME a échoué."
 
 #TODO : Configuration de mysql
 
-
-
-# docker exec -it $DB_CONTAINER_NAME mysql -e "USE \$DB_NAME; 
-# CREATE TABLE IF NOT EXISTS todo_list(
-#     id INT AUTO_INCREMENT PRIMARY KEY,
-#     content VARCHAR(255) NOT NULL,
-#     statut INT DEFAULT 0
-# );
-# INSERT INTO todo_list (content, statut) VALUES
-# ('Sécuriser le site A.',0),
-# ('Sécuriser le site B.',0),
-# ('Créer une page secrète.',1),
-# ('Faire fonctionner les services php, phpmyadmin, mysql et apache.',2);
-# "
+docker exec -i $DB_CONTAINER_NAME mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$SQL_QUERIES" $DB_NAME
+error_handler $? "Le lancement de l'initialisation de $DB_CONTAINER_NAME a échoué."
 
 #TODO : Sécurisation du serveur web et des sites par HTTPS
 #TODO : Sécurisation - Installation et configuration de ModSecurity
 #TODO : Sécurisation - Installation et configuration de ModEvasive
 #TODO : Sécurisation - Installation et configuration de ModRatelimit
-
 
 #===================================================================#
 # Affichage des adresses IP des conteneurs                          #
