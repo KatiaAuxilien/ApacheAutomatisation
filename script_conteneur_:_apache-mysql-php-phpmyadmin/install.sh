@@ -258,6 +258,40 @@ echo "<!DOCTYPE html>
     <head>
         <title>$site_name</title>
         <meta charset=\"utf-8\"/>
+        <style>
+        body{background-color: blue}
+        .notes{border-top-left-radius: 42px}
+        .dot{height: 6px;width: 6px;margin-left: 8px;margin-right: 3px;margin-top: 2px;background-color: rgb(91, 92, 91);border-radius: 50%;display: inline-block}
+        .review-text{background: red;color: #fff}.info{color: #8c8b9a}
+        .dot-red{background-color: red !important;height: 6px;width: 6px;margin-left: 8px;margin-right: 3px;margin-top: 2px;border-radius: 50%;display: inline-block}
+        .overview{color: red}
+        @keyframes 
+click-wave{0%{height: 40px;width: 40px;opacity: 0.15;position: relative}100%{height: 200px;width: 200px;margin-left: -80px;margin-top: -80px;opacity: 0}}
+.option-input{-webkit-appearance: none;-moz-appearance: none;-ms-appearance: none;-o-appearance: none;appearance: none;position: relative;top: 10.3px;right: 0;bottom: 0;left: 0;height: 30px;width: 30px;transition: all 0.15s ease-out 0s;background: #cbd1d8;border: none;color: #fff;cursor: pointer;display: inline-block;margin-right: 0.5rem;outline: none;position: relative;z-index: 1000}
+.option-input:hover{background: #9faab7}
+.option-input:checked{background: red}
+.option-input:checked::before{height: 30px;width: 30px;position: absolute;content: "\f111";font-family: "Font Awesome 5 Free";display: inline-block;font-size: 16.7px;text-align: center;line-height: 30px}
+.option-input:checked::after{-webkit-animation: click-wave 0.25s;-moz-animation: click-wave 0.25s;animation: click-wave 0.25s;background: red;content: '';display: block;position: relative;z-index: 100}
+.option-input.radio{border-radius: 50%}
+.option-input.radio::after{border-radius: 50%}
+.completed{color: gray;text-decoration: line-through}
+.line-text{width: 100%;text-align: center;border-bottom: 1px solid #eee;line-height: 0.1em;margin: 10px 0 20px}
+.line-text span{background: #fff;padding: 0 10px;color: #212529}
+.user-images img{margin-left: -5px}
+        </style>
+        <script>
+$(document).ready(function() {
+  $('input[type=checkbox]').change(function() {
+   
+    if (this.checked) {
+      $(this).next(".label-text").css("text-decoration-line", "line-through");
+    } else {
+       $(this).next(".label-text").css("text-decoration-line", "none");
+    }
+
+  });
+});
+        </script>
     </head>
     <body>
       <h1>Bienvenue sur le " $site_name " ! 👋</h1>
@@ -327,6 +361,44 @@ echo "<!DOCTYPE html>
     \$session->close();
 
 ?>
+
+
+<div class="page-content page-container" id="page-content">
+    <div class="padding">
+        <div class="row container d-flex justify-content-center">
+            <div class="col-md-12">
+                <div class="card px-3">
+                    <div class="card-body">
+                        <h4 class="card-title">Awesome Todo list</h4>
+                        <div class="add-items d-flex"> <input type="text" class="form-control todo-list-input" placeholder="What do you need to do today?"> <button class="add btn btn-primary font-weight-bold todo-list-add-btn">Add</button> </div>
+                        <div class="list-wrapper">
+                            <ul class="d-flex flex-column-reverse todo-list">
+                                <li>
+                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox"> For what reason would it be advisable. <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
+                                </li>
+                                <li class="completed">
+                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox" checked=""> For what reason would it be advisable for me to think. <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
+                                </li>
+                                <li>
+                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox"> it be advisable for me to think about business content? <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
+                                </li>
+                                <li>
+                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox"> Print Statements all <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
+                                </li>
+                                <li class="completed">
+                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox" checked=""> Call Rampbo <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
+                                </li>
+                                <li>
+                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox"> Print bills <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     </body>
 </html>" > apache/html/$site_name/confidential/confidential.php
         error_handler $? "L'écriture dans le fichier apache/html/$site_name/confidential/confidential.php a échouée."
