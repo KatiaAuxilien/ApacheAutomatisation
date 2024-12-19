@@ -40,7 +40,11 @@ source ./.common.sh
 # Prépartion de l'arborescence                                      #
 #===================================================================#
 
-mkdir mysql_data apache2 www
+mkdir mysql_data apache apache/html
+
+chmod -R 755 mysql_data
+chmod -R 755 apache
+chmod -R 755 apache/html
 
 #TODO : Messages de logs
 #TODO : Vérification du lancement en droits admin
@@ -53,39 +57,47 @@ mkdir mysql_data apache2 www
 #===================================================================#
 
 # Création du réseau docker
-sudo docker network create $NETWORK_NAME
+sudo docker network create $NETWORK_NAME --driver bridge
 error_handler $? " La création du réseau docker $NETWORK_NAME a échouée."
 
-#TODO : Installation de Apache
-#TODO : Installation PHP
-#TODO : Installation mysql
-#TODO : Installation PhpMyAdmin
+
+      # MYSQL_PORT_NUMBER: $DB_PORT
+    # ports:
+      # - \"$DB_PORT:$DB_PORT\"
+
+      # APACHE_PORT: $WEB_PORT
+    # ports:
+      # - \"$PHPMYADMIN_PORT:$PHPMYADMIN_PORT\"
+
+      # MYSQL_USER: $DB_ADMIN_USERNAME
+      # MYSQL_PASSWORD: $DB_ADMIN_PASSWORD
+      # PMA_USER: $PHPMYADMIN_ADMIN_USERNAME
+      # PMA_PASSWORD: $PHPMYADMIN_ADMIN_PASSWORD
+      # PMA_ARBITRARY: 1
+      # PMA_PORT: $DB_PORT
+
+    # ports:
+      # - \"$WEB_PORT:$WEB_PORT\"
+
 
 touch docker-compose.yml
+chmod -R 755 docker-compose.yml
 
-# ports:
-#   - \"$DB_PORT:3306\"
-#   depends_on:
-# - $DB_CONTAINER_NAME
-#      - ./apache2:/etc/apache2/
-  # $WEB_CONTAINER_NAME:
-  #   build: Dockerfile
-  #   container_name: $WEB_CONTAINER_NAME
-  #   ports:
-  #     - \"$WEB_PORT:80\"
-  #   networks:
-  #     - $NETWORK_NAME
-
-echo "
-services:
+# Installation PhpMyAdmin
+# Installation mysql
+#TODO : Changer les ports par défaut
+echo "services:
   $DB_CONTAINER_NAME:
-    image: mysql:5.7
+    image: bitnami/mysql:latest
     container_name: $DB_CONTAINER_NAME
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: $DB_ROOT_PASSWORD
       MYSQL_DATABASE: $DB_NAME
       MYSQL_USER: $DB_ADMIN_USERNAME
       MYSQL_PASSWORD: $DB_ADMIN_PASSWORD
+    ports:
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -94,21 +106,10 @@ services:
   $PHPMYADMIN_CONTAINER_NAME:
     image: phpmyadmin/phpmyadmin
     container_name: $PHPMYADMIN_CONTAINER_NAME
+    restart: always
     environment:
       PMA_HOST: $DB_CONTAINER_NAME
       MYSQL_ROOT_PASSWORD: $DB_ROOT_PASSWORD
-      PMA_USER: $PHPMYADMIN_ADMIN_USERNAME
-      PMA_PASSWORD: $PHPMYADMIN_ADMIN_PASSWORD
-    ports:
-      - \"$PHPMYADMIN_PORT:80\"
-    networks:
-      - $NETWORK_NAME
-
-  $WEB_CONTAINER_NAME:
-    build: .
-    container_name: $WEB_CONTAINER_NAME
-    ports:
-      - \"$WEB_PORT:80\"
     networks:
       - $NETWORK_NAME
 
@@ -120,33 +121,257 @@ networks:
     external: true" > docker-compose.yml
 error_handler $? "L'écriture du fichier docker-compose.yml a échouée."
 
+
+
+
+
+#TODO : Configuration de mysql
+# touch init.sql
+# echo "
+# USE $DB_NAME;
+# CREATE TABLE IF NOT EXISTS todo_list
+# (
+#     id INT AUTO_INCREMENT PRIMARY KEY,
+#     content VARCHAR(255) NOT NULL,
+#     statut INT DEFAULT 0
+# );
+# INSERT INTO todo_list (content, statut) VALUES
+# ('Sécuriser le site A',0),
+# ('Sécuriser le site B',0),
+# ('Créer une page secrète',1)
+# " > init.sql
+
+#TODO : Configurer mysql pour le TLS.
+
+
+
+
 #TODO : Configuration de Apache
-touch Dockerfile
 
-echo "
-FROM debian:buster-slim
 
-RUN apt-get update &&\
-    apt-get install -y apache2 libapache2-mod-php php php-mysql &&\
-    apt-get clean &&\
-    rm -rf /var/lib/apt/lists/*
+touch apache/apache2.conf
+#error_handler $? "  a échouée."
 
-COPY www /var/www/html
+chmod -R 755 apache/apache2.conf
 
-EXPOSE 80
+echo "ServerRoot \"/etc/apache2\"
 
-CMD [\"apachectl\",\"-D\", \"FOREGROUND\"]
-" > Dockerfile
+ServerName $DOMAIN_NAME
+
+#Mutex file:\${APACHE_LOCK_DIR} default
+
+DefaultRuntimeDir \${APACHE_RUN_DIR}
+
+PidFile \${APACHE_PID_FILE}
+
+Timeout 300
+
+KeepAlive On
+
+MaxKeepAliveRequests 100
+
+KeepAliveTimeout 5
+
+User \${APACHE_RUN_USER}
+Group \${APACHE_RUN_GROUP}
+
+HostnameLookups Off
+
+ErrorLog \${APACHE_LOG_DIR}/error.log
+
+LogLevel warn
+
+IncludeOptional mods-enabled/*.load
+IncludeOptional mods-enabled/*.conf
+
+Include ports.conf
+
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+    Require all denied
+</Directory>
+
+<Directory /usr/share>
+    AllowOverride None
+    Require all granted
+</Directory>
+
+<Directory /var/www/>
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+</Directory>
+
+AccessFileName .htaccess
+
+<FilesMatch "^\.ht">
+    Require all denied
+</FilesMatch>
+
+
+LogFormat \"%v:%p %h %l %u %t \\\"%r\\\" %>s %O \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" vhost_combined
+LogFormat \"%h %l %u %t \\\"%r\\\" %>s %O \\\"%{Referer}i\\\" \\\"%{User-Agent}i\\\"\" combined
+LogFormat \"%h %l %u %t \\\"%r\\\" %>s %O\" common
+LogFormat \"%{Referer}i -> %U\" referer
+LogFormat \"%{User-agent}i\" agent
+
+IncludeOptional conf-enabled/*.conf
+
+IncludeOptional sites-enabled/*.conf" > apache/apache2.conf
+error_handler $? "L'écriture du fichier de configuration apache/apache2.conf a échouée."
+
+touch apache/html/index.html
+chmod -R 755 apache/html/index.html
+
+echo "<!DOCTYPE html>
+<html>
+  <head>
+    <title>Page Title</title>
+    <meta charset=\"utf-8\"/>
+  </head>
+  <body>
+    <h1>Bienvenue sur $DOMAIN_NAME ! 👋</h1>
+    <p> ✨ <a href=\"http://siteA.$DOMAIN_NAME/\">Visiter siteA.$DOMAIN_NAME</a> </p>
+    <p> ✨ <a href=\"http://siteB.$DOMAIN_NAME/\">Visiter siteB.$DOMAIN_NAME</a> </p>
+  </body>
+</html> " > apache/html/index.html
+
+
+#TODO : Création de deux sites (siteA, siteB)
+
+    for site_name in siteA siteB
+    do
+        logs_info "Création du site " $site_name "..."
+        
+        mkdir apache/html/$site_name
+        #error_handler $? "La création du dossier apache/html/$site_name a échouée."
+        chmod -R 755 apache/html/$site_name
+        error_handler $? "L'attribution des droits sur le dossier html/$site_name a échouée."
+        
+        sudo touch apache/html/$site_name/index.html
+        # error_handler $? "La création du fichier apache/html/$site_name/index.html a échouée."
+
+
+        echo "<!DOCTYPE html>
+<html>
+    <head>
+        <title>$site_name</title>
+        <meta charset=\"utf-8\"/>
+    </head>
+    <body>
+      <h1>Bienvenue sur le " $site_name " ! 👋</h1>
+        <h1> N'allez pas sur l'autre site, ce site est malveillant !</h1>
+    </body>
+</html>" > apache/html/$site_name/index.html
+        error_handler $? "L'écriture dans le fichier apache/html/$site_name/index.html a échouée."
+
+# Création de la page confidentielle
+
+        mkdir apache/html/$site_name/confidential
+        # error_handler $? "La création du dossier apache/html/$site_name/confidential a échouée."
+        chmod -R 755 apache/html/$site_name/confidential
+
+        touch apache/html/$site_name/confidential/confidential.php
+        # error_handler $? "La création du fichier apache/html/$site_name/confidential/confidential.php a échouée."
+        chmod -R 755 apache/html/$site_name/confidential/confidential.php
+
+        echo "<!DOCTYPE html>
+<html>
+    <head>
+        <title>Page protégée du site $site_name</title>
+        <meta charset=\"utf-8\"/>
+    </head>
+    <body>
+        <h1> TOP SECRET </h1>
+<?php
+    \$user = \""$DB_ADMIN_USERNAME"\";
+    \$password = \""$DB_ADMIN_PASSWORD"\";
+    \$database = \""$DB_NAME"\";
+    \$table = \"todo_list\";
+
+
+    \$session = new mysqli(\"$DB_CONTAINER_NAME\",\$user,\$password, \$database);
+
+    if (\$session->connect_error)
+    {
+      die(\"Connection failed: \" . \$session->connect_error);
+    }
+    
+    \$sql = \"SELECT * FROM \$table\";
+    \$result = \$session->query(\$sql);
+
+    echo \"<h2>TODO</h2>\";
+
+    if (\$result->num_rows > 0) 
+    {
+       while( \$row = \$result->fetch_assoc() )
+       { \$statut = \"\";
+         if( \$row[\"statut\"] == 0 )
+         { \$statut = \"A faire\";
+         }
+         if( \$row[\"statut\"] == 1 )
+         { \$statut = \"En cours\";
+         }
+         if( \$row[\"statut\"] == 2 )
+         { \$statut = \"Fait\";
+         }
+         echo \"<p> \" . \$statut . \" : \" . \$row[\"content\"] . \"</p>\";
+       }
+    } 
+    else 
+    {
+      echo \"0 results\";
+    }
+
+    \$session->close();
+
+?>
+    </body>
+</html>" > apache/html/$site_name/confidential/confidential.php
+        error_handler $? "L'écriture dans le fichier apache/html/$site_name/confidential/confidential.php a échouée."
+
+        logs_success "$site_name.$DOMAIN_NAME créé."
+    done
+
+#TODO : Créer une page confidentielle (.htaccess et .htpasswd)
+
+
+#TODO : Configuration de PhpMyAdmin
+
 
 #TODO : Configuration de PHP
-#TODO : Configuration de mysql
-#TODO : Configuration de PhpMyAdmin
+
 
 #TODO : Faire fonctionner les 4 services ensemble.
 sudo docker-compose up -d
+error_handler $? "Le lancement des services phpmyadmin et mysql a échoué."
 
-#TODO : Création de deux sites (siteA, siteB)
-#TODO : Créer une page confidentielle (.htaccess et .htpasswd)
+#TODO : Installation de Apache
+#TODO : Installation PHP
+
+touch apache/Dockerfile
+
+echo "FROM php:apache
+RUN apt-get update
+
+RUN docker-php-ext-install mysqli
+
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/*
+
+COPY html/ /var/www/html/
+COPY apache2.conf /apache2/apache2.conf
+
+EXPOSE 80
+CMD [\"apache2-foreground\"]" > apache/Dockerfile
+error_handler $? "L'écriture dans le fichier apache/Dockerfile a échouée."
+
+docker build -t web-php-apache ./apache/.
+error_handler $? "La construction de l'image web-php-apache a échouée."
+
+docker run -d --name $WEB_CONTAINER_NAME --network $NETWORK_NAME -p 80:80 web-php-apache
+error_handler $? "Le lancement de $WEB_CONTAINER_NAME a échoué."
 
 #TODO : Créer une base de données d'intro
 
@@ -159,12 +384,6 @@ sudo docker-compose up -d
 #===================================================================#
 # Affichage des adresses IP des conteneurs                          #
 #===================================================================#
-
-# Afficher les adresses IP des conteneurs
-# logs_info "Adresses IP des conteneurs :"
-# docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $WEB_CONTAINER_NAME
-# docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $DB_CONTAINER_NAME
-# docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $PHPMYADMIN_CONTAINER_NAME
 
 # Récupérer les adresses IP des conteneurs
 WEB_CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $WEB_CONTAINER_NAME)

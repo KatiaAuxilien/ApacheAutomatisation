@@ -40,13 +40,12 @@ source ./.common.sh
 # Suppression et arrêts Docker                                      #
 #===================================================================#
 
+sudo rm -rf manage_services.sh
+
 # Arrêt de tout les services
 docker stop $PHPMYADMIN_CONTAINER_NAME
 docker stop $DB_CONTAINER_NAME
 docker stop $WEB_CONTAINER_NAME
-
-#TODO : Suppression des images des services
-
 
 # Suppression du conteneur PhpMyAdmin
 docker rm -f $PHPMYADMIN_CONTAINER_NAME
@@ -60,6 +59,9 @@ docker rm -f $WEB_CONTAINER_NAME
 #TODO : Suppression du network docker
 docker network rm $NETWORK_NAME
 
+#TODO : Suppression des images des services
+sudo docker rmi web-php-apache
+
 #TODO : Suppression des fichiers de configuration HTTPS
 #TODO : Suppression des fichiers de configuration de ModSecurity
 #TODO : Suppression des fichiers de configuration  de ModEvasive
@@ -68,8 +70,9 @@ docker network rm $NETWORK_NAME
 #TODO : Suppression des fichiers de configuration de la page confidentielle (.htaccess et .htpasswd)
 
 # Suppression des fichiers de configuration de Apache
-sudo rm -rf www
-sudo rm -rf apache2
+sudo rm -rf html
+sudo rm -rf apache
+sudo rm -rf Dockerfile
 
 # Suppression des fichiers de configuration de mysql
 sudo rm -rf mysql_data
@@ -81,5 +84,4 @@ sudo rm -rf docker-compose.yml
 
 #TODO : Suppression de la base de données d'intro
 
-sudo rm -rf manage_services.sh
-sudo rm -rf Dockerfile
+sudo rm -rf init.sql
