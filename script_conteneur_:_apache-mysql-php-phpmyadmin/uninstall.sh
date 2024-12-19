@@ -74,8 +74,10 @@ sudo rm -rf html
 sudo rm -rf apache
 sudo rm -rf Dockerfile
 
+
 # Suppression des fichiers de configuration de mysql
-sudo rm -rf mysql_data
+sudo rm -rf bdd/mysql_data
+sudo rm -rf bdd
 
 #TODO : Suppression des fichiers de configuration de PhpMyAdmin
 
@@ -83,5 +85,3 @@ sudo rm -rf mysql_data
 sudo rm -rf docker-compose.yml
 
 #TODO : Suppression de la base de données d'intro
-
-sudo rm -rf init.sql

@@ -40,11 +40,12 @@ source ./.common.sh
 # Prépartion de l'arborescence                                      #
 #===================================================================#
 
-mkdir mysql_data apache apache/html
-
-chmod -R 755 mysql_data
+mkdir apache apache/html bdd bdd/mysql_data
 chmod -R 755 apache
 chmod -R 755 apache/html
+chmod -R 755 bdd
+
+chown -R 1001:1001 bdd/mysql_data
 
 #TODO : Messages de logs
 #TODO : Vérification du lancement en droits admin
@@ -99,7 +100,8 @@ echo "services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./bdd/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./bdd/mysql_data/:/bitnami/mysql/data/
     networks:
       - $NETWORK_NAME
 
@@ -122,32 +124,13 @@ networks:
 error_handler $? "L'écriture du fichier docker-compose.yml a échouée."
 
 
-
-
-
 #TODO : Configuration de mysql
-# touch init.sql
-# echo "
-# USE $DB_NAME;
-# CREATE TABLE IF NOT EXISTS todo_list
-# (
-#     id INT AUTO_INCREMENT PRIMARY KEY,
-#     content VARCHAR(255) NOT NULL,
-#     statut INT DEFAULT 0
-# );
-# INSERT INTO todo_list (content, statut) VALUES
-# ('Sécuriser le site A',0),
-# ('Sécuriser le site B',0),
-# ('Créer une page secrète',1)
-# " > init.sql
+
 
 #TODO : Configurer mysql pour le TLS.
 
 
-
-
 #TODO : Configuration de Apache
-
 
 touch apache/apache2.conf
 #error_handler $? "  a échouée."
@@ -229,6 +212,12 @@ echo "<!DOCTYPE html>
   <head>
     <title>Page Title</title>
     <meta charset=\"utf-8\"/>
+    <style>
+body{
+  background-color: #C6E7FF;
+  font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+}
+      </style>
   </head>
   <body>
     <h1>Bienvenue sur $DOMAIN_NAME ! 👋</h1>
@@ -258,40 +247,12 @@ echo "<!DOCTYPE html>
     <head>
         <title>$site_name</title>
         <meta charset=\"utf-8\"/>
-        <style>
-        body{background-color: blue}
-        .notes{border-top-left-radius: 42px}
-        .dot{height: 6px;width: 6px;margin-left: 8px;margin-right: 3px;margin-top: 2px;background-color: rgb(91, 92, 91);border-radius: 50%;display: inline-block}
-        .review-text{background: red;color: #fff}.info{color: #8c8b9a}
-        .dot-red{background-color: red !important;height: 6px;width: 6px;margin-left: 8px;margin-right: 3px;margin-top: 2px;border-radius: 50%;display: inline-block}
-        .overview{color: red}
-        @keyframes 
-click-wave{0%{height: 40px;width: 40px;opacity: 0.15;position: relative}100%{height: 200px;width: 200px;margin-left: -80px;margin-top: -80px;opacity: 0}}
-.option-input{-webkit-appearance: none;-moz-appearance: none;-ms-appearance: none;-o-appearance: none;appearance: none;position: relative;top: 10.3px;right: 0;bottom: 0;left: 0;height: 30px;width: 30px;transition: all 0.15s ease-out 0s;background: #cbd1d8;border: none;color: #fff;cursor: pointer;display: inline-block;margin-right: 0.5rem;outline: none;position: relative;z-index: 1000}
-.option-input:hover{background: #9faab7}
-.option-input:checked{background: red}
-.option-input:checked::before{height: 30px;width: 30px;position: absolute;content: "\f111";font-family: "Font Awesome 5 Free";display: inline-block;font-size: 16.7px;text-align: center;line-height: 30px}
-.option-input:checked::after{-webkit-animation: click-wave 0.25s;-moz-animation: click-wave 0.25s;animation: click-wave 0.25s;background: red;content: '';display: block;position: relative;z-index: 100}
-.option-input.radio{border-radius: 50%}
-.option-input.radio::after{border-radius: 50%}
-.completed{color: gray;text-decoration: line-through}
-.line-text{width: 100%;text-align: center;border-bottom: 1px solid #eee;line-height: 0.1em;margin: 10px 0 20px}
-.line-text span{background: #fff;padding: 0 10px;color: #212529}
-.user-images img{margin-left: -5px}
-        </style>
-        <script>
-$(document).ready(function() {
-  $('input[type=checkbox]').change(function() {
-   
-    if (this.checked) {
-      $(this).next(".label-text").css("text-decoration-line", "line-through");
-    } else {
-       $(this).next(".label-text").css("text-decoration-line", "none");
-    }
-
-  });
-});
-        </script>
+    <style>
+body{
+  background-color: #C6E7FF;
+  font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+}
+      </style>
     </head>
     <body>
       <h1>Bienvenue sur le " $site_name " ! 👋</h1>
@@ -316,6 +277,32 @@ $(document).ready(function() {
         <title>Page protégée du site $site_name</title>
         <meta charset=\"utf-8\"/>
     </head>
+    <style>
+body{
+  background-color: #C6E7FF;
+  font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+}
+table {
+  width: 100%;
+  border: 1px solid;
+}
+.todo{
+  background-color: #B06161;
+  text-align: center;
+
+}
+.inprogess{
+  background-color: #FFCF9D;
+  text-align: center;
+}
+.done{
+  background-color: #D0E8C5;
+  text-align: center;
+}
+      </style>
+      <script>
+
+      </script>
     <body>
         <h1> TOP SECRET </h1>
 <?php
@@ -335,22 +322,29 @@ $(document).ready(function() {
     \$sql = \"SELECT * FROM \$table\";
     \$result = \$session->query(\$sql);
 
-    echo \"<h2>TODO</h2>\";
+    echo \"<h2>Liste de tâches à faire</h2>\";
+
+    echo \"<table>
+    <tr> 
+      <th>Tâche</th>
+      <th>Statut</th>
+    </tr>\";
 
     if (\$result->num_rows > 0) 
     {
        while( \$row = \$result->fetch_assoc() )
        { \$statut = \"\";
          if( \$row[\"statut\"] == 0 )
-         { \$statut = \"A faire\";
+         { \$statut = \"<td class="todo"> A faire </td>\";
          }
          if( \$row[\"statut\"] == 1 )
-         { \$statut = \"En cours\";
+         { \$statut = \"<td class="inprogess"> En cours </td>\";
          }
          if( \$row[\"statut\"] == 2 )
-         { \$statut = \"Fait\";
+         { \$statut = \"<td class="done"> Fait </td>\";
          }
-         echo \"<p> \" . \$statut . \" : \" . \$row[\"content\"] . \"</p>\";
+
+         echo \"<tr><td>\" . \$row[\"content\"] . \"</td>\" . \$statut . \"</tr>\";
        }
     } 
     else 
@@ -358,47 +352,10 @@ $(document).ready(function() {
       echo \"0 results\";
     }
 
+    echo \"</table>\";
     \$session->close();
 
 ?>
-
-
-<div class="page-content page-container" id="page-content">
-    <div class="padding">
-        <div class="row container d-flex justify-content-center">
-            <div class="col-md-12">
-                <div class="card px-3">
-                    <div class="card-body">
-                        <h4 class="card-title">Awesome Todo list</h4>
-                        <div class="add-items d-flex"> <input type="text" class="form-control todo-list-input" placeholder="What do you need to do today?"> <button class="add btn btn-primary font-weight-bold todo-list-add-btn">Add</button> </div>
-                        <div class="list-wrapper">
-                            <ul class="d-flex flex-column-reverse todo-list">
-                                <li>
-                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox"> For what reason would it be advisable. <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
-                                </li>
-                                <li class="completed">
-                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox" checked=""> For what reason would it be advisable for me to think. <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
-                                </li>
-                                <li>
-                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox"> it be advisable for me to think about business content? <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
-                                </li>
-                                <li>
-                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox"> Print Statements all <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
-                                </li>
-                                <li class="completed">
-                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox" checked=""> Call Rampbo <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
-                                </li>
-                                <li>
-                                    <div class="form-check"> <label class="form-check-label"> <input class="checkbox" type="checkbox"> Print bills <i class="input-helper"></i></label> </div> <i class="remove mdi mdi-close-circle-outline"></i>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
     </body>
 </html>" > apache/html/$site_name/confidential/confidential.php
         error_handler $? "L'écriture dans le fichier apache/html/$site_name/confidential/confidential.php a échouée."
@@ -407,6 +364,25 @@ $(document).ready(function() {
     done
 
 #TODO : Créer une page confidentielle (.htaccess et .htpasswd)
+
+#TODO : Créer une base de données d'intro
+
+touch bdd/init.sql
+
+echo "USE $DB_NAME;
+CREATE TABLE IF NOT EXISTS todo_list
+(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    content VARCHAR(255) NOT NULL,
+    statut INT DEFAULT 0
+);
+INSERT INTO todo_list (content, statut) VALUES
+('Sécuriser le site A.',0),
+('Sécuriser le site B.',0),
+('Créer une page secrète.',1),
+('Faire fonctionner les services php, phpmyadmin, mysql et apache.',2);" > bdd/init.sql
+
+chmod 644 bdd/init.sql
 
 
 #TODO : Configuration de PhpMyAdmin
@@ -445,7 +421,22 @@ error_handler $? "La construction de l'image web-php-apache a échouée."
 docker run -d --name $WEB_CONTAINER_NAME --network $NETWORK_NAME -p 80:80 web-php-apache
 error_handler $? "Le lancement de $WEB_CONTAINER_NAME a échoué."
 
-#TODO : Créer une base de données d'intro
+#TODO : Configuration de mysql
+
+
+
+# docker exec -it $DB_CONTAINER_NAME mysql -e "USE \$DB_NAME; 
+# CREATE TABLE IF NOT EXISTS todo_list(
+#     id INT AUTO_INCREMENT PRIMARY KEY,
+#     content VARCHAR(255) NOT NULL,
+#     statut INT DEFAULT 0
+# );
+# INSERT INTO todo_list (content, statut) VALUES
+# ('Sécuriser le site A.',0),
+# ('Sécuriser le site B.',0),
+# ('Créer une page secrète.',1),
+# ('Faire fonctionner les services php, phpmyadmin, mysql et apache.',2);
+# "
 
 #TODO : Sécurisation du serveur web et des sites par HTTPS
 #TODO : Sécurisation - Installation et configuration de ModSecurity
