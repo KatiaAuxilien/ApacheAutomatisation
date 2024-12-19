@@ -28,6 +28,7 @@ required_vars_start=(
 "DB_ADMIN_PASSWORD"
 "DB_ADMIN_ADDRESS"
 "DB_NAME"
+"DB_VOLUME_NAME"
 )
 
 #===================================================================#
@@ -40,12 +41,10 @@ source ./.common.sh
 # Prépartion de l'arborescence                                      #
 #===================================================================#
 
-mkdir apache apache/html bdd bdd/mysql_data
+mkdir apache apache/html mysql
 chmod -R 755 apache
 chmod -R 755 apache/html
-chmod -R 755 bdd
-
-chown -R 1001:1001 bdd/mysql_data
+chmod -R 755 mysql
 
 #TODO : Messages de logs
 #TODO : Vérification du lancement en droits admin
@@ -62,6 +61,13 @@ sudo docker network create $NETWORK_NAME --driver bridge
 error_handler $? " La création du réseau docker $NETWORK_NAME a échouée."
 
 
+#===================================================================#
+# Installation de PhpMyAdmin et mysql                               #
+#===================================================================#
+touch docker-compose.yml
+chmod -R 755 docker-compose.yml
+
+#TODO : Changer les ports par défaut
       # MYSQL_PORT_NUMBER: $DB_PORT
     # ports:
       # - \"$DB_PORT:$DB_PORT\"
@@ -80,13 +86,6 @@ error_handler $? " La création du réseau docker $NETWORK_NAME a échouée."
     # ports:
       # - \"$WEB_PORT:$WEB_PORT\"
 
-
-touch docker-compose.yml
-chmod -R 755 docker-compose.yml
-
-# Installation PhpMyAdmin
-# Installation mysql
-#TODO : Changer les ports par défaut
 echo "services:
   $DB_CONTAINER_NAME:
     image: bitnami/mysql:latest
@@ -100,7 +99,7 @@ echo "services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/bitnami/mysql/data/
+      - $DB_VOLUME_NAME:/bitnami/mysql/data/
     networks:
       - $NETWORK_NAME
 
@@ -115,7 +114,7 @@ echo "services:
       - $NETWORK_NAME
 
 volumes:
-  mysql_data:
+  $DB_VOLUME_NAME:
 
 networks:
   $NETWORK_NAME:
@@ -123,12 +122,71 @@ networks:
 error_handler $? "L'écriture du fichier docker-compose.yml a échouée."
 
 
+#===================================================================#
+# Configuration de PhpMyAdmin                                       #
+#===================================================================#
+#TODO : Configuration de PhpMyAdmin
+
+
+#===================================================================#
+# Configuration de mysql                                            #
+#===================================================================#
 #TODO : Configuration de mysql
 
+# Créer une base de données d'intro
+docker volume create $DB_VOLUME_NAME
+error_handler $? "La création du volume $DB_VOLUME_NAME a échouée."
+
+DB_INIT_SQL_QUERIES=$(cat <<EOF
+CREATE TABLE IF NOT EXISTS todo_list
+(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    content VARCHAR(255) NOT NULL,
+    statut INT DEFAULT 0
+);
+
+INSERT INTO todo_list (content, statut) VALUES
+('Sécuriser le site A.',0),
+('Sécuriser le site B.',0),
+('Créer une page secrète.',1),
+('Faire fonctionner les services php, phpmyadmin, mysql et apache.',2);
+EOF
+)
 
 #TODO : Configurer mysql pour le TLS.
 
 
+#===================================================================#
+# Installation de Apache et PHP                                     #
+#===================================================================#
+
+touch apache/Dockerfile
+
+echo "FROM php:apache
+RUN apt-get update
+
+RUN docker-php-ext-install mysqli
+
+RUN apt-get clean
+RUN rm -rf /var/lib/apt/lists/*
+
+COPY html/ /var/www/html/
+COPY apache2.conf /apache2/apache2.conf
+
+EXPOSE 80
+CMD [\"apache2-foreground\"]" > apache/Dockerfile
+error_handler $? "L'écriture dans le fichier apache/Dockerfile a échouée."
+
+
+#===================================================================#
+# Configuration de PHP                                              #
+#===================================================================#
+#TODO : Configuration de PHP
+
+
+#===================================================================#
+# Configuration de Apache                                           #
+#===================================================================#
 #TODO : Configuration de Apache
 
 touch apache/apache2.conf
@@ -226,7 +284,7 @@ body{
 </html> " > apache/html/index.html
 
 
-#TODO : Création de deux sites (siteA, siteB)
+# Création de deux sites (siteA, siteB)
 
     for site_name in siteA siteB
     do
@@ -359,59 +417,28 @@ table {
 </html>" > apache/html/$site_name/confidential/confidential.php
         error_handler $? "L'écriture dans le fichier apache/html/$site_name/confidential/confidential.php a échouée."
 
+
+# Configuration de la page confidentielle (.htaccess et .htpasswd)
+
+
         logs_success "$site_name.$DOMAIN_NAME créé."
     done
 
-#TODO : Créer une page confidentielle (.htaccess et .htpasswd)
-
-#TODO : Créer une base de données d'intro
 
 
-SQL_QUERIES=$(cat <<EOF
-CREATE TABLE IF NOT EXISTS todo_list
-(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    content VARCHAR(255) NOT NULL,
-    statut INT DEFAULT 0
-);
 
-INSERT INTO todo_list (content, statut) VALUES
-('Sécuriser le site A.',0),
-('Sécuriser le site B.',0),
-('Créer une page secrète.',1),
-('Faire fonctionner les services php, phpmyadmin, mysql et apache.',2);
-EOF
-)
+#TODO : Sécurisation du serveur web et des sites par HTTPS
+#TODO : Sécurisation - Installation et configuration de ModSecurity
+#TODO : Sécurisation - Installation et configuration de ModEvasive
+#TODO : Sécurisation - Installation et configuration de ModRatelimit
 
-#TODO : Configuration de PhpMyAdmin
+#===================================================================#
+# Lancement des services                                            #
+#===================================================================#
 
-
-#TODO : Configuration de PHP
-
-
-#TODO : Faire fonctionner les 4 services ensemble.
+# Faire fonctionner les 4 services ensemble.
 sudo docker-compose up -d
 error_handler $? "Le lancement des services phpmyadmin et mysql a échoué."
-
-#TODO : Installation de Apache
-#TODO : Installation PHP
-
-touch apache/Dockerfile
-
-echo "FROM php:apache
-RUN apt-get update
-
-RUN docker-php-ext-install mysqli
-
-RUN apt-get clean
-RUN rm -rf /var/lib/apt/lists/*
-
-COPY html/ /var/www/html/
-COPY apache2.conf /apache2/apache2.conf
-
-EXPOSE 80
-CMD [\"apache2-foreground\"]" > apache/Dockerfile
-error_handler $? "L'écriture dans le fichier apache/Dockerfile a échouée."
 
 docker build -t web-php-apache ./apache/.
 error_handler $? "La construction de l'image web-php-apache a échouée."
@@ -419,15 +446,12 @@ error_handler $? "La construction de l'image web-php-apache a échouée."
 docker run -d --name $WEB_CONTAINER_NAME --network $NETWORK_NAME -p 80:80 web-php-apache
 error_handler $? "Le lancement de $WEB_CONTAINER_NAME a échoué."
 
-#TODO : Configuration de mysql
+#===================================================================#
+# Lancement du script d'initialisation de mysql                     #
+#===================================================================#
 
-docker exec -i $DB_CONTAINER_NAME mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$SQL_QUERIES" $DB_NAME
+docker exec -i $DB_CONTAINER_NAME mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_INIT_SQL_QUERIES" $DB_NAME
 error_handler $? "Le lancement de l'initialisation de $DB_CONTAINER_NAME a échoué."
-
-#TODO : Sécurisation du serveur web et des sites par HTTPS
-#TODO : Sécurisation - Installation et configuration de ModSecurity
-#TODO : Sécurisation - Installation et configuration de ModEvasive
-#TODO : Sécurisation - Installation et configuration de ModRatelimit
 
 #===================================================================#
 # Affichage des adresses IP des conteneurs                          #
@@ -452,11 +476,15 @@ echo "$PHPMYADMIN_CONTAINER_NAME : "
 echo "   $PHPMYADMIN_CONTAINER_IP phpmyadmin.$DOMAIN_NAME"
 echo "$DB_CONTAINER_NAME :"
 echo "   $DB_CONTAINER_IP"
+
 #======================================================================#
 
 logs_end "Installation et configuration des services apache, mysql, php et phpmyadmin sous docker terminée."
 
-#======================================================================#
+#===================================================================#
+# Création d'un script de gestion des services                      #
+#===================================================================#
+touch manage_services.sh
 
 echo "#!/bin/bash
 source ./../.common.sh
@@ -568,8 +596,7 @@ case \$1 in
         show_help
         exit 1
         ;;
-esac
-" > manage_services.sh
+esac" > manage_services.sh
 
 chmod +x manage_services.sh
 

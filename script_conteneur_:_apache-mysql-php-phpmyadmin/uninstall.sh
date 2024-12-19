@@ -28,6 +28,7 @@ required_vars_start=(
 "DB_ADMIN_PASSWORD"
 "DB_ADMIN_ADDRESS"
 "DB_NAME"
+"DB_VOLUME_NAME"
 )
 
 #===================================================================#
@@ -74,10 +75,8 @@ sudo rm -rf html
 sudo rm -rf apache
 sudo rm -rf Dockerfile
 
-
 # Suppression des fichiers de configuration de mysql
-sudo rm -rf bdd/mysql_data
-sudo rm -rf bdd
+sudo rm -rf mysql
 
 #TODO : Suppression des fichiers de configuration de PhpMyAdmin
 
@@ -85,3 +84,4 @@ sudo rm -rf bdd
 sudo rm -rf docker-compose.yml
 
 #TODO : Suppression de la base de données d'intro
+docker volume rm $DB_VOLUME_NAME
