@@ -38,6 +38,18 @@ required_vars_start=(
 source ./.common.sh
 
 #===================================================================#
+# Suppression des données mysql                                     #
+#===================================================================#
+
+DB_PURGE_SQL_QUERIES=$(cat <<EOF
+DROP TABLE IF EXISTS todo_list;
+EOF
+)
+
+docker exec -i $DB_CONTAINER_NAME mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_PURGE_SQL_QUERIES" $DB_NAME
+error_handler $? "Le lancement de l'initialisation de $DB_CONTAINER_NAME a échoué."
+
+#===================================================================#
 # Suppression et arrêts Docker                                      #
 #===================================================================#
 
@@ -63,25 +75,11 @@ docker network rm $NETWORK_NAME
 #TODO : Suppression des images des services
 sudo docker rmi web-php-apache
 
-#TODO : Suppression des fichiers de configuration HTTPS
-#TODO : Suppression des fichiers de configuration de ModSecurity
-#TODO : Suppression des fichiers de configuration  de ModEvasive
-#TODO : Suppression des fichiers de configuration de ModRatelimit
-#TODO : Suppression des fichiers de configuration des deux sites (siteA, siteB)
-#TODO : Suppression des fichiers de configuration de la page confidentielle (.htaccess et .htpasswd)
-
-# Suppression des fichiers de configuration de Apache
-sudo rm -rf html
-sudo rm -rf apache
-sudo rm -rf Dockerfile
+# Suppression des lignes faisant le lien adresse ip nom de domaine dans etc/hosts
+sed -i "/$DOMAIN_NAME/d" /etc/hosts
+sed -i "/phpmyadmin.$DOMAIN_NAME/d" /etc/hosts
 
 # Suppression des fichiers de configuration de mysql
 sudo rm -rf mysql
 
 #TODO : Suppression des fichiers de configuration de PhpMyAdmin
-
-# Suppression des fichiers de configuration de PHP
-sudo rm -rf docker-compose.yml
-
-#TODO : Suppression de la base de données d'intro
-docker volume rm $DB_VOLUME_NAME

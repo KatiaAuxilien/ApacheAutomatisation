@@ -15,18 +15,65 @@
 
 ### ✨ [Demo](https://katiaauxilien.github.io/projets/) 
 
+## Funct
+
+-
+-
+-
+
+## Prerequisite
+
+- Docker
+- Docker-compose
+- openssl
+- sudo privileges
+- tar
+- wget
+
 ## Usage
 
+Step 1 : Create a .env file in ApacheAutomatisation.
 ```sh
-TODO
+touch ApacheAutomatisation/.env
 ```
 
-## Run tests
-
+Step 2 : Define environment variables. (Example)
 ```sh
-TODO
+# .env
+DOMAIN_NAME=servicescomplexe.fr
+NETWORK_NAME=servicescomplexe-network
+
+WEB_CONTAINER_NAME=servicescomplexe-web-container
+WEB_ADMIN_ADDRESS=admin-web@servicescomplexe.fr
+WEB_PORT=79
+WEB_ADMIN_USER=admin
+WEB_ADMIN_PASSWORD=changeme
+SSL_KEY_PASSWORD=changeme
+WEB_HTACCESS_PASSWORD=changeme
+
+PHPMYADMIN_CONTAINER_NAME=servicescomplexe-phpmyadmin-container
+PHPMYADMIN_HTACCESS_PASSWORD=changeme
+PHPMYADMIN_ADMIN_ADDRESS=admin-php@servicescomplexe.fr
+PHPMYADMIN_ADMIN_USERNAME=admin
+PHPMYADMIN_ADMIN_PASSWORD=changeme
+PHPMYADMIN_PORT=81
+
+DB_CONTAINER_NAME=servicescomplexe-db-container
+DB_PORT=3307
+DB_ROOT_PASSWORD=changeme
+DB_ADMIN_USERNAME=admin
+DB_ADMIN_PASSWORD=changeme
+DB_ADMIN_ADDRESS=admin-db@servicescomplexe.fr
+DB_NAME=servicescomplexe-database
+DB_VOLUME_NAME=servicescomplexe-volume
 ```
 
+Step 3 : Launch install.sh (in script-baremetal or script-c)
+```sh
+sudo ./install.sh
+```
+
+You can check logs in /logs/install.log
 
 ## Sources
 

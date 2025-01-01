@@ -20,7 +20,7 @@ logs()
     local color="$1"
     shift
     date_formated=$(date +"%d-%m-%Y %H:%M:%S")
-    echo -e "${color}[$date_formated] $1 ${RESET}" | tee -a /logs/install.log
+    echo -e "${color}[$date_formated] $1 ${RESET}" | tee -a /var/log/ApacheAutomatisation.log
 }
 
 logs_info()
