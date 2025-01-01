@@ -15,29 +15,34 @@
 
 ### ✨ [Demo](https://katiaauxilien.github.io/projets/) 
 
-## Funct
+## Functionalities
 
 -
 -
 -
 
 ## Prerequisite
-
+- bash
+- 
 - Docker
 - Docker-compose
-- openssl
 - sudo privileges
 - tar
 - wget
 
+- openssl (The install.sh script install it)
+- apache2-utils (The install.sh script install it)
+
 ## Usage
+
+### Installation
 
 Step 1 : Create a .env file in ApacheAutomatisation.
 ```sh
 touch ApacheAutomatisation/.env
 ```
 
-Step 2 : Define environment variables. (Example)
+Step 2 : Define environment variables. (Example :)
 ```sh
 # .env
 DOMAIN_NAME=servicescomplexe.fr
@@ -68,19 +73,31 @@ DB_NAME=servicescomplexe-database
 DB_VOLUME_NAME=servicescomplexe-volume
 ```
 
-Step 3 : Launch install.sh (in script-baremetal or script-c)
+Step 3 : Launch install.sh (in script-baremetal or script-c).
 ```sh
 sudo ./install.sh
 ```
 
 You can check logs in /logs/install.log
 
-## Sources
+### Uninstallation
 
-[] TODO
+(Dependencies with .env)
+
+Step 1 : Launch uninstall.sh (in script-baremetal or script-c).
+```sh
+sudo ./uninstall.sh
+```
+
+## TODO (Pistes de progression)
+
+- Install ModRateLimit
+
+## Sources
 
 - Virtualization class  during my computer science studies.
 - Installation and configuration of complex services class during my computer science studies.
+
 https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-ubuntu-20-04-fr
 https://www.howtogeek.com/devops/how-to-host-multiple-websites-with-one-apache-server/
 https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-on-arch-linux
@@ -95,8 +112,6 @@ https://htaccessbook.com/disable-directory-indexes/
 https://www.it-connect.fr/configurer-le-ssl-avec-apache-2/
 https://www.ssltrust.com/help/setup-guides/arch-linux-ssl-install-guide
 https://techexpert.tips/fr/apache-fr/activer-https-sur-apache/
-https://en.wikipedia.org/wiki/ModSecurity
-https://owasp.org/www-project-modsecurity/
 https://ubuntu.com/server/docs/how-to-install-and-configure-phpmyadmin
 https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-20-04
 https://ubuntu.com/server/docs/how-to-install-and-configure-php
@@ -106,13 +121,20 @@ https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-
 https://ubuntu.com/tutorials/install-and-configure-apache#1-overview
 https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-ubuntu-20-04
 
+https://fr.linux-terminal.com/?p=3240
+https://en.wikipedia.org/wiki/ModSecurity
+https://owasp.org/www-project-modsecurity/
+
+https://bobcares.com/blog/configure-mod_evasive/
+https://www.linuxtricks.fr/wiki/apache-limiter-la-bande-passante-avec-ratelimit-ou-mod_bw
+
 ## Author
 
 👤 **Katia Auxilien**
 
 * Website: [My portfolio](https://katiaauxilien.github.io/projets.html)
 * Github: [@KatiaAuxilien](https://github.com/KatiaAuxilien)
-* LinkedIn: [@TODO](https://linkedin.com/in/TODO)
+<!-- * LinkedIn: [@TODO](https://linkedin.com/in/TODO) -->
 
 ## 🤝 Contributing
 
@@ -124,8 +146,8 @@ Give a ⭐️ if this project helped you!
 
 ## 📝 License
 
-Copyright © 2024 [Katia Auxilien](https://github.com/KatiaAuxilien).<br />
-This project is [TODO](TODO) licensed.
+<!-- Copyright © 2024 [Katia Auxilien](https://github.com/KatiaAuxilien).<br /> -->
+<!-- This project is [TODO](TODO) licensed. -->
 
 ***
 _This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
