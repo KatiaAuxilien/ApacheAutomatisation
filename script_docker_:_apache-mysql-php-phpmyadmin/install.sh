@@ -77,7 +77,6 @@ chmod -R 755 mysql
 sudo docker network create $NETWORK_NAME --driver bridge
 error_handler $? " La création du réseau docker $NETWORK_NAME a échouée."
 
-
 #===================================================================#
 # Installation de PhpMyAdmin et mysql                               #
 #===================================================================#
@@ -127,16 +126,13 @@ error_handler $? "L'écriture du fichier docker-compose.yml a échouée."
 #===================================================================#
 # Configuration de PhpMyAdmin                                       #
 #===================================================================#
-#TODO : Configuration de PhpMyAdmin
-
+#TODO : Configurer PhpMyAdmin pour le TLS.
 
 #===================================================================#
 # Configuration de mysql                                            #
 #===================================================================#
-#TODO : Configuration de mysql
 
 # Créer une base de données d'intro
-
 DB_INIT_SQL_QUERIES=$(cat <<EOF
 CREATE TABLE IF NOT EXISTS todo_list
 (
@@ -303,7 +299,7 @@ error_handler $? "L'écriture du fichier de configuration apache/apache2.conf a 
 # Installation d'openssl
 
 sudo apt-get install -y openssl
-error_handler $? "L'installation d'openssl a échouée."
+# error_handler $? "L'installation d'openssl a échouée."
 
 # Configuration du port par défaut & HTTPS
 
@@ -381,7 +377,7 @@ Listen $WEB_PORT
 
 
 # Génération du certificat et de la clé pour le HTTPS
-# logs_info "..."
+logs_info "Apache > Configuration > HTTPS : Génération du certificat et de la clé en cours."
 
 mkdir apache/certificate
 error_handler $? "La création du dossier /apache/certificate a échouée."
@@ -396,6 +392,7 @@ sudo chmod 600 apache/certificate/"$CERT_NAME"_server.key
 sudo chown root:root apache/certificate/"$CERT_NAME"_server.crt
 sudo chmod 440 apache/certificate/"$CERT_NAME"_server.crt
 
+logs_success "Apache > Configuration > HTTPS : Génération du certificat et de la clé terminée."
 
 # Création de la page principale
 
@@ -470,7 +467,6 @@ body{
 </html>" > apache/www/$site_name/index.html
         error_handler $? "L'écriture dans le fichier apache/www/$site_name/index.html a échouée."
 
-
         sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt -keyout apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$site_name.$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
         error_handler $? "La génération de demande de signature de certifcat du site $site_name a échouée"
 
@@ -485,10 +481,7 @@ body{
         touch apache/sites-available/$site_name.conf
         error_handler $? "La création du fichier apache/sites-available/$site_name.conf a échouée."
 
-#TODO : FAIRE FONCTIONNER REWRITE COND
         echo "
-
-
 <VirtualHost *:80>
   ServerAdmin $WEB_ADMIN_ADDRESS
   ServerName $site_name.$DOMAIN_NAME
@@ -545,10 +538,12 @@ body{
 
         mkdir apache/www/$site_name/confidential
         # error_handler $? "La création du dossier apache/www/$site_name/confidential a échouée."
+        
         chmod -R 755 apache/www/$site_name/confidential
 
         touch apache/www/$site_name/confidential/confidential.php
         # error_handler $? "La création du fichier apache/www/$site_name/confidential/confidential.php a échouée."
+        
         chmod -R 755 apache/www/$site_name/confidential/confidential.php
 
         echo "<!DOCTYPE html>
@@ -639,7 +634,6 @@ table {
     </body>
 </html>" > apache/www/$site_name/confidential/confidential.php
         error_handler $? "L'écriture dans le fichier apache/www/$site_name/confidential/confidential.php a échouée."
-
 
 # Configuration de la page confidentielle (.htaccess et .htpasswd)
 
