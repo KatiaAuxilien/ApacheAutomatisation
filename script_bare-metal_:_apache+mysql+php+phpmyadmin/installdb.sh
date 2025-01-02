@@ -42,23 +42,12 @@ source ./.common.sh
 
 sudo apt update -y
 
-#TODO : Messages de logs
-#TODO : Vérification du lancement en droits admin
-#TODO : Vérification des variables fournies dans le .env
-
 #===================================================================#
 # Installation et configuration de mysql                            #
 #===================================================================#
-#TODO : Installation mysql
-#TODO : Configuration de mysql
 
-# https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04
-
+# Installer MySQL Server
 sudo apt install mysql-server -y
-  error_handler $? "sudo apt install mysql-server -y a échoué."
-
-sudo systemctl start mysql.service
-  error_handler $? "sudo systemctl start mysql.service a échoué."
 
 # Préconfigurer les réponses pour mysql_secure_installation
 debconf-set-selections <<EOF
@@ -82,7 +71,8 @@ Y
 EOF
 
 # Démarrer et activer MySQL
-sudo systemctl start mysql.service
+sudo systemctl start mysql
+sudo systemctl enable mysql
 
 # Se connecter à MySQL et créer une base de données et un utilisateur
 sudo mysql -u root -p$DB_ADMIN_PASSWORD <<EOF
@@ -92,34 +82,30 @@ GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_ADMIN_USERNAME'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 EOF
-error_handler $? " a échoué."
 
 # Vérifier que l'utilisateur a les permissions nécessaires
 sudo mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "SHOW GRANTS FOR '$DB_ADMIN_USERNAME'@'localhost';"
-error_handler $? ". a échoué."
 
 # Créer une base de données d'intro
 DB_INIT_SQL_QUERIES=$(cat <<EOF
-CREATE TABLE IF NOT EXISTS todo_list
-(
+CREATE TABLE IF NOT EXISTS todo_list (
     id INT AUTO_INCREMENT PRIMARY KEY,
     content VARCHAR(255) NOT NULL,
     statut INT DEFAULT 0
 );
 
 INSERT INTO todo_list (content, statut) VALUES
-('Sécuriser le site A.',0),
-('Sécuriser le site B.',0),
-('Créer une page secrète.',1),
-('Faire fonctionner les services php, phpmyadmin, mysql et apache.',2);
+('Sécuriser le site A.', 0),
+('Sécuriser le site B.', 0),
+('Créer une page secrète.', 1),
+('Faire fonctionner les services php, phpmyadmin, mysql et apache.', 2);
 EOF
 )
 
-
-logs_info "MySQL > Initialisation de la base de données $DB_NAME."
-
 # Exécuter les commandes SQL pour initialiser la base de données
-sudo mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_INIT_SQL_QUERIES" --database $DB_NAME
+sudo mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD $DB_NAME -e "$DB_INIT_SQL_QUERIES"
 error_handler $? "Le lancement de l'initialisation de $DB_NAME a échoué."
 
+logs_info "MySQL > Initialisation de la base de données $DB_NAME."
 logs_success "MySQL > Base de données $DB_NAME initialisée."
+
