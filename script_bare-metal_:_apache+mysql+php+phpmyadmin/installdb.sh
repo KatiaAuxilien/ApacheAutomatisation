@@ -82,8 +82,7 @@ Y
 EOF
 
 # Démarrer et activer MySQL
-sudo systemctl start mysql
-sudo systemctl enable mysql
+sudo systemctl start mysql.service
 
 # Se connecter à MySQL et créer une base de données et un utilisateur
 sudo mysql -u root -p$DB_ADMIN_PASSWORD <<EOF
@@ -93,9 +92,11 @@ GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_ADMIN_USERNAME'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 EOF
+error_handler $? " a échoué."
 
 # Vérifier que l'utilisateur a les permissions nécessaires
 sudo mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "SHOW GRANTS FOR '$DB_ADMIN_USERNAME'@'localhost';"
+error_handler $? ". a échoué."
 
 # Créer une base de données d'intro
 DB_INIT_SQL_QUERIES=$(cat <<EOF
@@ -118,7 +119,7 @@ EOF
 logs_info "MySQL > Initialisation de la base de données $DB_NAME."
 
 # Exécuter les commandes SQL pour initialiser la base de données
-sudo mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_INIT_SQL_QUERIES" $DB_NAME
+sudo mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_INIT_SQL_QUERIES" --database $DB_NAME
 error_handler $? "Le lancement de l'initialisation de $DB_NAME a échoué."
 
 logs_success "MySQL > Base de données $DB_NAME initialisée."
