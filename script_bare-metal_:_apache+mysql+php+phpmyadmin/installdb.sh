@@ -79,37 +79,37 @@ sudo systemctl start mysql.service
   error_handler $? "sudo systemctl start mysql.service a échoué."
 
 
-DB_INIT_SQL_QUERIES=$(cat <<EOF
-  UPDATE mysql.user SET Password=PASSWORD('$DB_ADMIN_PASSWORD') WHERE User='root';
-  DELETE FROM mysql.user WHERE User='';
-  DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-  DROP DATABASE IF EXISTS test;
-  DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-  FLUSH PRIVILEGES;
-EOF
-)
+# DB_INIT_SQL_QUERIES=$(cat <<EOF
+#   UPDATE mysql.user SET Password=PASSWORD('$DB_ADMIN_PASSWORD') WHERE User='root';
+#   DELETE FROM mysql.user WHERE User='';
+#   DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+#   DROP DATABASE IF EXISTS test;
+#   DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+#   FLUSH PRIVILEGES;
+# EOF
+# )
 
-sudo mysql --user=root -e "$DB_INIT_SQL_QUERIES"
+# sudo mysql --user=root -e "$DB_INIT_SQL_QUERIES"
 
-  error_handler $? "mysql --user=root <<_EOF_ a échoué."
+#   error_handler $? "mysql --user=root <<_EOF_ a échoué."
 
-#TODO : Créer une base de données d'intro
-sudo mysql -u'root' -p$DB_ADMIN_PASSWORD -e "CREATE DATABASE '$DB_NAME'";
-  error_handler $? "sudo mysql -u'root' -p\$DB_ADMIN_PASSWORD -e \"CREATE DATABASE '$DB_NAME'\"; a échoué."
-
-
-sudo mysql -u'root' -p$DB_ADMIN_PASSWORD -e "CREATE USER '$DB_ADMIN_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_ADMIN_PASSWORD';"
-  error_handler $? "sudo mysql -u'root' -p\$DB_ADMIN_PASSWORD -e \"CREATE USER '\$DB_ADMIN_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '\$DB_ADMIN_PASSWORD';\" a échoué."
+# #TODO : Créer une base de données d'intro
+# sudo mysql -u'root' -p$DB_ADMIN_PASSWORD -e "CREATE DATABASE '$DB_NAME'";
+#   error_handler $? "sudo mysql -u'root' -p\$DB_ADMIN_PASSWORD -e \"CREATE DATABASE '$DB_NAME'\"; a échoué."
 
 
-sudo mysql -u'root' -p$DB_ADMIN_PASSWORD -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_ADMIN_USERNAME'@'host' WITH GRANT OPTION;"
-  error_handler $? "sudo mysql -u'root' -p\$DB_ADMIN_PASSWORD -e \"GRANT ALL PRIVILEGES ON $DB_NAME.* TO '\$DB_ADMIN_USERNAME'@'host' WITH GRANT OPTION;\" a échoué."
+# sudo mysql -u'root' -p$DB_ADMIN_PASSWORD -e "CREATE USER '$DB_ADMIN_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$DB_ADMIN_PASSWORD';"
+#   error_handler $? "sudo mysql -u'root' -p\$DB_ADMIN_PASSWORD -e \"CREATE USER '\$DB_ADMIN_USERNAME'@'localhost' IDENTIFIED WITH caching_sha2_password BY '\$DB_ADMIN_PASSWORD';\" a échoué."
+
+
+# sudo mysql -u'root' -p$DB_ADMIN_PASSWORD -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_ADMIN_USERNAME'@'host' WITH GRANT OPTION;"
+#   error_handler $? "sudo mysql -u'root' -p\$DB_ADMIN_PASSWORD -e \"GRANT ALL PRIVILEGES ON $DB_NAME.* TO '\$DB_ADMIN_USERNAME'@'host' WITH GRANT OPTION;\" a échoué."
 
 
 # Préconfigurer les réponses pour mysql_secure_installation
 debconf-set-selections <<EOF
-mysql-server mysql-server/root_password password your_root_password
-mysql-server mysql-server/root_password_again password your_root_password
+mysql-server mysql-server/root_password password $DB_ADMIN_PASSWORD
+mysql-server mysql-server/root_password_again password $DB_ADMIN_PASSWORD
 mysql-server mysql-server/remove_test_db boolean true
 mysql-server mysql-server/disallow_root_login boolean true
 mysql-server mysql-server/remove_anonymous_users boolean true
@@ -119,8 +119,8 @@ EOF
 sudo mysql_secure_installation <<EOF
 
 Y
-your_root_password
-your_root_password
+$DB_ADMIN_PASSWORD
+$DB_ADMIN_PASSWORD
 Y
 Y
 Y
@@ -132,20 +132,17 @@ sudo systemctl start mysql
 sudo systemctl enable mysql
 
 # Se connecter à MySQL et créer une base de données et un utilisateur
+
 sudo mysql -u root -pyour_root_password <<EOF
-CREATE DATABASE nom_de_la_base_de_donnees;
-CREATE USER 'nom_utilisateur'@'localhost' IDENTIFIED BY 'mot_de_passe';
-GRANT ALL PRIVILEGES ON nom_de_la_base_de_donnees.* TO 'nom_utilisateur'@'localhost';
+CREATE DATABASE $DB_NAME;
+CREATE USER '$DB_ADMIN_USERNAME'@'localhost' IDENTIFIED BY '$DB_ADMIN_PASSWORD';
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_ADMIN_USERNAME'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 EOF
 
-
-
-
-
-
-
+sudo mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_INIT_SQL_QUERIES"
+error_handler $? "Le lancement de l'initialisation de $DB_NAME a échoué."
 
 # Créer une base de données d'intro
 DB_INIT_SQL_QUERIES=$(cat <<EOF
@@ -164,12 +161,10 @@ INSERT INTO todo_list (content, statut) VALUES
 EOF
 )
 
-
-
 logs_info "MySQL > Initialisation de la base de données $DB_NAME."
   
-  sudo mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_INIT_SQL_QUERIES" $DB_NAME
-  error_handler $? "Le lancement de l'initialisation de $DB_NAME a échoué."
+sudo mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_INIT_SQL_QUERIES" $DB_NAME
+error_handler $? "Le lancement de l'initialisation de $DB_NAME a échoué."
 
 logs_success "MySQL > Base de données $DB_NAME initialisée."
 
