@@ -887,9 +887,8 @@ logs_success "Apache > Service redémarré."
 
 # https://ubuntu.com/server/docs/how-to-install-and-configure-php
 
-sudo apt install -y php
-error_handler $? "L'installation du service php a échouée."
-  php-mysql
+# sudo apt install -y php php-mysql
+# error_handler $? "L'installation du service php et php-mysql a échouée."
 
 #===================================================================#
 # Installation et configuration de mysql                            #
@@ -899,30 +898,10 @@ error_handler $? "L'installation du service php a échouée."
 
 # https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04
 
-#TODO : Créer une base de données d'intro
-# Créer une base de données d'intro
-DB_INIT_SQL_QUERIES=$(cat <<EOF
-CREATE TABLE IF NOT EXISTS todo_list
-(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    content VARCHAR(255) NOT NULL,
-    statut INT DEFAULT 0
-);
 
-INSERT INTO todo_list (content, statut) VALUES
-('Sécuriser le site A.',0),
-('Sécuriser le site B.',0),
-('Créer une page secrète.',1),
-('Faire fonctionner les services php, phpmyadmin, mysql et apache.',2);
-EOF
-)
 
-logs_info "MySQL > Initialisation de la base de données $DB_CONTAINER_NAME."
-  
-  sudo mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_INIT_SQL_QUERIES" $DB_NAME
-  error_handler $? "Le lancement de l'initialisation de $DB_CONTAINER_NAME a échoué."
 
-logs_success "MySQL > Base de données $DB_CONTAINER_NAME initialisée."
+
 
 #===================================================================#
 # Installation de PhpMyAdmin                                        #

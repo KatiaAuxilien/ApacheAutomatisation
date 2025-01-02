@@ -66,3 +66,54 @@ source ./.common.sh
 
 
 #TODO : Suppression de la base de données d'intro
+
+
+	sudo systemctl stop apache2
+	# error_handler $? "L'arrêt du service apache a échouée."
+	
+	sudo systemctl disable apache2
+	# error_handler $? "La désactivation d'apache a échouée."
+	
+	sudo apt remove --purge -y apache2 apache2-utils
+	# error_handler $? "La désinstallation d'apache a échouée."
+
+	sudo apt-get purge apache2 apache2-utils apache2-bin apache2.2-common
+	# error_handler $? "La désinstallation des services apache2 apache2-utils apache2-bin apache2.2-common a échouée."
+
+	sudo rm -rf /etc/apache2
+	# error_handler $? "La suppression du dossier /etc/apache2"
+	
+	#sudo rm -rf /var/www/html
+	#error_handler $? "La suppression du dossier /var/www/html"
+	
+	sudo rm -rf /var/log/apache2
+	# error_handler $? "La suppression du dossier /var/log/apache2"
+
+	sudo rm -rf /var/www/siteA
+	# error_handler $? "La suppression du dossier /var/www/siteA"
+
+	sudo rm -rf /var/www/siteB
+	# error_handler $? "La suppression du dossier /var/www/siteB"
+
+
+	logs_success "Désinstallation d'apache terminée."
+
+
+	sudo apt remove --purge -y libapache2-mod-php
+	# error_handler $? "La désinstallation de libapache2-mod-php a échouée."
+	
+	sudo apt remove --purge -y libapache2-mod-security2
+	# error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
+	
+	sudo apt remove --purge -y libapache2-mod-evasive 
+	# error_handler $? "La désinstallation de libapache2-mod-evasive a échouée."
+
+	sudo apt remove --purge -y ssl-cert
+
+
+	sudo apt remove --purge -y mysql-server
+
+
+
+
+	logs_end "Désinstallation terminée."
