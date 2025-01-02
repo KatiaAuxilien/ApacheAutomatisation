@@ -105,6 +105,48 @@ sudo mysql -u'root' -p$DB_ADMIN_PASSWORD -e "CREATE USER '$DB_ADMIN_USERNAME'@'l
 sudo mysql -u'root' -p$DB_ADMIN_PASSWORD -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_ADMIN_USERNAME'@'host' WITH GRANT OPTION;"
   error_handler $? "sudo mysql -u'root' -p\$DB_ADMIN_PASSWORD -e \"GRANT ALL PRIVILEGES ON $DB_NAME.* TO '\$DB_ADMIN_USERNAME'@'host' WITH GRANT OPTION;\" a échoué."
 
+
+# Préconfigurer les réponses pour mysql_secure_installation
+debconf-set-selections <<EOF
+mysql-server mysql-server/root_password password your_root_password
+mysql-server mysql-server/root_password_again password your_root_password
+mysql-server mysql-server/remove_test_db boolean true
+mysql-server mysql-server/disallow_root_login boolean true
+mysql-server mysql-server/remove_anonymous_users boolean true
+EOF
+
+# Exécuter mysql_secure_installation sans interaction
+sudo mysql_secure_installation <<EOF
+
+Y
+your_root_password
+your_root_password
+Y
+Y
+Y
+Y
+EOF
+
+# Démarrer et activer MySQL
+sudo systemctl start mysql
+sudo systemctl enable mysql
+
+# Se connecter à MySQL et créer une base de données et un utilisateur
+sudo mysql -u root -pyour_root_password <<EOF
+CREATE DATABASE nom_de_la_base_de_donnees;
+CREATE USER 'nom_utilisateur'@'localhost' IDENTIFIED BY 'mot_de_passe';
+GRANT ALL PRIVILEGES ON nom_de_la_base_de_donnees.* TO 'nom_utilisateur'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+EOF
+
+
+
+
+
+
+
+
 # Créer une base de données d'intro
 DB_INIT_SQL_QUERIES=$(cat <<EOF
 CREATE TABLE IF NOT EXISTS todo_list
@@ -121,6 +163,8 @@ INSERT INTO todo_list (content, statut) VALUES
 ('Faire fonctionner les services php, phpmyadmin, mysql et apache.',2);
 EOF
 )
+
+
 
 logs_info "MySQL > Initialisation de la base de données $DB_NAME."
   
