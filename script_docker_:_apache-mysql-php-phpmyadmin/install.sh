@@ -994,10 +994,10 @@ logs_success "Docker > Services php et apache lancés."
 
 sleep 10
 
-logs_info "MySQL > Initialisation de la base de données $DB_CONTAINER_NAME."
+logs_info "MySQL > Initialisation de la base de données $DB_NAME."
   docker exec -i $DB_CONTAINER_NAME mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_INIT_SQL_QUERIES" $DB_NAME
-  error_handler $? "Le lancement de l'initialisation de $DB_CONTAINER_NAME a échoué."
-logs_success "MySQL > Base de données $DB_CONTAINER_NAME initialisée."
+  error_handler $? "Le lancement de l'initialisation de $DB_NAME a échoué."
+logs_success "MySQL > Base de données $DB_NAME initialisée."
 
 #===================================================================#
 # Nettoyage                                                         #

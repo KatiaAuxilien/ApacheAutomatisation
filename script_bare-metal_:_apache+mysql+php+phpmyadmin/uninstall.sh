@@ -1,5 +1,21 @@
 #!/bin/bash
 
+#TODO : Messages de logs
+#TODO : Vérification du lancement en droits admin
+#TODO : Arrêt de tout les services
+#TODO : Suppression des fichiers de configuration de Apache
+#TODO : Suppression des fichiers de configuration HTTPS
+#TODO : Suppression des fichiers de configuration de ModSecurity
+#TODO : Suppression des fichiers de configuration  de ModEvasive
+#TODO : Suppression des fichiers de configuration de ModRatelimit
+#TODO : Suppression de la configuration des deux sites (siteA, siteB)
+#TODO : Suppression de la configuration de la page confidentielle (.htaccess et .htpasswd)
+#TODO : Désinstallation de Apache
+#TODO : Désinstallation PhpMyAdmin
+#TODO : Suppression des fichiers de configuration de PhpMyAdmin
+#TODO : Désinstallation PHP
+#TODO : Suppression des fichiers de configuration de PHP
+
 #======================================================================#
 source ./../.common.sh
 #======================================================================#
@@ -41,79 +57,144 @@ source ./.common.sh
 #===================================================================#
 
 
-#TODO : Messages de logs
-#TODO : Vérification du lancement en droits admin
+logs_info "Services complexes > Désinstallation en cours ..."
 
-#TODO : Arrêt de tout les services
+#===================================================================#
+# Désinstallation de Apache                                         #
+#===================================================================#
+	logs_info "Services complexes > Apache > Désinstallation en cours ..."
 
-#TODO : Suppression des fichiers de configuration de Apache
-#TODO : Suppression des fichiers de configuration HTTPS
-#TODO : Suppression des fichiers de configuration de ModSecurity
-#TODO : Suppression des fichiers de configuration  de ModEvasive
-#TODO : Suppression des fichiers de configuration de ModRatelimit
-#TODO : Suppression de la configuration des deux sites (siteA, siteB)
-#TODO : Suppression de la configuration de la page confidentielle (.htaccess et .htpasswd)
-#TODO : Désinstallation de Apache
+		sudo systemctl stop apache2
+		# error_handler $? "L'arrêt du service apache a échouée."
 
-#TODO : Désinstallation PHP
-#TODO : Suppression des fichiers de configuration de PHP
+		sudo systemctl disable apache2
+		# error_handler $? "La désactivation d'apache a échouée."
 
-#TODO : Désinstallation mysql
-#TODO : Suppression des fichiers de configuration de mysql
+		sudo apt remove --purge -y apache2 apache2-utils apache2-bin apache2.2-common
+		# error_handler $? "La désinstallation d'apache a échouée."
+		
+		sudo apt-get autoremove -y
+		# error_handler $? " a échouée."
 
-#TODO : Désinstallation PhpMyAdmin
-#TODO : Suppression des fichiers de configuration de PhpMyAdmin
+		sudo apt remove --purge -y libapache2-mod-security2
+		# error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
+		
+		sudo apt-get autoremove -y
+		# error_handler $? " a échouée."
+		
+		sudo apt remove --purge -y libapache2-mod-evasive 
+		# error_handler $? "La désinstallation de libapache2-mod-evasive a échouée."
+		
+		sudo apt-get autoremove -y
+		# error_handler $? " a échouée."
+		
+		sudo apt remove --purge -y ssl-cert
+		# error_handler $? " a échouée."
+		
+		sudo apt-get autoremove -y
+		# error_handler $? " a échouée."
+		
+		sudo rm -rf /etc/apache2
+		# error_handler $? "La suppression du dossier /etc/apache2"
 
+		sudo rm -rf /var/www/html
+		#error_handler $? "La suppression du dossier /var/www/html"
 
-#TODO : Suppression de la base de données d'intro
+		sudo rm -rf /var/log/apache2
+		# error_handler $? "La suppression du dossier /var/log/apache2"
 
+		sudo rm -rf /var/www/siteA
+		# error_handler $? "La suppression du dossier /var/www/siteA"
 
-	sudo systemctl stop apache2
-	# error_handler $? "L'arrêt du service apache a échouée."
-	
-	sudo systemctl disable apache2
-	# error_handler $? "La désactivation d'apache a échouée."
-	
-	sudo apt remove --purge -y apache2 apache2-utils
-	# error_handler $? "La désinstallation d'apache a échouée."
+		sudo rm -rf /var/www/siteB
+		# error_handler $? "La suppression du dossier /var/www/siteB"
+		
+		sudo apt-get autoclean -y
+		# error_handler $? " a échouée."
+	logs_success "Services complexes > Apache > Désinstallation terminée."
 
-	sudo apt-get purge apache2 apache2-utils apache2-bin apache2.2-common
-	# error_handler $? "La désinstallation des services apache2 apache2-utils apache2-bin apache2.2-common a échouée."
+#===================================================================#
+# Désinstallation de mysql                                          #
+#===================================================================#
+	logs_info "Services complexes > MySQL >  Désinstallation en cours ..."
 
-	sudo rm -rf /etc/apache2
-	# error_handler $? "La suppression du dossier /etc/apache2"
-	
-	#sudo rm -rf /var/www/html
-	#error_handler $? "La suppression du dossier /var/www/html"
-	
-	sudo rm -rf /var/log/apache2
-	# error_handler $? "La suppression du dossier /var/log/apache2"
+		# Arrêter le service MySQL
+		sudo systemctl stop mysql
+		# error_handler $? " a échouée."
 
-	sudo rm -rf /var/www/siteA
-	# error_handler $? "La suppression du dossier /var/www/siteA"
+		# Désinstaller les paquets MySQL
+		sudo apt-get remove --purge -y mysql-server mysql-client mysql-common
+		# error_handler $? " a échouée."
 
-	sudo rm -rf /var/www/siteB
-	# error_handler $? "La suppression du dossier /var/www/siteB"
+		# Supprimer les fichiers de configuration et les bases de données
+		sudo rm -rf /etc/mysql /var/lib/mysql /var/log/mysql
+		# error_handler $? " a échouée."
 
+		# Supprimer les paquets MySQL résiduels
+		sudo apt-get autoremove -y
+		# error_handler $? " a échouée."
 
-	logs_success "Désinstallation d'apache terminée."
+		sudo apt-get autoclean -y
+		# error_handler $? " a échouée."
 
+		# Vérifier la suppression
+		sudo find / -name '*mysql*'
+		# error_handler $? " a échouée."
 
-	sudo apt remove --purge -y libapache2-mod-php
-	# error_handler $? "La désinstallation de libapache2-mod-php a échouée."
-	
-	sudo apt remove --purge -y libapache2-mod-security2
-	# error_handler $? "La désinstallation de libapache2-mod-security2 a échouée."
-	
-	sudo apt remove --purge -y libapache2-mod-evasive 
-	# error_handler $? "La désinstallation de libapache2-mod-evasive a échouée."
+	logs_success "Services complexes > MySQL >  Désinstallation terminée."
+#===================================================================#
+# Désinstallation de PHP                                            #
+#===================================================================#
+	logs_info "Services complexes > PHP >  Désinstallation en cours ..."
 
-	sudo apt remove --purge -y ssl-cert
+		# sudo systemctl stop php8.3-fpm
+		# error_handler $? " a échouée."
 
+		sudo apt-get remove --purge -y libapache2-mod-php
+		# error_handler $? " a échouée."
 
-	sudo apt remove --purge -y mysql-server
+		sudo apt-get autoremove -y
+		# error_handler $? " a échouée."
+		
+		sudo apt-get remove --purge -y php libapache2-mod-php php-mysql php-xml php-mbstring php-curl php-zip php-gd
+		# error_handler $? " a échouée."
 
+		sudo rm -rf /etc/php /usr/lib/php /usr/share/php
+		# error_handler $? " a échouée."
+		
+		sudo apt-get autoremove -y
+		# error_handler $? " a échouée."
+		
+		sudo apt-get autoclean -y
+		# error_handler $? " a échouée."
 
+	logs_success "Services complexes > PHP >  Désinstallation terminée."
+#===================================================================#
+# Désinstallation de PhpMyAdmin                                     #
+#===================================================================#
+	logs_info "Services complexes > PhpMyAdmin >  Désinstallation en cours ..."
+		
+		sudo systemctl stop phpmyadmin
+		# error_handler $? " a échouée."
 
+		sudo apt-get remove --purge -y phpmyadmin
+		# error_handler $? " a échouée."
 
-	logs_end "Désinstallation terminée."
+		sudo apt-get autoremove -y
+		# error_handler $? " a échouée."
+
+		sudo rm -rf /etc/phpmyadmin /usr/share/phpmyadmin /var/lib/phpmyadmin
+		# error_handler $? " a échouée."
+
+		sudo apt-get remove --purge -y phpmyadmin
+		# error_handler $? " a échouée."
+
+		sudo apt-get autoremove -y
+		# error_handler $? " a échouée."
+
+		sudo apt-get autoclean -y
+		# error_handler $? " a échouée."
+
+	logs_success "Services complexes > PhpMyAdmin >  Désinstallation terminée."
+
+logs_end "Services complexes > Désinstallation terminée."
