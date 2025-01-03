@@ -615,10 +615,10 @@ logs_success "Services complexes > Apache > Service redémarré."
 logs_info "Services complexes > Apache > Site page d'accueil > Création et configuration de la page principale en cours ..."
 
     touch /var/www/html/index.html
-    error_handler $? "Services complexes > Apache > Site page d'accueil > La création du fichier /var/www/index.html a échouée."
+    error_handler $? "Services complexes > Apache > Site page d'accueil > La création du fichier /var/www/html/index.html a échouée."
 
-    chmod -R 755 /var/www/index.html
-    error_handler $? "Services complexes > Apache > Site page d'accueil > L'attribution des droits sur le fichier /var/www/index.html a échoué."
+    chmod -R 755 /var/www/html/index.html
+    error_handler $? "Services complexes > Apache > Site page d'accueil > L'attribution des droits sur le fichier /var/www/html/index.html a échoué."
 
     echo "<!DOCTYPE html>
 <html>
