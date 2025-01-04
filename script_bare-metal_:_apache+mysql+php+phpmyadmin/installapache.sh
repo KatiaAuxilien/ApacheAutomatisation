@@ -47,15 +47,13 @@ logs_info "Services complexes > Mise à jour des paquets en cours ..."
     error_handler $? "Services complexes > La mise à jour des paquets a échouée."
 logs_success "Services complexes > Mise à jour des paquets terminée."
 
+
 #===================================================================#
 # Installation de Apache                                            #
 #===================================================================#
 logs_info "Services complexes > Apache > Installation et configuration avancée en cours ..."
 
 logs_info "Services complexes > Apache > Installation du service en cours ..."
-
-    sudo apt update -y
-    error_handler $? "Services complexes > Apache > La mise à jour des paquets a échouée."
 
     sudo apt install -y apache2 apache2-utils
     error_handler $? "Services complexes > Apache > L'installation du service a échouée."
@@ -201,6 +199,9 @@ echo "<VirtualHost *:80>
 </VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf
 error_handler $? "Services complexes > Apache > L'écriture du fichier de configuration du site par défaut a échouée."
 
+echo "127.0.0.1 $DOMAIN_NAME" >> /etc/hosts
+error_handler $? "Services complexes > Apache > L'écriture du fichier /etc/hosts a échouée."
+
 echo "# If you just change the port or add more ports here, you will likely also
 # have to change the VirtualHost statement in
 # /etc/apache2/sites-enabled/000-default.conf
@@ -217,6 +218,17 @@ Listen $WEB_PORT
 error_handler $? "Services complexes > Apache > L'écriture du fichier de configuration des ports a échouée."
 
 logs_success "Services complexes > Apache > Configuration basique du service terminée."
+
+logs_info "Services complexes > Apache > PHP > Installation du module php pour apache en cours ..."
+    sudo apt-get install -y libapache2-mod-php
+    error_handler $? "Services complexes > Apache > PHP > L'installation du module php pour apache a échouée."
+logs_success "Services complexes > Apache > PHP > Installation du module php pour apache terminée."
+
+# Activer les modules PHP nécessaires pour Apache
+logs_info "Services complexes > Apache > PHP > Activation du module php en cours ..."
+    sudo a2enmod php8.3
+    error_handler $? "Services complexes > Apache > PHP > L'activation du module php a échouée."
+logs_success "Services complexes > Apache > PHP > Activation du module php terminée."
 
 #===================================================================#
 # Sécurisation de Apache                                            #
@@ -637,7 +649,7 @@ body{
     <p> ✨ <a href=\"https://siteA.$DOMAIN_NAME:$WEB_PORT\">Visiter siteA.$DOMAIN_NAME</a> </p>
     <p> ✨ <a href=\"https://siteB.$DOMAIN_NAME:$WEB_PORT\">Visiter siteB.$DOMAIN_NAME</a> </p>
   </body>
-</html> " > /var/www/index.html
+</html> " > /var/www/html/index.html
     error_handler $? "Services complexes > Apache > Site page d'accueil > L'écriture de la page /var/www/index.html a échouée."
 
 logs_success "Services complexes > Apache > Site page d'accueil > Création et configuration de la page principale terminée."
@@ -661,10 +673,10 @@ logs_success "Services complexes > Apache > .htaccess > Configuration terminée.
     do
     logs_info "Services complexes > Apache > $site_name > Configuration du site en cours ..."
         
-        mkdir /var/www/$site_name
+        sudo mkdir /var/www/$site_name
         error_handler $? "Services complexes > Apache > $site_name > La création du dossier /var/www/$site_name a échouée."
         
-        chmod -R 755 /var/www/$site_name
+        sudo chmod -R 755 /var/www/$site_name
         error_handler $? "Services complexes > Apache > $site_name > L'attribution des droits sur le dossier /var/www/$site_name a échouée."
         
         sudo touch /var/www/$site_name/index.html
@@ -871,6 +883,13 @@ Options -Indexes" > /var/www/$site_name/confidential/.htaccess
         error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /var/www/$site_name/confidential/.htaccess a échouée."
 
         sudo a2ensite $site_name.conf
+        error_handler $? "Services complexes > Apache > $site_name > Activation du site a échouée."
+
+        sudo systemctl reload apache2
+        error_handler $? "Services complexes > Apache > $site_name > Le redémarrage du service apache a échouée."
+
+        echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
+        error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /etc/hosts a échouée."
 
     logs_success "Services complexes > Apache > $site_name > $site_name.$DOMAIN_NAME créé et configuré."
     done
@@ -885,203 +904,3 @@ logs_info "Services complexes > Apache > Redémarrage du service en cours..."
 logs_success "Services complexes > Apache > Service redémarré."
 
 logs_success "Services complexes > Apache > Installation et configuration avancée terminée."
-#===================================================================#
-# Installation et configuration de PHP                              #
-#===================================================================#
-# Installer PHP et les extensions couramment utilisées
-logs_info "Services complexes > PHP > Installation et configuration en cours ..."
-
-    logs_info "Services complexes > PHP > Installation de php en cours ..."
-        sudo apt-get install -y php php-mysql php-xml php-mbstring php-curl php-zip php-gd php-json
-        error_handler $? "Services complexes > PHP > L'installation de php-mysql, php-xml, php-mbstring, php-curl, php-zip et php-gd a échouée."
-    logs_success "Services complexes > PHP > Installation de php terminée."
-
-    logs_info "Services complexes > PHP > Installation du module php pour apache en cours ..."
-        sudo apt-get install -y libapache2-mod-php
-        error_handler $? "Services complexes > PHP > L'installation du module php pour apache a échouée."
-    logs_success "Services complexes > PHP > Installation du module php pour apache terminée."
-
-    # Activer les modules PHP nécessaires pour Apache
-    logs_info "Services complexes > PHP > Activation du module php en cours ..."
-        sudo a2enmod php8.3
-        error_handler $? "Services complexes > PHP > L'activation du module php a échouée."
-    logs_success "Services complexes > PHP > Activation du module php terminée."
-
-    logs_info "Services complexes > PHP > Apache > Redémarrage en cours ..."
-        # Redémarrer Apache pour appliquer les changements
-        sudo systemctl restart apache2
-        error_handler $? "Services complexes > PHP > Apache > Le redémarrage a échouée."
-    logs_success "Services complexes > PHP > Apache > Redémarrage en terminé."
-
-    # Vérifier la version de PHP installée
-    logs_info "Services complexes > PHP > Vérification en cours ..."
-        php -v
-        error_handler $? "Services complexes > PHP > L'installation de php a échouée."
-    logs_success "Services complexes > PHP > Vérification terminée."
-
-    logs_info "Services complexes > PHP > Redémarrage en cours ..."
-        sudo systemctl restart php8.3-fpm
-        error_handler $? "Services complexes > PHP > L'installation de php a échouée."
-    logs_success "Services complexes > PHP > Redémarrage terminée."
-
-logs_success "Services complexes > PHP > Installation et configuration avancée terminée."
-#===================================================================#
-# Installation et configuration de mysql                            #
-#===================================================================#
-logs_info "Services complexes > MySQL > Installation et configuration avancée en cours ..."
-
-    logs_info "Services complexes > MySQL > Installation en cours ..."
-        sudo apt-get install -y mysql-server
-        error_handler $? "Services complexes > MySQL > L'installation a échouée."
-    logs_success "Services complexes > MySQL > Installation terminée."
-
-    # Configuration sécurisée de mysql
-    logs_info "Services complexes > MySQL > Configuration sécurisée en cours ..."
-        sudo mysql_secure_installation <<EOF
-
-Y
-$DB_ADMIN_PASSWORD
-$DB_ADMIN_PASSWORD
-Y
-Y
-Y
-Y
-EOF
-        error_handler $? "Services complexes > MySQL > Changement du port par défaut a échoué."
-    logs_success "Services complexes > MySQL > Configuration sécurisée terminée."
-
-    # Changer le port MySQL
-    logs_info "Services complexes > MySQL > Configuration du port en cours ..."
-        sudo sed -i "s/^port\s*=\s*3306/port = $DB_PORT/" /etc/mysql/mysql.conf.d/mysqld.cnf
-        error_handler $? "Services complexes > MySQL > Changement du port par défaut a échoué."
-    logs_success "Services complexes > MySQL > Configuration du port terminée."
-
-    # Redémarrer MySQL pour appliquer les changements
-    logs_info "Services complexes > MySQL > Redémarrage du service en cours ..."
-        sudo systemctl restart mysql
-        error_handler $? "Services complexes > MySQL > Le redémarrage du service a échoué."
-    logs_success "Services complexes > MySQL > Redémarrage du service terminée."
-
-    # Créer la base de données et l'utilisateur admin
-    logs_info "Services complexes > MySQL > Initialisation de la base de données $DB_NAME et création des utilisateurs en cours ..."
-
-        sudo mysql -u root -p$DB_ADMIN_PASSWORD <<EOF
-CREATE DATABASE IF NOT EXISTS $DB_NAME;
-CREATE USER '$DB_ADMIN_USERNAME'@'localhost' IDENTIFIED BY '$DB_ADMIN_PASSWORD';
-GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_ADMIN_USERNAME'@'localhost';
-FLUSH PRIVILEGES;
-
-USE $DB_NAME;
-CREATE TABLE IF NOT EXISTS todo_list (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    content VARCHAR(255) NOT NULL,
-    statut INT DEFAULT 0
-);
-
-INSERT INTO todo_list (content, statut) VALUES
-('Sécuriser le site A.', 0),
-('Sécuriser le site B.', 0),
-('Créer une page secrète.', 1),
-('Faire fonctionner les services php, phpmyadmin, mysql et apache.', 2);
-
-CREATE USER 'phpmyadmin'@'localhost' IDENTIFIED BY '$PHPMYADMIN_PASSWORD';
-GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost';
-FLUSH PRIVILEGES;
-EOF
-        error_handler $? "Services complexes > MySQL > Le lancement de l'initialisation de $DB_NAME et création des utilisateurs a échoué."
-
-    logs_success "Services complexes > MySQL > Initialisation de la base de données $DB_NAME et création des utilisateurs terminée."
-
-logs_success "Services complexes > MySQL > Installation et configuration avancée terminée."
-
-#===================================================================#
-# Installation de PhpMyAdmin                                        #
-#===================================================================#
-
-logs_info "Services complexes > PhpMyAdmin > Installation et configuration en cours ..."
-
-    # Installer phpMyAdmin
-    logs_info "Services complexes > PhpMyAdmin > Installation en cours ..."
-        sudo apt-get install -y phpmyadmin
-        error_handler $? "Services complexes > PhpMyAdmin > L'installation a échouée."
-    logs_success "Services complexes > PhpMyAdmin > Installation terminée."
-
-    # Configurer phpMyAdmin avec Apache
-    logs_info "Services complexes > PhpMyAdmin > Activation du module mbstring en cours ..."
-        sudo phpenmod mbstring
-        error_handler $? "Services complexes > PhpMyAdmin > Activation du module mbstring a échouée."
-    logs_success "Services complexes > PhpMyAdmin > Activation du module terminée."
-
-    # Redémarrer Apache pour appliquer les changements
-    logs_info "Services complexes > PhpMyAdmin > Apache > Redémarrage en cours ..."
-        sudo systemctl restart apache2
-        error_handler $? "Services complexes > PhpMyAdmin > Apache > Le redémarrage a échouée."
-    logs_success "Services complexes > PhpMyAdmin > Apache > Redémarrage terminé."
-
-    # Configurer phpMyAdmin pour utiliser la base de données créée
-    logs_info "Services complexes > PhpMyAdmin > Configuration basique en cours ..."
-        sudo sed -i "s/^.*\$cfg\['Servers'\]\[\$i\]\['auth_type'\] = 'cookie';/\$cfg['Servers'][\$i]['auth_type'] = 'cookie';/" /etc/phpmyadmin/config.inc.php
-        error_handler $? "Services complexes > PhpMyAdmin > La configuration de l'authentification a échouée."
-
-        sudo sed -i "s/^.*\$cfg\['Servers'\]\[\$i\]\['user'\] = 'root';/\$cfg['Servers'][\$i]['user'] = 'phpmyadmin';/" /etc/phpmyadmin/config.inc.php
-        error_handler $? "Services complexes > PhpMyAdmin > La configuration de l'utilisateur a échouée."
-
-        sudo sed -i "s/^.*\$cfg\['Servers'\]\[\$i\]\['password'\] = '';/\$cfg['Servers'][\$i]['password'] = '$PHPMYADMIN_PASSWORD';/" /etc/phpmyadmin/config.inc.php
-        error_handler $? "Services complexes > PhpMyAdmin > La configuration du mot de passe a échouée."
-        
-        sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
-        error_handler $? "Services complexes > PhpMyAdmin > La configuration symlink a échouée."
-
-        sudo a2enconf phpmyadmin.conf
-        error_handler $? "Services complexes > PhpMyAdmin > L'activation de la configuration phpmyadmin a échouée."
-
-    logs_success "Services complexes > PhpMyAdmin > Configuration basique terminée."
-
-    # logs_info "Services complexes > PhpMyAdmin > Sécurisation > ."
-
-        # logs_info "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > ."
-
-            # sudo nano /etc/apache2/conf-available/phpmyadmin.conf
-            #     AllowOverride All
-
-            # sudo nano /usr/share/phpmyadmin/.htaccess
-
-            # echo "AuthType Basic
-            # AuthName "Restricted Files"
-            # AuthUserFile /etc/phpmyadmin/.htpasswd
-            # Require valid-user" > /usr/share/phpmyadmin/.htaccess
-            # error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > a échouée."
-
-            # sudo htpasswd -c /etc/phpmyadmin/.htpasswd username
-            # error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > a échouée."
-
-        # logs_success "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > ."
-
-    # logs_success "Services complexes > PhpMyAdmin > Sécurisation > ."
-
-    # Redémarrer PhpMyAdmin pour appliquer les changements
-    logs_info "Services complexes > PhpMyAdmin > Redémarrage en cours ..."
-        sudo systemctl restart phpmyadmin
-        error_handler $? "Services complexes > PhpMyAdmin > Le redémarrage a échouée."
-    logs_success "Services complexes > PhpMyAdmin > Redémarrage terminé."
-
-    # Redémarrer Apache pour appliquer les changements
-    logs_info "Services complexes > PhpMyAdmin > Apache > Redémarrage en cours ..."
-        sudo systemctl restart apache2
-        error_handler $? "Services complexes > PhpMyAdmin > Apache > Le redémarrage a échouée."
-    logs_success "Services complexes > PhpMyAdmin > Apache > Redémarrage terminé."
-
-logs_success "Services complexes > PhpMyAdmin > Installation et configuration avancée terminée."
-#===================================================================#
-
-#TODO : Faire fonctionner les 4 services ensemble.
-
-        # sudo systemctl restart apache2
-#===================================================================#
-
-# sudo apt-get clean
-# sudo rm -rf /var/lib/apt/lists/*
-
-#===================================================================#
-
-logs_end "Services complexes > Script terminée."
