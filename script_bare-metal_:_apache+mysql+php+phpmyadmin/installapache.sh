@@ -6,22 +6,18 @@ source ../.common.sh
 
 required_vars_start=(
 "DOMAIN_NAME"
-"NETWORK_NAME"
-"WEB_CONTAINER_NAME"
 "WEB_ADMIN_ADDRESS"
 "WEB_PORT"
 "WEB_ADMIN_USER"
 "WEB_ADMIN_PASSWORD"
 "SSL_KEY_PASSWORD"
 
-"PHPMYADMIN_CONTAINER_NAME"
 "PHPMYADMIN_HTACCESS_PASSWORD"
 "PHPMYADMIN_ADMIN_ADDRESS"
 "PHPMYADMIN_ADMIN_USERNAME"
 "PHPMYADMIN_ADMIN_PASSWORD"
 "PHPMYADMIN_PORT"
 
-"DB_CONTAINER_NAME"
 "DB_PORT"
 "DB_ROOT_PASSWORD"
 "DB_ADMIN_USERNAME"
@@ -168,6 +164,13 @@ echo "<VirtualHost *:80>
   SSLCertificateFile /etc/apache2/certificate/"$CERT_NAME"_server.crt
   SSLCertificateKeyFile /etc/apache2/certificate/"$CERT_NAME"_server.key
 
+  Alias /phpmyadmin /usr/share/phpmyadmin
+  <Directory /usr/share/phpmyadmin>
+    Options FollowSymLinks
+    AllowOverride All
+    Require all granted
+  </Directory>
+  
   <Directory /var/www/html>
     Options -Indexes
     AllowOverride All
@@ -188,6 +191,13 @@ echo "<VirtualHost *:80>
   SSLCertificateFile /etc/apache2/certificate/"$CERT_NAME"_server.crt
   SSLCertificateKeyFile /etc/apache2/certificate/"$CERT_NAME"_server.key
 
+  Alias /phpmyadmin /usr/share/phpmyadmin
+  <Directory /usr/share/phpmyadmin>
+    Options FollowSymLinks
+    AllowOverride All
+    Require all granted
+  </Directory>
+
   <Directory /var/www/html>
     Options -Indexes
     AllowOverride All
@@ -198,6 +208,25 @@ echo "<VirtualHost *:80>
   CustomLog \${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf
 error_handler $? "Services complexes > Apache > L'écriture du fichier de configuration du site par défaut a échouée."
+    
+# echo "<VirtualHost *:79>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} !=on
+#     RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
+# </VirtualHost>
+# <VirtualHost *:443>
+#     ServerAdmin $WEB_ADMIN_ADDRESS
+#     ServerName $DOMAIN_NAME
+#     ServerAlias localhost
+#     DocumentRoot /var/www/html
+#     ErrorLog \${APACHE_LOG_DIR}/error.log
+#     CustomLog \${APACHE_LOG_DIR}/access.log combined
+#     SSLEngine on
+#     SSLCertificateFile /etc/apache2/certificate/"$CERT_NAME"_server.crt
+#     SSLCertificateKeyFile /etc/apache2/certificate/"$CERT_NAME"_server.key
+# </VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf
+# error_handler $? "Services complexes > Apache > L'écriture du fichier de configuration du site par défaut a échouée."
+
 
 echo "127.0.0.1 $DOMAIN_NAME" >> /etc/hosts
 error_handler $? "Services complexes > Apache > L'écriture du fichier /etc/hosts a échouée."
@@ -716,6 +745,7 @@ body{
         touch /etc/apache2/sites-available/$site_name.conf
         error_handler $? "Services complexes > Apache > $site_name > La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
+
         echo "<VirtualHost *:80>
   ServerAdmin $WEB_ADMIN_ADDRESS
   ServerName $site_name.$DOMAIN_NAME
@@ -767,6 +797,31 @@ body{
   CustomLog \${APACHE_LOG_DIR}/$site_name-access.log combined
 </VirtualHost>" > /etc/apache2/sites-available/$site_name.conf
         error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
+
+#         echo "<VirtualHost *:79>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} !=on
+#     RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
+# </VirtualHost>
+# <VirtualHost *:443>
+#     ServerAdmin $WEB_ADMIN_ADDRESS
+#     ServerName $site_name.$DOMAIN_NAME
+#     DocumentRoot /var/www/$site_name
+
+#     SSLEngine on
+#     SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
+#     SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
+
+#     <Directory /var/www/$site_name>
+#         Options Indexes FollowSymLinks
+#         AllowOverride All
+#         Require all granted
+#     </Directory>
+
+#     ErrorLog \${APACHE_LOG_DIR}/error.log
+#     CustomLog \${APACHE_LOG_DIR}/access.log combined
+# </VirtualHost>" > /etc/apache2/sites-available/$site_name.conf
+#         error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
 # Création de la page confidentielle
         mkdir /var/www/$site_name/confidential
@@ -822,7 +877,7 @@ table {
     \$table = \"todo_list\";
 
 
-    \$session = new mysqli(\"$DB_CONTAINER_NAME\",\$user,\$password, \$database, $DB_PORT);
+    \$session = new mysqli(\"localhost\",\$user,\$password, \$database, $DB_PORT);
 
     if (\$session->connect_error)
     {

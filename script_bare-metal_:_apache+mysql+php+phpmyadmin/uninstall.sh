@@ -22,22 +22,18 @@ source ./../.common.sh
 
 required_vars_start=(
 "DOMAIN_NAME"
-"NETWORK_NAME"
-"WEB_CONTAINER_NAME"
 "WEB_ADMIN_ADDRESS"
 "WEB_PORT"
 "WEB_ADMIN_USER"
 "WEB_ADMIN_PASSWORD"
 "SSL_KEY_PASSWORD"
 
-"PHPMYADMIN_CONTAINER_NAME"
 "PHPMYADMIN_HTACCESS_PASSWORD"
 "PHPMYADMIN_ADMIN_ADDRESS"
 "PHPMYADMIN_ADMIN_USERNAME"
 "PHPMYADMIN_ADMIN_PASSWORD"
 "PHPMYADMIN_PORT"
 
-"DB_CONTAINER_NAME"
 "DB_PORT"
 "DB_ROOT_PASSWORD"
 "DB_ADMIN_USERNAME"
@@ -201,12 +197,16 @@ logs_info "Services complexes > Désinstallation en cours ..."
 #===================================================================#
 	logs_info "Services complexes > PhpMyAdmin >  Désinstallation en cours ..."
 		
+		sudo a2disconf phpmyadmin.conf
 		# Désinstaller phpMyAdmin
-		sudo apt-get remove --purge -y phpmyadmin*
+		sudo DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y phpmyadmin*
 		# error_handler $? " a échouée."
+		sudo DEBIAN_FRONTEND=noninteractive apt-get purge -y phpmyadmin
+		sudo DEBIAN_FRONTEND=noninteractive apt-get remove -y phpmyadmin
 
-		sudo rm -rf /etc/phpmyadmin
-		# error_handler $? " a échouée."
+		sudo rm -rf /etc/phpmyadmin /usr/share/phpmyadmin /var/lib/phpmyadmin
+		sudo rm  -rf /etc/apache2/conf-available/phpmyadmin.conf
+		sudo rm  -rf /etc/apache2/sites-available/phpmyadmin.conf
 
 		# sudo systemctl stop phpmyadmin
 		# error_handler $? " a échouée."
@@ -215,9 +215,6 @@ logs_info "Services complexes > Désinstallation en cours ..."
 		# error_handler $? " a échouée."
 
 		# sudo apt-get autoremove -y
-		# error_handler $? " a échouée."
-
-		# sudo rm -rf /etc/phpmyadmin /usr/share/phpmyadmin /var/lib/phpmyadmin
 		# error_handler $? " a échouée."
 
 		# sudo apt-get remove --purge -y phpmyadmin
@@ -235,6 +232,8 @@ logs_info "Services complexes > Désinstallation en cours ..."
 #===================================================================#
 
 sed -i "/$DOMAIN_NAME/d" /etc/hosts
+sed -i "/siteA.$DOMAIN_NAME/d" /etc/hosts
+sed -i "/siteB.$DOMAIN_NAME/d" /etc/hosts
 sed -i "/phpmyadmin.$DOMAIN_NAME/d" /etc/hosts
 
 

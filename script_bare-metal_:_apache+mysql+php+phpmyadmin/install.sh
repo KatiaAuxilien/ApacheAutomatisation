@@ -1,27 +1,25 @@
 #!/bin/bash
 
+# Apache > PHP > MySQL > PHPMYADMIN
+
 #======================================================================#
 source ../.common.sh
 #======================================================================#
 
 required_vars_start=(
 "DOMAIN_NAME"
-"NETWORK_NAME"
-"WEB_CONTAINER_NAME"
 "WEB_ADMIN_ADDRESS"
 "WEB_PORT"
 "WEB_ADMIN_USER"
 "WEB_ADMIN_PASSWORD"
 "SSL_KEY_PASSWORD"
 
-"PHPMYADMIN_CONTAINER_NAME"
 "PHPMYADMIN_HTACCESS_PASSWORD"
 "PHPMYADMIN_ADMIN_ADDRESS"
 "PHPMYADMIN_ADMIN_USERNAME"
 "PHPMYADMIN_ADMIN_PASSWORD"
 "PHPMYADMIN_PORT"
 
-"DB_CONTAINER_NAME"
 "DB_PORT"
 "DB_ROOT_PASSWORD"
 "DB_ADMIN_USERNAME"
@@ -149,57 +147,76 @@ error_handler $? "Services complexes > Apache > L'écriture du fichier de config
 
 CERT_NAME="servicescomplexe"
 
-echo "<VirtualHost *:80>
-  ServerAdmin $WEB_ADMIN_ADDRESS
-  ServerName $DOMAIN_NAME
+# echo "<VirtualHost *:80>
+#   ServerAdmin $WEB_ADMIN_ADDRESS
+#   ServerName $DOMAIN_NAME
 
-  RewriteEngine On
-  RewriteCond %{HTTPS} off
-  RewriteRule ^ https://%{HTTP_HOST}:$WEB_PORT%{REQUEST_URL} [R,L]
+#   RewriteEngine On
+#   RewriteCond %{HTTPS} off
+#   RewriteRule ^ https://%{HTTP_HOST}:$WEB_PORT%{REQUEST_URL} [R,L]
+# </VirtualHost>
+
+# <VirtualHost *:443>
+#   ServerAdmin $WEB_ADMIN_ADDRESS
+#   ServerName $DOMAIN_NAME
+
+#   RewriteEngine On
+#   RewriteCond %{SERVER_PORT} 443
+#   RewriteRule ^ https://%{HTTP_HOST}:$WEB_PORT%{REQUEST_URL} [R,L]
+
+#   SSLEngine on
+#   SSLCertificateFile /etc/apache2/certificate/"$CERT_NAME"_server.crt
+#   SSLCertificateKeyFile /etc/apache2/certificate/"$CERT_NAME"_server.key
+
+#   <Directory /var/www/html>
+#     Options -Indexes
+#     AllowOverride All
+#     Require all granted
+#   </Directory>
+ 
+#   ErrorLog \${APACHE_LOG_DIR}/error.log
+#   CustomLog \${APACHE_LOG_DIR}/access.log combined
+# </VirtualHost>
+
+# <VirtualHost *:$WEB_PORT>
+#   ServerAdmin $WEB_ADMIN_ADDRESS
+#   ServerName $DOMAIN_NAME
+
+#   DocumentRoot /var/www/html
+
+#   SSLEngine on
+#   SSLCertificateFile /etc/apache2/certificate/"$CERT_NAME"_server.crt
+#   SSLCertificateKeyFile /etc/apache2/certificate/"$CERT_NAME"_server.key
+
+#   <Directory /var/www/html>
+#     Options -Indexes
+#     AllowOverride All
+#     Require all granted
+#   </Directory>
+ 
+#   ErrorLog \${APACHE_LOG_DIR}/error.log
+#   CustomLog \${APACHE_LOG_DIR}/access.log combined
+# </VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf
+# error_handler $? "Services complexes > Apache > L'écriture du fichier de configuration du site par défaut a échouée."
+    
+echo "<VirtualHost *:79>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
 </VirtualHost>
-
 <VirtualHost *:443>
-  ServerAdmin $WEB_ADMIN_ADDRESS
-  ServerName $DOMAIN_NAME
-
-  RewriteEngine On
-  RewriteCond %{SERVER_PORT} 443
-  RewriteRule ^ https://%{HTTP_HOST}:$WEB_PORT%{REQUEST_URL} [R,L]
-
-  SSLEngine on
-  SSLCertificateFile /etc/apache2/certificate/"$CERT_NAME"_server.crt
-  SSLCertificateKeyFile /etc/apache2/certificate/"$CERT_NAME"_server.key
-
-  <Directory /var/www/html>
-    Options -Indexes
-    AllowOverride All
-    Require all granted
-  </Directory>
- 
-  ErrorLog \${APACHE_LOG_DIR}/error.log
-  CustomLog \${APACHE_LOG_DIR}/access.log combined
-</VirtualHost>
-
-<VirtualHost *:$WEB_PORT>
-  ServerAdmin $WEB_ADMIN_ADDRESS
-  ServerName $DOMAIN_NAME
-
-  DocumentRoot /var/www/html
-
-  SSLEngine on
-  SSLCertificateFile /etc/apache2/certificate/"$CERT_NAME"_server.crt
-  SSLCertificateKeyFile /etc/apache2/certificate/"$CERT_NAME"_server.key
-
-  <Directory /var/www/html>
-    Options -Indexes
-    AllowOverride All
-    Require all granted
-  </Directory>
- 
-  ErrorLog \${APACHE_LOG_DIR}/error.log
-  CustomLog \${APACHE_LOG_DIR}/access.log combined
+    ServerAdmin $WEB_ADMIN_ADDRESS
+    ServerName $DOMAIN_NAME
+    ServerAlias localhost
+    DocumentRoot /var/www/html
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/certificate/"$CERT_NAME"_server.crt
+    SSLCertificateKeyFile /etc/apache2/certificate/"$CERT_NAME"_server.key
 </VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf
 error_handler $? "Services complexes > Apache > L'écriture du fichier de configuration du site par défaut a échouée."
+
 
 echo "# If you just change the port or add more ports here, you will likely also
 # have to change the VirtualHost statement in
@@ -640,6 +657,9 @@ body{
 </html> " > /var/www/index.html
     error_handler $? "Services complexes > Apache > Site page d'accueil > L'écriture de la page /var/www/index.html a échouée."
 
+    echo "127.0.0.1 $DOMAIN_NAME" >> /etc/hosts
+    error_handler $? "Services complexes > Apache > Site page d'accueil > L'écriture du fichier /etc/hosts a échouée."
+
 logs_success "Services complexes > Apache > Site page d'accueil > Création et configuration de la page principale terminée."
 
 # Configuration du .htaccess et .htpasswd
@@ -704,57 +724,83 @@ body{
         touch /etc/apache2/sites-available/$site_name.conf
         error_handler $? "Services complexes > Apache > $site_name > La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
-        echo "<VirtualHost *:80>
-  ServerAdmin $WEB_ADMIN_ADDRESS
-  ServerName $site_name.$DOMAIN_NAME
+#         echo "<VirtualHost *:80>
+#   ServerAdmin $WEB_ADMIN_ADDRESS
+#   ServerName $site_name.$DOMAIN_NAME
 
-  RewriteEngine On
-  RewriteCond %{HTTPS} off
-  RewriteRule ^ https://%{HTTP_HOST}:$WEB_PORT%{REQUEST_URL} [R,L]
+#   RewriteEngine On
+#   RewriteCond %{HTTPS} off
+#   RewriteRule ^ https://%{HTTP_HOST}:$WEB_PORT%{REQUEST_URL} [R,L]
+# </VirtualHost>
+
+# <VirtualHost *:443>
+#   ServerAdmin $WEB_ADMIN_ADDRESS
+#   ServerName $site_name.$DOMAIN_NAME
+
+#   RewriteEngine On
+#   RewriteCond %{SERVER_PORT} 443
+#   RewriteRule ^ https://%{HTTP_HOST}:$WEB_PORT%{REQUEST_URL} [R,L]
+
+#   SSLEngine on
+#   SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
+#   SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
+
+#   <Directory /var/www/html>
+#     Options -Indexes
+#     AllowOverride All
+#     Require all granted
+#   </Directory>
+ 
+#   ErrorLog \${APACHE_LOG_DIR}/$site_name-error.log
+#   CustomLog \${APACHE_LOG_DIR}/$site_name-access.log combined
+# </VirtualHost>
+
+# <VirtualHost *:$WEB_PORT>
+#   ServerAdmin $WEB_ADMIN_ADDRESS
+#   ServerName $site_name.$DOMAIN_NAME
+
+#   DocumentRoot /var/www/$site_name
+
+#   SSLEngine on
+#   SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
+#   SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
+
+#   <Directory /var/www/$site_name>
+#     Options -Indexes
+#     AllowOverride All
+#     Require all granted
+#   </Directory>
+ 
+#   ErrorLog \${APACHE_LOG_DIR}/$site_name-error.log
+#   CustomLog \${APACHE_LOG_DIR}/$site_name-access.log combined
+# </VirtualHost>" > /etc/apache2/sites-available/$site_name.conf
+#         error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
+
+        echo "<VirtualHost *:79>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^/?(.*) https://%SERVER_NAME/$1 [R=301,L]
 </VirtualHost>
-
 <VirtualHost *:443>
-  ServerAdmin $WEB_ADMIN_ADDRESS
-  ServerName $site_name.$DOMAIN_NAME
+    ServerAdmin $WEB_ADMIN_ADDRESS
+    ServerName $site_name.$DOMAIN_NAME
+    DocumentRoot /var/www/$site_name
 
-  RewriteEngine On
-  RewriteCond %{SERVER_PORT} 443
-  RewriteRule ^ https://%{HTTP_HOST}:$WEB_PORT%{REQUEST_URL} [R,L]
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
+    SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
 
-  SSLEngine on
-  SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
-  SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
+    <Directory /var/www/$site_name>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
 
-  <Directory /var/www/html>
-    Options -Indexes
-    AllowOverride All
-    Require all granted
-  </Directory>
- 
-  ErrorLog \${APACHE_LOG_DIR}/$site_name-error.log
-  CustomLog \${APACHE_LOG_DIR}/$site_name-access.log combined
-</VirtualHost>
-
-<VirtualHost *:$WEB_PORT>
-  ServerAdmin $WEB_ADMIN_ADDRESS
-  ServerName $site_name.$DOMAIN_NAME
-
-  DocumentRoot /var/www/$site_name
-
-  SSLEngine on
-  SSLCertificateFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
-  SSLCertificateKeyFile /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
-
-  <Directory /var/www/$site_name>
-    Options -Indexes
-    AllowOverride All
-    Require all granted
-  </Directory>
- 
-  ErrorLog \${APACHE_LOG_DIR}/$site_name-error.log
-  CustomLog \${APACHE_LOG_DIR}/$site_name-access.log combined
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>" > /etc/apache2/sites-available/$site_name.conf
         error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
+
 
 # Création de la page confidentielle
         mkdir /var/www/$site_name/confidential
@@ -871,6 +917,10 @@ Options -Indexes" > /var/www/$site_name/confidential/.htaccess
         error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /var/www/$site_name/confidential/.htaccess a échouée."
 
         sudo a2ensite $site_name.conf
+        error_handler $? "Services complexes > Apache > $site_name > L'activation du site a échouée."
+
+        echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
+        error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /etc/hosts a échouée."
 
     logs_success "Services complexes > Apache > $site_name > $site_name.$DOMAIN_NAME créé et configuré."
     done

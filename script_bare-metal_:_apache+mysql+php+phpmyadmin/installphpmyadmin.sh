@@ -6,22 +6,18 @@ source ../.common.sh
 
 required_vars_start=(
 "DOMAIN_NAME"
-"NETWORK_NAME"
-"WEB_CONTAINER_NAME"
 "WEB_ADMIN_ADDRESS"
 "WEB_PORT"
 "WEB_ADMIN_USER"
 "WEB_ADMIN_PASSWORD"
 "SSL_KEY_PASSWORD"
 
-"PHPMYADMIN_CONTAINER_NAME"
 "PHPMYADMIN_HTACCESS_PASSWORD"
 "PHPMYADMIN_ADMIN_ADDRESS"
 "PHPMYADMIN_ADMIN_USERNAME"
 "PHPMYADMIN_ADMIN_PASSWORD"
 "PHPMYADMIN_PORT"
 
-"DB_CONTAINER_NAME"
 "DB_PORT"
 "DB_ROOT_PASSWORD"
 "DB_ADMIN_USERNAME"
@@ -55,6 +51,7 @@ logs_info "Services complexes > PhpMyAdmin > Installation et configuration en co
 
     # Installer phpMyAdmin
     logs_info "Services complexes > PhpMyAdmin > Installation en cours ..."
+        # sudo DEBIAN_FRONTEND=noninteractive apt-get install -y phpmyadmin
         sudo apt-get install -y phpmyadmin
         error_handler $? "Services complexes > PhpMyAdmin > L'installation a échouée."
     logs_success "Services complexes > PhpMyAdmin > Installation terminée."
@@ -73,6 +70,7 @@ logs_info "Services complexes > PhpMyAdmin > Installation et configuration en co
 
     # Configurer phpMyAdmin pour utiliser la base de données créée
     logs_info "Services complexes > PhpMyAdmin > Configuration basique en cours ..."
+
         sudo sed -i "s/^.*\$cfg\['Servers'\]\[\$i\]\['auth_type'\] = 'cookie';/\$cfg['Servers'][\$i]['auth_type'] = 'cookie';/" /etc/phpmyadmin/config.inc.php
         error_handler $? "Services complexes > PhpMyAdmin > La configuration de l'authentification a échouée."
 
@@ -82,49 +80,127 @@ logs_info "Services complexes > PhpMyAdmin > Installation et configuration en co
         sudo sed -i "s/^.*\$cfg\['Servers'\]\[\$i\]\['password'\] = '';/\$cfg['Servers'][\$i]['password'] = '$PHPMYADMIN_PASSWORD';/" /etc/phpmyadmin/config.inc.php
         error_handler $? "Services complexes > PhpMyAdmin > La configuration du mot de passe a échouée."
         
+        sudo sed -i "s/^.*\$cfg\['Servers'\]\[\$i\]\['password'\] = '';/\$cfg['Servers'][\$i]['password'] = '$PHPMYADMIN_PASSWORD';/" /etc/phpmyadmin/config.inc.php
+        error_handler $? "Services complexes > PhpMyAdmin > La configuration du mot de passe a échouée."
+ 
         sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
-        error_handler $? "Services complexes > PhpMyAdmin > La configuration symlink a échouée."
-
-        sudo a2enconf phpmyadmin.conf
-        error_handler $? "Services complexes > PhpMyAdmin > L'activation de la configuration phpmyadmin a échouée."
+        # error_handler $? "Services complexes > PhpMyAdmin > La création du symlink /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf a échouée."
 
     logs_success "Services complexes > PhpMyAdmin > Configuration basique terminée."
+    logs_info "Services complexes > PhpMyAdmin > Sécurisation > Configuration avancée en cours ..."
 
-    # logs_info "Services complexes > PhpMyAdmin > Sécurisation > ."
+    logs_info "Services complexes > PhpMyAdmin > Sécurisation > HTTPS > Génération du certificat et de la clé privée en cours ..."
 
-        # logs_info "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > ."
+        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt -keyout /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=phpmyadmin.$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
+        error_handler $? "Services complexes > Apache > HTTPS > La génération de demande de signature de certifcat du site phpmyadmin.$DOMAIN_NAME a échouée"
 
-            # sudo nano /etc/apache2/conf-available/phpmyadmin.conf
-            #     AllowOverride All
+        openssl x509 -in /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt -text -noout
+        error_handler $? "Services complexes > Apache > HTTPS > La vérification du certificat a échouée."
+        
+        sudo chmod 600 /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.key
+        sudo chown root:root /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt
+        sudo chmod 440 /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt
 
-            # sudo nano /usr/share/phpmyadmin/.htaccess
+        #Création des Virtual Host
+        touch /etc/apache2/sites-available/phpmyadmin.conf
+        error_handler $? "Services complexes > Apache > HTTPS > La création du fichier /etc/apache2/sites-available/phpmyadmin.conf a échouée."
 
-            # echo "AuthType Basic
-            # AuthName "Restricted Files"
-            # AuthUserFile /etc/phpmyadmin/.htpasswd
-            # Require valid-user" > /usr/share/phpmyadmin/.htaccess
-            # error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > a échouée."
+    logs_success "Services complexes > PhpMyAdmin > Sécurisation > HTTPS > Génération du certificat et de la clé privée terminée."
+    
+    logs_info "Services complexes > PhpMyAdmin > Sécurisation > Configuration de la page phpmyadmin.$DOMAIN_NAME en cours ..."
 
-            # sudo htpasswd -c /etc/phpmyadmin/.htpasswd username
-            # error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > a échouée."
+        echo "
+Listen $PHPMYADMIN_PORT
+<VirtualHost *:80>
+  ServerAdmin $WEB_ADMIN_ADDRESS
+  erverName phpmyadmin.$DOMAIN_NAME
 
-        # logs_success "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > ."
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteRule ^ https://%{HTTP_HOST}:$PHPMYADMIN_PORT%{REQUEST_URL} [R,L]
+</VirtualHost>
 
-    # logs_success "Services complexes > PhpMyAdmin > Sécurisation > ."
+<VirtualHost *:443>
+    ServerAdmin $WEB_ADMIN_ADDRESS
+    DocumentRoot /usr/share/phpmyadmin
+    ServerName phpmyadmin.$DOMAIN_NAME
 
-    # Redémarrer PhpMyAdmin pour appliquer les changements
-    # logs_info "Services complexes > PhpMyAdmin > Redémarrage en cours ..."
-    #     sudo systemctl restart phpmyadmin
-    #     error_handler $? "Services complexes > PhpMyAdmin > Le redémarrage a échouée."
-    # logs_success "Services complexes > PhpMyAdmin > Redémarrage terminé."
+    RewriteEngine On
+    RewriteCond %{SERVER_PORT} 443
+    RewriteRule ^ https://%{HTTP_HOST}:$PHPMYADMIN_PORT%{REQUEST_URL} [R,L]
+
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt
+    SSLCertificateKeyFile /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.key
+
+    <Directory /usr/share/phpmyadmin>
+        Options -Indexes
+        DirectoryIndex index.php
+        AllowOverride All
+        Require all granted
+    </Directory>
+ 
+    ErrorLog ${APACHE_LOG_DIR}/phpmyadmin_error.log
+    CustomLog ${APACHE_LOG_DIR}/phpmyadmin_access.log combined
+</VirtualHost>
+
+<VirtualHost *:$PHPMYADMIN_PORT>
+    ServerAdmin $WEB_ADMIN_ADDRESS
+    DocumentRoot /usr/share/phpmyadmin
+    ServerName phpmyadmin.$DOMAIN_NAME
+
+    SSLEngine on
+    SSLCertificateFile /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt
+    SSLCertificateKeyFile /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.key
+
+    <Directory /usr/share/phpmyadmin>
+        Options -Indexes
+        DirectoryIndex index.php
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/phpmyadmin_error.log
+    CustomLog ${APACHE_LOG_DIR}/phpmyadmin_access.log combined
+</VirtualHost>" > /etc/apache2/sites-available/phpmyadmin.conf
+        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > L'écriture du fichier /etc/apache2/sites-available/phpmyadmin.conf a échouée."
+
+        sudo ufw allow $PHPMYADMIN_PORT/tcp
+        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > L'autorisation du port personnalisé pour phpMyAdmin a échouée."
+        
+        sudo ufw reload
+        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > Le redémarrage du pare-feu a échoué."
+
+        sudo a2ensite phpmyadmin.conf
+        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > Activation du site a échouée."
+
+        echo "127.0.0.1 phpmyadmin.$DOMAIN_NAME" >> /etc/hosts
+        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > L'écriture dans /etc/hosts échouée."
+
+    logs_success "Services complexes > PhpMyAdmin > Sécurisation > Configuration de la page phpmyadmin.$DOMAIN_NAME terminée."
+    logs_info "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > Configuration en cours ..."
+
+        sudo touch /usr/share/phpmyadmin/.htaccess
+        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > La création du fichier /usr/share/phpmyadmin/.htaccess a échouée."
+
+        echo "AuthType Basic
+AuthName \"Accès protégé\"
+AuthUserFile /var/www/.htpasswd
+require valid-user
+Options -Indexes" > /usr/share/phpmyadmin/.htaccess
+        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > L'écriture dans /usr/share/phpmyadmin/.htaccess a échouée."
+
+    logs_success "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > Configuration terminée."
+
+    logs_success "Services complexes > PhpMyAdmin > Sécurisation > Configuration avancée terminée."
 
     # Redémarrer Apache pour appliquer les changements
     logs_info "Services complexes > PhpMyAdmin > Apache > Redémarrage en cours ..."
+
         sudo systemctl reload apache2
         error_handler $? "Services complexes > PhpMyAdmin > Apache > Le redémarrage a échouée."
+
     logs_success "Services complexes > PhpMyAdmin > Apache > Redémarrage terminé."
 
-echo "127.0.0.1 phpmyadmin.$DOMAIN_NAME" >> /etc/hosts
-
-logs_success "Services complexes > PhpMyAdmin > Installation et configuration avancée terminée."
+logs_end "Services complexes > PhpMyAdmin > Installation et configuration avancée terminée."
 #===================================================================#
