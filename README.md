@@ -17,9 +17,13 @@
 
 ## Functionalities
 
--
--
--
+## Bare-metal
+
+TODO
+
+### Docker
+
+TODO
 
 ## Prerequisite
 - bash
@@ -78,7 +82,7 @@ Step 3 : Launch install.sh (in script-baremetal or script-c).
 sudo ./install.sh
 ```
 
-You can check logs in /logs/install.log
+You can check logs in /var/log/ApacheAutomatisation.log
 
 ### Uninstallation
 
@@ -91,7 +95,9 @@ sudo ./uninstall.sh
 
 ## TODO (Pistes de progression)
 
-- Install ModRateLimit
+- Install ModRateLimit.
+- Improve phpmyadmin installlation to not have user interface.
+- 
 
 ## Sources
 
@@ -136,9 +142,9 @@ https://www.linuxtricks.fr/wiki/apache-limiter-la-bande-passante-avec-ratelimit-
 * Github: [@KatiaAuxilien](https://github.com/KatiaAuxilien)
 <!-- * LinkedIn: [@TODO](https://linkedin.com/in/TODO) -->
 
-## 🤝 Contributing
+<!--## 🤝 Contributing-->
 
-Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/KatiaAuxilien/ApacheAutomatisation/issues). 
+<!--Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/KatiaAuxilien/ApacheAutomatisation/issues). -->
 
 ## Show your support
 
