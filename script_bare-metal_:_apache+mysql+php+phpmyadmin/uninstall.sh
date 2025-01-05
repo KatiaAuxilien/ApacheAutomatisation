@@ -127,9 +127,6 @@ logs_info "Services complexes > Désinstallation en cours ..."
 #===================================================================#
 	logs_info "Services complexes > PhpMyAdmin >  Désinstallation en cours ..."
 		
-		sudo a2disconf phpmyadmin.conf
-		error_handler $? "Services complexes > PhpMyAdmin > La désactivation de phpmyadmin a échouée."
-
 		# Désinstaller phpMyAdmin
 		sudo DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y phpmyadmin*
 		error_handler $? "Services complexes > PhpMyAdmin > La désinstallation de phpmyadmin* a échouée."
