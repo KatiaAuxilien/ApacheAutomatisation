@@ -69,7 +69,7 @@ DB_ROOT_PASSWORD=changeme
 DB_ADMIN_USERNAME=admin
 DB_ADMIN_PASSWORD=changeme
 DB_ADMIN_ADDRESS=admin-db@servicescomplexe.fr
-DB_NAME=servicescomplexe-database
+DB_NAME=servicescomplexedatabase
 DB_VOLUME_NAME=servicescomplexe-volume
 ```
 
