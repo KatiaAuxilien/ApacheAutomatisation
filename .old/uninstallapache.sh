@@ -32,7 +32,6 @@ required_vars_start=(
 "PHPMYADMIN_ADMIN_ADDRESS"
 "PHPMYADMIN_ADMIN_USERNAME"
 "PHPMYADMIN_ADMIN_PASSWORD"
-"PHPMYADMIN_PORT"
 
 "DB_PORT"
 "DB_ROOT_PASSWORD"
@@ -55,45 +54,38 @@ source ./.common.sh
 logs_info "Services complexes > Désinstallation en cours ..."
 
 #===================================================================#
-# Désinstallation de PhpMyAdmin                                     #
+# Désinstallation de Apache                                         #
 #===================================================================#
-	logs_info "Services complexes > PhpMyAdmin >  Désinstallation en cours ..."
-		
-		sudo a2disconf phpmyadmin.conf
-		# Désinstaller phpMyAdmin
-		sudo DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y phpmyadmin*
-		# error_handler $? " a échouée."
-		sudo DEBIAN_FRONTEND=noninteractive apt-get purge -y phpmyadmin
-		sudo DEBIAN_FRONTEND=noninteractive apt-get remove -y phpmyadmin
-		sudo rm -rf /etc/phpmyadmin /usr/share/phpmyadmin /var/lib/phpmyadmin
-		sudo rm  -rf /etc/apache2/conf-available/phpmyadmin.conf
-		sudo rm  -rf /etc/apache2/sites-available/phpmyadmin.conf
+	logs_info "Services complexes > Apache > Désinstallation en cours ..."
 
-		# sudo systemctl stop phpmyadmin
+		# Désinstaller Apache
+		sudo apt-get remove --purge -y apache2*
 		# error_handler $? " a échouée."
 
-		# sudo apt-get remove --purge -y phpmyadmin
-		# error_handler $? " a échouée."
+		sudo rm -rf /etc/apache2
+		# error_handler $? "La suppression du dossier /etc/apache2"
 
-		# sudo apt-get autoremove -y
-		# error_handler $? " a échouée."
+		sudo rm -rf /var/www/html
+		#error_handler $? "La suppression du dossier /var/www/html"
 
-		# sudo apt-get remove --purge -y phpmyadmin
-		# error_handler $? " a échouée."
+		sudo rm -rf /var/www/siteA
+		error_handler $? "La suppression du dossier /var/www/siteA"
 
-		# sudo apt-get autoremove -y
-		# error_handler $? " a échouée."
+		sudo rm -rf /var/www/siteB
+		error_handler $? "La suppression du dossier /var/www/siteB"
 
-		# sudo apt-get autoclean -y
-		# error_handler $? " a échouée."
+		# sudo rm -rf /var/log/apache2
+		# error_handler $? "La suppression du dossier /var/log/apache2"
 
-	logs_success "Services complexes > PhpMyAdmin >  Désinstallation terminée."
+	logs_success "Services complexes > Apache > Désinstallation terminée."
+
 #===================================================================#
 # Nettoyer les dépendances inutilisées                              #
 #===================================================================#
 
-sed -i "/phpmyadmin.$DOMAIN_NAME/d" /etc/hosts
-
+sed -i "/$DOMAIN_NAME/d" /etc/hosts
+sed -i "/siteA.$DOMAIN_NAME/d" /etc/hosts
+sed -i "/siteB.$DOMAIN_NAME/d" /etc/hosts
 
 sudo apt-get autoremove -y
 # error_handler $? " a échouée."

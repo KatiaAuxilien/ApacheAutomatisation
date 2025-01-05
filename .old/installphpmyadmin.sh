@@ -16,7 +16,6 @@ required_vars_start=(
 "PHPMYADMIN_ADMIN_ADDRESS"
 "PHPMYADMIN_ADMIN_USERNAME"
 "PHPMYADMIN_ADMIN_PASSWORD"
-"PHPMYADMIN_PORT"
 
 "DB_PORT"
 "DB_ROOT_PASSWORD"
@@ -91,7 +90,7 @@ logs_info "Services complexes > PhpMyAdmin > Installation et configuration en co
 
     logs_info "Services complexes > PhpMyAdmin > Sécurisation > HTTPS > Génération du certificat et de la clé privée en cours ..."
 
-        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt -keyout /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=phpmyadmin.$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
+        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt -keyout /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=phpmyadmin.$DOMAIN_NAME/emailAddress=$PHPMYADMIN_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
         error_handler $? "Services complexes > Apache > HTTPS > La génération de demande de signature de certifcat du site phpmyadmin.$DOMAIN_NAME a échouée"
 
         openssl x509 -in /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt -text -noout
@@ -109,25 +108,22 @@ logs_info "Services complexes > PhpMyAdmin > Installation et configuration en co
     
     logs_info "Services complexes > PhpMyAdmin > Sécurisation > Configuration de la page phpmyadmin.$DOMAIN_NAME en cours ..."
 
-        echo "
-Listen $PHPMYADMIN_PORT
-<VirtualHost *:80>
-  ServerAdmin $WEB_ADMIN_ADDRESS
-  erverName phpmyadmin.$DOMAIN_NAME
+        echo "<VirtualHost *:80>
+  ServerAdmin $PHPMYADMIN_ADMIN_ADDRESS
+  ServerName phpmyadmin.$DOMAIN_NAME
 
   RewriteEngine On
   RewriteCond %{HTTPS} off
-  RewriteRule ^ https://%{HTTP_HOST}:$PHPMYADMIN_PORT%{REQUEST_URL} [R,L]
+  RewriteRule ^ https://%{HTTP_HOST}:$$WEB_PORT%{REQUEST_URL} [R,L]
 </VirtualHost>
 
 <VirtualHost *:443>
-    ServerAdmin $WEB_ADMIN_ADDRESS
-    DocumentRoot /usr/share/phpmyadmin
     ServerName phpmyadmin.$DOMAIN_NAME
+    ServerAdmin $PHPMYADMIN_ADMIN_ADDRESS
 
     RewriteEngine On
     RewriteCond %{SERVER_PORT} 443
-    RewriteRule ^ https://%{HTTP_HOST}:$PHPMYADMIN_PORT%{REQUEST_URL} [R,L]
+    RewriteRule ^ https://%{HTTP_HOST}:$WEB_PORT%{REQUEST_URL} [R,L]
 
     SSLEngine on
     SSLCertificateFile /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt
@@ -144,18 +140,18 @@ Listen $PHPMYADMIN_PORT
     CustomLog ${APACHE_LOG_DIR}/phpmyadmin_access.log combined
 </VirtualHost>
 
-<VirtualHost *:$PHPMYADMIN_PORT>
-    ServerAdmin $WEB_ADMIN_ADDRESS
-    DocumentRoot /usr/share/phpmyadmin
+<VirtualHost *:$WEB_PORT>
     ServerName phpmyadmin.$DOMAIN_NAME
+    ServerAdmin $PHPMYADMIN_ADMIN_ADDRESS
+    DocumentRoot /usr/share/phpmyadmin
 
     SSLEngine on
     SSLCertificateFile /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt
     SSLCertificateKeyFile /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.key
 
     <Directory /usr/share/phpmyadmin>
-        Options -Indexes
         DirectoryIndex index.php
+        Options -Indexes
         AllowOverride All
         Require all granted
     </Directory>
@@ -165,11 +161,11 @@ Listen $PHPMYADMIN_PORT
 </VirtualHost>" > /etc/apache2/sites-available/phpmyadmin.conf
         error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > L'écriture du fichier /etc/apache2/sites-available/phpmyadmin.conf a échouée."
 
-        sudo ufw allow $PHPMYADMIN_PORT/tcp
-        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > L'autorisation du port personnalisé pour phpMyAdmin a échouée."
+        # sudo ufw allow $PHPMYADMIN_PORT/tcp
+        # error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > L'autorisation du port personnalisé pour phpMyAdmin a échouée."
         
-        sudo ufw reload
-        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > Le redémarrage du pare-feu a échoué."
+        # sudo ufw reload
+        # error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > Le redémarrage du pare-feu a échoué."
 
         sudo a2ensite phpmyadmin.conf
         error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > Activation du site a échouée."

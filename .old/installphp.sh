@@ -16,7 +16,6 @@ required_vars_start=(
 "PHPMYADMIN_ADMIN_ADDRESS"
 "PHPMYADMIN_ADMIN_USERNAME"
 "PHPMYADMIN_ADMIN_PASSWORD"
-"PHPMYADMIN_PORT"
 
 "DB_PORT"
 "DB_ROOT_PASSWORD"
@@ -54,8 +53,8 @@ logs_info "Services complexes > PHP > Installation et configuration en cours ...
         error_handler $? "Services complexes > PHP > L'installation de php-mysql, php-xml, php-mbstring, php-curl, php-zip et php-gd a échouée."
     logs_success "Services complexes > PHP > Installation de php terminée."
 
+    # Redémarrer Apache pour appliquer les changements
     logs_info "Services complexes > PHP > Apache > Redémarrage en cours ..."
-        # Redémarrer Apache pour appliquer les changements
         sudo systemctl restart apache2
         error_handler $? "Services complexes > PHP > Apache > Le redémarrage a échouée."
     logs_success "Services complexes > PHP > Apache > Redémarrage en terminé."
@@ -65,10 +64,5 @@ logs_info "Services complexes > PHP > Installation et configuration en cours ...
         php -v
         error_handler $? "Services complexes > PHP > L'installation de php a échouée."
     logs_success "Services complexes > PHP > Vérification terminée."
-
-    # logs_info "Services complexes > PHP > Redémarrage en cours ..."
-    #     sudo systemctl restart php8.3-fpm
-    #     error_handler $? "Services complexes > PHP > L'installation de php a échouée."
-    # logs_success "Services complexes > PHP > Redémarrage terminée."
 
 logs_success "Services complexes > PHP > Installation et configuration avancée terminée."
