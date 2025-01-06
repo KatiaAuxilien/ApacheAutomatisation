@@ -1235,6 +1235,37 @@ welcome()
     echo -e \"\${PINK}\$1\${RESET}\" >> /var/log/ApacheAutomatisation.log
 }
 
+logs()
+{   
+    local color=\"\$1\"
+    shift
+    date_formated=\$(date +\"%d-%m-%Y %H:%M:%S\")
+    echo -e \"\${PINK}[🍋 PAMPLUSS]\${RESET}[\$date_formated]\${color} \$1 \${RESET}\"
+    echo -e \"\${PINK}[🍋 PAMPLUSS]\${RESET}[\$date_formated]\${color} \$1 \${RESET}\" >> /var/log/ApacheAutomatisation.log
+}
+
+logs_error()
+{
+    date_formated=\$(date +\"%d-%m-%Y %H:%M:%S\")
+    echo -e \"\${PINK}[🍋 PAMPLUSS]\${RESET}[\$date_formated]\${RED} \$1 \${RESET}\"
+    echo -e \"\${PINK}[🍋 PAMPLUSS]\${RESET}[\$date_formated]\${RED} \$1 \${RESET}\" >> /var/log/ApacheAutomatisation.log
+}
+
+logs_info()
+{
+    logs \"\$YELLOW\" \"\$*\"
+}
+
+logs_success()
+{
+    logs \"\$GREEN\" \"\$*\"
+}
+
+logs_end()
+{
+    logs \"\$BLUE\" \"\$*\"
+}
+
 logs_error()
 {
     date_formated=\$(date +\"%d-%m-%Y %H:%M:%S\")
@@ -1348,6 +1379,15 @@ show_help()
 }
 
 #===================================================================#
+
+welcome \".·:'''''''''''''''''''''''''''''''''''''''''''''':·.\"
+welcome \": :  ____                       _                : :\"
+welcome \": : |  _ \ __ _ _ __ ___  _ __ | |_   _ ___ ___  : :\"
+welcome \": : | |_) / _\` | '_ \` _ \| '_ \| | | | / __/ __| : :\"
+welcome \": : |  __/ (_| | | | | | | |_) | | |_| \__ \__ \ : :\"
+welcome \": : |_|   \__,_|_| |_| |_| .__/|_|\__,_|___/___/ : :\"
+welcome \": :                      |_|                     : :\"
+welcome \"'·:..............................................:·'\"
 
 # Vérifier le nombre d'arguments
 if [ \"\$#\" -ne 1 ]; then
