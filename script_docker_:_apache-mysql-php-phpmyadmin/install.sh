@@ -135,10 +135,6 @@ logs_info "Préparation de l'arborescence en cours ..."
   run_command mkdir apache apache/www mysql
   error_handler $? "La création des dossiers a échouée."
 
-run_command mkdir apache
-exit_code=$?
-echo "Debug: run_command returned code $exit_code"
-
   run_command chmod -R 755 apache
   error_handler $? "L'attribution des droits au dosser apache a échouée."
 
