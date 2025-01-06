@@ -130,13 +130,13 @@ logs_success "Vérification réussie, les services ne sont pas déjà installés
 #===================================================================#
 
 
-run_command dqkzdqzodqzd
-error_handler $? "nimp."
-
 logs_info "Préparation de l'arborescence en cours ..."
 
   run_command mkdir apache apache/www mysql
   error_handler $? "La création des dossiers a échouée."
+
+run_command mkdir apache
+error_handler $? "nimp."
 
   run_command chmod -R 755 apache
   error_handler $? "L'attribution des droits au dosser apache a échouée."
