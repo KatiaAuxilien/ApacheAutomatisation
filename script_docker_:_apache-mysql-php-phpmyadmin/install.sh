@@ -169,7 +169,7 @@ logs_success "Docker > Préparation de docker terminée."
 
 logs_info "Docker > Préparation de la configuration du docker-compose.yml pour PhpMyAdmin et mysql en cours ..."
 
-  run_command echo "services:
+  echo "services:
   $DB_CONTAINER_NAME:
     image: bitnami/mysql:latest
     container_name: $DB_CONTAINER_NAME
@@ -206,7 +206,7 @@ volumes:
 networks:
   $NETWORK_NAME:
     external: true" > docker-compose.yml
-  error_handler $? "Docker > L'écriture du fichier docker-compose.yml a échouée."
+  # error_handler $? "Docker > L'écriture du fichier docker-compose.yml a échouée."
 
 logs_success "Docker > La préparation de la configuration du docker-compose.yml pour PhpMyAdmin et mysql est terminée."
 
