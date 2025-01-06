@@ -24,6 +24,20 @@
 source ./../.common.sh
 #===================================================================#
 
+welcome ".·:'''''''''''''''''''''''''''''''''''''''''''''':·."
+welcome ": :  ____                       _                : :"
+welcome ": : |  _ \ __ _ _ __ ___  _ __ | |_   _ ___ ___  : :"
+welcome ": : | |_) / _` | '_ ` _ \| '_ \| | | | / __/ __| : :"
+welcome ": : |  __/ (_| | | | | | | |_) | | |_| \__ \__ \ : :"
+welcome ": : |_|  _\__,_|_| |_|_|_| .__/|_|\__,_|___/___/ : :"
+welcome ": :   __| | ___   ___| | |_|__ _ __              : :"
+welcome ": :  / _\` |/ _ \ / __| |/ / _ \ '__|             : :"
+welcome ": : | (_| | (_) | (__|   <  __/ |                : :"
+welcome ": :  \__,_|\___/ \___|_|\_\___|_|                : :"
+welcome "'·:..............................................:·'"
+
+#===================================================================#
+
 required_vars_start=(
 "DOMAIN_NAME"
 "NETWORK_NAME"
@@ -71,29 +85,41 @@ source ./.common.sh
 
 logs_info "Vérification des services installés ..."
 
+error_count=0
+
 	if [ $mysql_installed -eq 0 ]; then
 	    logs_error "Aucun conteneur avec l'image bitnami/mysql:latest trouvé."
+	    let error_count++
 	fi
 
 	if [ $phpmyadmin_installed -eq 0 ]; then
 	    logs_error "Aucun conteneur avec l'image phpmyadmin/phpmyadmin trouvé."
+	    let error_count++
 	fi
 
 	if [ $apache_installed -eq 0 ]; then
 	    logs_error "Aucun conteneur avec l'image debian:latest trouvé."
+	    let error_count++
 	fi
 
 	if [ $db_container_name_exists -eq 0 ]; then
 	    logs_error "Aucun conteneur avec le nom $DB_CONTAINER_NAME trouvé."
+	    let error_count++
 	fi
 
 	if [ $phpmyadmin_container_name_exists -eq 0 ]; then
 	    logs_error "Aucun conteneur avec le nom $PHPMYADMIN_CONTAINER_NAME trouvé."
+	    let error_count++
 	fi
 
 	if [ $web_container_name_exists -eq 0 ]; then
 	    logs_error "Aucun conteneur avec le nom $WEB_CONTAINER_NAME trouvé."
+	    let error_count++
 	fi
+
+if [ $error_count -ne 0 ]
+  exit 1
+fi
 
 logs_success "Vérification réussie, les services sont installés."
 

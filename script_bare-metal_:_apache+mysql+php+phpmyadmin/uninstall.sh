@@ -24,9 +24,23 @@
 # 7. Nettoyer les dépendances inutilisées                           #
 #===================================================================#
 
-#======================================================================#
+#===================================================================#
 source ./../.common.sh
-#======================================================================#
+#===================================================================#
+
+welcome ".·:'''''''''''''''''''''''''''''''''''''''''''''''''''''''':·."
+welcome ": :  ____                       _                          : :"
+welcome ": : |  _ \ __ _ _ __ ___  _ __ | |_   _ ___ ___            : :"
+welcome ": : | |_) / _\` | '_ \` _ \| '_ \| | | | / __/ __|           : :"
+welcome ": : |  __/ (_| | | | | | | |_) | | |_| \__ \__ \           : :"
+welcome ": : |_|   \__,_|_| |_| |_| .__/|_|\__,_|___/___/        _  : :"
+welcome ": : | |__   __ _ _ __ ___|_|    _ __ ___   ___| |_ __ _| | : :"
+welcome ": : | '_ \ / _\` | '__/ _ \_____| '_ \` _ \ / _ \ __/ _\` | | : :"
+welcome ": : | |_) | (_| | | |  __/_____| | | | | |  __/ || (_| | | : :"
+welcome ": : |_.__/ \__,_|_|  \___|     |_| |_| |_|\___|\__\__,_|_| : :"
+welcome "'·:........................................................:·'"
+
+#===================================================================#
 
 required_vars_start=(
 "DOMAIN_NAME"
@@ -53,21 +67,31 @@ required_vars_start=(
 
 logs_info "Vérification des services installés ..."
 
+error_count=0
+
   if [ $apache_installed -eq 0 ]; then
       logs_error "Il n'y a pas d'installation d'apache."
+	  let error_count++
   fi
 
   if [ $php_installed -eq 0 ]; then
       logs_error "Il n'y a pas d'installation de php."
+	  let error_count++
   fi
 
   if [ $mysql_installed -eq 0 ]; then
       logs_error "Il n'y a pas d'installation mysql."
+	  let error_count++
   fi
 
   if [ $phpmyadmin_installed -eq 0 ]; then
       logs_error "Il n'y a pas d'installation de phpmyadmin."
+	  let error_count++
   fi
+
+if [ $error_count -ne 0 ]
+  exit 1
+fi
 
 logs_success "Vérification réussie, les services sont installés."
 
