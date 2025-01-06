@@ -63,9 +63,9 @@ check_variable()
 # Fonction pour exécuter des commandes avec redirection conditionnelle.
 run_command() 
 {
-    if [ "$verbose" = true ]; then
-        "$@"
+    if [ "$verbose" = "true" ]; then
+        "$@" 2>&1 | tee -a /var/log/ApacheAutomatisation.log
     else
-        "$@" &>/dev/null
+        "$@" 2>&1 | tee -a /var/log/ApacheAutomatisation.log &>/dev/null
     fi
 }
