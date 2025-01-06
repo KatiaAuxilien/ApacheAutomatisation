@@ -37,7 +37,7 @@ logs_info "Vérification des variables .env..."
         logs_error "Erreur : fichier .env non trouvé."
         exit 1
     fi
-    
+
     source ../.env
 
     for var in "${required_vars_start[@]}"; do
@@ -79,9 +79,9 @@ logs_success "Les variables .env ont été vérifiées."
 check_service_installed() {
     local service_name="$1"
     if ! "$service_name" -v  &> /dev/null; then
-        return 1
-    else
         return 0
+    else
+        return 1
     fi
 }
 
