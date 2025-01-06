@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# .·:'''''''''''''''''''''''''''''''''''''''''''''''''''''''':·.
+# : :  ____                       _                          : :
+# : : |  _ \ __ _ _ __ ___  _ __ | |_   _ ___ ___            : :
+# : : | |_) / _` | '_ ` _ \| '_ \| | | | / __/ __|           : :
+# : : |  __/ (_| | | | | | | |_) | | |_| \__ \__ \           : :
+# : : |_|   \__,_|_| |_| |_| .__/|_|\__,_|___/___/        _  : :
+# : : | |__   __ _ _ __ ___|_|    _ __ ___   ___| |_ __ _| | : :
+# : : | '_ \ / _` | '__/ _ \_____| '_ ` _ \ / _ \ __/ _` | | : :
+# : : | |_) | (_| | | |  __/_____| | | | | |  __/ || (_| | | : :
+# : : |_.__/ \__,_|_|  \___|     |_| |_| |_|\___|\__\__,_|_| : :
+# '·:........................................................:·'
+
 #===================================================================#
 #                            Sommaire                               #
 #===================================================================#
@@ -49,37 +61,37 @@ source ./.common.sh
 # 2. Préparation de l'arborescence                                  #
 #===================================================================#
 
-logs_info "Services complexes > Mise à jour des paquets en cours ..."
+logs_info "Mise à jour des paquets en cours ..."
     sudo apt update -y
-    error_handler $? "Services complexes > La mise à jour des paquets a échouée."
-logs_success "Services complexes > Mise à jour des paquets terminée."
+    error_handler $? "La mise à jour des paquets a échouée."
+logs_success "Mise à jour des paquets terminée."
 
 #===================================================================#
 # 3. Installation de Apache                                         #
 #===================================================================#
-logs_info "Services complexes > Apache > Installation et configuration avancée en cours ..."
+logs_info "Apache > Installation et configuration avancée en cours ..."
 
-logs_info "Services complexes > Apache > Installation du service en cours ..."
+logs_info "Apache > Installation du service en cours ..."
 
     sudo apt install -y apache2 apache2-utils
-    error_handler $? "Services complexes > Apache > L'installation du service a échouée."
+    error_handler $? "Apache > L'installation du service a échouée."
 
     sudo ufw allow 'Apache'
-    error_handler $? "Services complexes > Apache > L'autorisation du service apache auprès du pare-feu a échouée."
+    error_handler $? "Apache > L'autorisation du service apache auprès du pare-feu a échouée."
 
-logs_success "Services complexes > Apache > Installation du service terminée."
+logs_success "Apache > Installation du service terminée."
 
-logs_info "Services complexes > Apache > Lancement du service en cours..."
+logs_info "Apache > Lancement du service en cours..."
 
     sudo systemctl start apache2
-    error_handler $? "Services complexes > Apache > Le lancement du service apache a échouée."
+    error_handler $? "Apache > Le lancement du service apache a échouée."
         
-logs_success "Services complexes > Apache > Service lancé."
+logs_success "Apache > Service lancé."
 
 #===================================================================#
 # 4. Configuration de Apache                                        #
 #===================================================================#
-logs_info "Services complexes > Apache > Configuration basique du service en cours ..."
+logs_info "Apache > Configuration basique du service en cours ..."
 
 echo "ServerRoot \"/etc/apache2\"
 
@@ -149,7 +161,7 @@ LogFormat \"%{User-agent}i\" agent
 IncludeOptional conf-enabled/*.conf
 
 IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf
-error_handler $? "Services complexes > Apache > L'écriture du fichier de configuration /etc/apache2/apache2.conf a échouée."
+error_handler $? "Apache > L'écriture du fichier de configuration /etc/apache2/apache2.conf a échouée."
 
 
 CERT_NAME="servicescomplexe"
@@ -204,10 +216,10 @@ echo "<VirtualHost *:80>
   ErrorLog \${APACHE_LOG_DIR}/error.log
   CustomLog \${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf
-error_handler $? "Services complexes > Apache > L'écriture du fichier de configuration du site par défaut a échouée."
+error_handler $? "Apache > L'écriture du fichier de configuration du site par défaut a échouée."
 
 echo "127.0.0.1 $DOMAIN_NAME" >> /etc/hosts
-error_handler $? "Services complexes > Apache > L'écriture du fichier /etc/hosts a échouée."
+error_handler $? "Apache > L'écriture du fichier /etc/hosts a échouée."
 
 echo "# If you just change the port or add more ports here, you will likely also
 # have to change the VirtualHost statement in
@@ -222,88 +234,88 @@ Listen $WEB_PORT
 <IfModule mod_gnutls.c>
   Listen 443
 </IfModule>" > /etc/apache2/ports.conf 
-error_handler $? "Services complexes > Apache > L'écriture du fichier de configuration des ports a échouée."
+error_handler $? "Apache > L'écriture du fichier de configuration des ports a échouée."
 
-logs_success "Services complexes > Apache > Configuration basique du service terminée."
+logs_success "Apache > Configuration basique du service terminée."
 
-logs_info "Services complexes > Apache > PHP > Installation du module php pour apache en cours ..."
+logs_info "Apache > PHP > Installation du module php pour apache en cours ..."
     sudo apt-get install -y libapache2-mod-php
-    error_handler $? "Services complexes > Apache > PHP > L'installation du module php pour apache a échouée."
-logs_success "Services complexes > Apache > PHP > Installation du module php pour apache terminée."
+    error_handler $? "Apache > PHP > L'installation du module php pour apache a échouée."
+logs_success "Apache > PHP > Installation du module php pour apache terminée."
 
 # Activer les modules PHP nécessaires pour Apache
-logs_info "Services complexes > Apache > PHP > Activation du module php en cours ..."
+logs_info "Apache > PHP > Activation du module php en cours ..."
     sudo a2enmod php8.3
-    error_handler $? "Services complexes > Apache > PHP > L'activation du module php a échouée."
-logs_success "Services complexes > Apache > PHP > Activation du module php terminée."
+    error_handler $? "Apache > PHP > L'activation du module php a échouée."
+logs_success "Apache > PHP > Activation du module php terminée."
 
 #===================================================================#
 # 5. Sécurisation de Apache                                         #
 #===================================================================#
-logs_info "Services complexes > Apache > Sécurisation du service en cours..."
+logs_info "Apache > Sécurisation du service en cours..."
 
-    logs_info "Services complexes > Apache > Sécurisation > Activation des modules headers et rewrite en cours."
+    logs_info "Apache > Sécurisation > Activation des modules headers et rewrite en cours."
 
         sudo a2enmod headers
-        error_handler $? "Services complexes > Apache > Sécurisation > L'activation du module Mod_headers a échouée."
+        error_handler $? "Apache > Sécurisation > L'activation du module Mod_headers a échouée."
 
         sudo a2enmod rewrite
-        error_handler $? "Services complexes > Apache > Sécurisation > L'activation du module Mod_rewrite a échouée."
+        error_handler $? "Apache > Sécurisation > L'activation du module Mod_rewrite a échouée."
 
-    logs_success "Services complexes > Apache > Sécurisation > Modules headers et rewrite activé."
+    logs_success "Apache > Sécurisation > Modules headers et rewrite activé."
 
-    logs_info "Services complexes > Apache > Sécurisation > HTTPS > Installation d'openssl et ssl-cert en cours."
+    logs_info "Apache > Sécurisation > HTTPS > Installation d'openssl et ssl-cert en cours."
 
         sudo apt-get install -y openssl ssl-cert
         error_handler $? "L'installation d'openssl a échouée."
 
-    logs_success "Services complexes > Apache > Sécurisation > HTTPS > Installation d'openssl et ssl-cert terminée."
+    logs_success "Apache > Sécurisation > HTTPS > Installation d'openssl et ssl-cert terminée."
 
-    logs_info "Services complexes > Apache > Sécurisation > HTTPS > Activation du module ssl en cours."
+    logs_info "Apache > Sécurisation > HTTPS > Activation du module ssl en cours."
 
         sudo a2enmod ssl
-        error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > L'activation du module Mod_ssl a échouée."
+        error_handler $? "Apache > Sécurisation > HTTPS > L'activation du module Mod_ssl a échouée."
 
         a2ensite default-ssl
-        error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > L'activation du module default_ssl a échouée."
+        error_handler $? "Apache > Sécurisation > HTTPS > L'activation du module default_ssl a échouée."
 
-    logs_success "Services complexes > Apache > Sécurisation > HTTPS > Activation du module ssl terminée."
+    logs_success "Apache > Sécurisation > HTTPS > Activation du module ssl terminée."
 
-    logs_info "Services complexes > Apache > Sécurisation > HTTPS > Génération du certificat et de la clé en cours ..."
+    logs_info "Apache > Sécurisation > HTTPS > Génération du certificat et de la clé en cours ..."
 
         mkdir -p /etc/apache2/certificate/
-        error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > La création du dossier /etc/apache2/certificate/ a échouée."
+        error_handler $? "Apache > Sécurisation > HTTPS > La création du dossier /etc/apache2/certificate/ a échouée."
 
         sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$CERT_NAME"_server.crt -keyout /etc/apache2/certificate/"$CERT_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
-        error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > La génération de demande de signature de certificat a échouée."
+        error_handler $? "Apache > Sécurisation > HTTPS > La génération de demande de signature de certificat a échouée."
 
         openssl x509 -in /etc/apache2/certificate/"$CERT_NAME"_server.crt -text -noout
-        error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > La vérification du certificat a échouée."
+        error_handler $? "Apache > Sécurisation > HTTPS > La vérification du certificat a échouée."
 
         sudo chmod 600 /etc/apache2/certificate/"$CERT_NAME"_server.key
-        error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > ..."
+        error_handler $? "Apache > Sécurisation > HTTPS > ..."
 
         sudo chown root:root /etc/apache2/certificate/"$CERT_NAME"_server.crt
-        error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > ..."
+        error_handler $? "Apache > Sécurisation > HTTPS > ..."
 
         sudo chmod 440 /etc/apache2/certificate/"$CERT_NAME"_server.crt
-        error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > ..."
+        error_handler $? "Apache > Sécurisation > HTTPS > ..."
 
-    logs_success "Services complexes > Apache > Sécurisation > HTTPS > Génération du certificat et de la clé terminée."
+    logs_success "Apache > Sécurisation > HTTPS > Génération du certificat et de la clé terminée."
 
     # Sécurisation - Installation et configuration de ModSecurity
 
-    logs_info "Services complexes > Apache > Sécurisation > ModSecurity > Préparation de la configuration en cours."
+    logs_info "Apache > Sécurisation > ModSecurity > Préparation de la configuration en cours."
 
         sudo apt-get install -y libapache2-mod-security2
-        error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > L'installation du module a échouée."
+        error_handler $? "Apache > Sécurisation > ModSecurity > L'installation du module a échouée."
 
         # Récupérer l'adresse IP publique de l'utilisateur
         IP=$(curl -s https://api.ipify.org)
 
         # Vérifier si l'adresse IP a été récupérée correctement
         if [ -z "$IP" ]; then
-          logs_error "Services complexes > Apache > Sécurisation > ModSecurity > Impossible de récupérer l'adresse IP."
+          logs_error "Apache > Sécurisation > ModSecurity > Impossible de récupérer l'adresse IP."
           exit 1
         fi
 
@@ -549,8 +561,8 @@ SecStatusEngine Off
 
 SecRule REMOTE_ADDR \"^$IP\$\" \"phase:1,pass,nolog,id:1000001\"
 " > /etc/modsecurity/modsecurity.conf
-        error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > La configuration de /etc/modsecurity/modsecurity.conf a échouée."
-logs_success "Services complexes > Apache > Sécurisation > ModSecurity > L'adresse IP $IP a été ajoutée à la configuration de ModSecurity."
+        error_handler $? "Apache > Sécurisation > ModSecurity > La configuration de /etc/modsecurity/modsecurity.conf a échouée."
+logs_success "Apache > Sécurisation > ModSecurity > L'adresse IP $IP a été ajoutée à la configuration de ModSecurity."
 
         echo "<IfModule security2_module>
   # Default Debian dir for modsecurity's persistent data
@@ -566,46 +578,46 @@ logs_success "Services complexes > Apache > Sécurisation > ModSecurity > L'adre
   IncludeOptional /etc/apache2/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf
   IncludeOptional /etc/apache2/modsecurity-crs/coreruleset-3.3.0/rules/*.conf
 </IfModule>" > /etc/apache2/mods-enabled/security2.conf
-        error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > La configuration de /etc/apache2/mods-enabled/security2.conf a échouée."
+        error_handler $? "Apache > Sécurisation > ModSecurity > La configuration de /etc/apache2/mods-enabled/security2.conf a échouée."
 
         # ModSecurity : Règles de base OWASP (CRS)
 
-        logs_info "Services complexes > Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > Préparation de la configuration en cours."
+        logs_info "Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > Préparation de la configuration en cours."
 
             wget https://github.com/coreruleset/coreruleset/archive/v3.3.0.tar.gz
-            error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > wget https://github.com/coreruleset/coreruleset/archive/v3.3.0.tar.gz a échoué."
+            error_handler $? "Apache > Sécurisation > ModSecurity > wget https://github.com/coreruleset/coreruleset/archive/v3.3.0.tar.gz a échoué."
 
             tar xvf v3.3.0.tar.gz
-            error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > tar xvf v3.3.0.tar.gz a échoué."
+            error_handler $? "Apache > Sécurisation > ModSecurity > tar xvf v3.3.0.tar.gz a échoué."
 
             rm -rf v3.3.0.tar.gz
-            error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > rm -rf v3.3.0.tar.gz a échoué."
+            error_handler $? "Apache > Sécurisation > ModSecurity > rm -rf v3.3.0.tar.gz a échoué."
 
             sudo mkdir /etc/apache2/modsecurity-crs/
-            error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > ..."
+            error_handler $? "Apache > Sécurisation > ModSecurity > ..."
 
             sudo mv coreruleset-3.3.0/ /etc/apache2/modsecurity-crs/
-            error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > mv coreruleset-3.3.0/ /etc/apache2/modsecurity-crs/ a échoué."
+            error_handler $? "Apache > Sécurisation > ModSecurity > mv coreruleset-3.3.0/ /etc/apache2/modsecurity-crs/ a échoué."
 
             sudo mv /etc/apache2/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf.example /etc/apache2/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf
-            error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > mv /etc/apache2/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf.example /etc/apache2/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf a échoué."
+            error_handler $? "Apache > Sécurisation > ModSecurity > mv /etc/apache2/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf.example /etc/apache2/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf a échoué."
 
-        logs_success "Services complexes > Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > Préparation de la configuration terminée."
+        logs_success "Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > Préparation de la configuration terminée."
 
-    logs_success "Services complexes > Apache > Sécurisation > ModSecurity > Préparation de la configuration terminée."
+    logs_success "Apache > Sécurisation > ModSecurity > Préparation de la configuration terminée."
       
-    logs_info "Services complexes > Apache > Sécurisation > ModSecurity > Activation en cours ..."
+    logs_info "Apache > Sécurisation > ModSecurity > Activation en cours ..."
       
       sudo a2enmod security2
-      error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > L'activation du module a échouée."
+      error_handler $? "Apache > Sécurisation > ModSecurity > L'activation du module a échouée."
 
-    logs_success "Services complexes > Apache > Sécurisation > ModSecurity > Module activé."
+    logs_success "Apache > Sécurisation > ModSecurity > Module activé."
 
     # Sécurisation - Installation et configuration de ModEvasive
-    logs_info "Services complexes > Apache > Sécurisation > ModEvasive > Préparation de la configuration en cours ..."
+    logs_info "Apache > Sécurisation > ModEvasive > Préparation de la configuration en cours ..."
 
         sudo apt-get install -y libapache2-mod-evasive
-        error_handler $? "Services complexes > Apache > Sécurisation > ModEvasive > L'installation du module a échouée."
+        error_handler $? "Apache > Sécurisation > ModEvasive > L'installation du module a échouée."
 
         sudo mkdir /var/log/mod_evasive
 
@@ -620,40 +632,40 @@ logs_success "Services complexes > Apache > Sécurisation > ModSecurity > L'adre
     DOSLogDir           \"/var/log/mod_evasive\"
     DOSWhitelist        $IP
 </IfModule>" > /etc/apache2/mods-enabled/evasive.conf
-        error_handler $? "Services complexes > Apache > Sécurisation > ModEvasive > L'écriture du fichier /etc/apache2/mods-enabled/evasive.conf a échouée."
+        error_handler $? "Apache > Sécurisation > ModEvasive > L'écriture du fichier /etc/apache2/mods-enabled/evasive.conf a échouée."
 
-    logs_success "Services complexes > Apache > Sécurisation > ModEvasive > Préparation de la configuration terminée."
+    logs_success "Apache > Sécurisation > ModEvasive > Préparation de la configuration terminée."
 
-    logs_info "Services complexes > Apache > Sécurisation > ModEvasive > Activation en cours ..."
+    logs_info "Apache > Sécurisation > ModEvasive > Activation en cours ..."
 
         sudo a2enmod evasive
-        error_handler $? "Services complexes > Apache > Sécurisation > ModEvasive > L'activation a échouée."
+        error_handler $? "Apache > Sécurisation > ModEvasive > L'activation a échouée."
 
-    logs_success "Services complexes > Apache > Sécurisation > ModEvasive > Module activé."
+    logs_success "Apache > Sécurisation > ModEvasive > Module activé."
 
     #TODO BONUS : Sécurisation - Installation et configuration de ModRatelimit
 
-logs_success "Services complexes > Apache > Sécurisation > Installations et configurations terminées."
+logs_success "Apache > Sécurisation > Installations et configurations terminées."
 
-logs_info "Services complexes > Apache > Redémarrage du service en cours..."
+logs_info "Apache > Redémarrage du service en cours..."
 
     sudo systemctl reload apache2
-    error_handler $? "Services complexes > Apache > Le redémarrage du service a échoué."
+    error_handler $? "Apache > Le redémarrage du service a échoué."
         
-logs_success "Services complexes > Apache > Service redémarré."
+logs_success "Apache > Service redémarré."
 
 #===================================================================#
 # 6. Création des sites                                             #
 #===================================================================#
 
 # Création de la page principale
-logs_info "Services complexes > Apache > Site page d'accueil > Création et configuration de la page principale en cours ..."
+logs_info "Apache > Site page d'accueil > Création et configuration de la page principale en cours ..."
 
     touch /var/www/html/index.html
-    error_handler $? "Services complexes > Apache > Site page d'accueil > La création du fichier /var/www/html/index.html a échouée."
+    error_handler $? "Apache > Site page d'accueil > La création du fichier /var/www/html/index.html a échouée."
 
     chmod -R 755 /var/www/html/index.html
-    error_handler $? "Services complexes > Apache > Site page d'accueil > L'attribution des droits sur le fichier /var/www/html/index.html a échoué."
+    error_handler $? "Apache > Site page d'accueil > L'attribution des droits sur le fichier /var/www/html/index.html a échoué."
 
     echo "<!DOCTYPE html>
 <html>
@@ -673,37 +685,37 @@ body{
     <p> ✨ <a href=\"https://siteB.$DOMAIN_NAME:$WEB_PORT\">Visiter siteB.$DOMAIN_NAME</a> </p>
   </body>
 </html> " > /var/www/html/index.html
-    error_handler $? "Services complexes > Apache > Site page d'accueil > L'écriture de la page /var/www/index.html a échouée."
+    error_handler $? "Apache > Site page d'accueil > L'écriture de la page /var/www/index.html a échouée."
 
-logs_success "Services complexes > Apache > Site page d'accueil > Création et configuration de la page principale terminée."
+logs_success "Apache > Site page d'accueil > Création et configuration de la page principale terminée."
 
 # Configuration du .htaccess et .htpasswd
-logs_info "Services complexes > Apache > .htaccess > Configuration en cours ..."
+logs_info "Apache > .htaccess > Configuration en cours ..."
 
     sudo apt install apache2-utils -y
-    error_handler $? "Services complexes > Apache > .htaccess > L'installation de apache2-utils pour la génération de .htpasswd a échouée."
+    error_handler $? "Apache > .htaccess > L'installation de apache2-utils pour la génération de .htpasswd a échouée."
 
     touch /var/www/.htpasswd
-    error_handler $? "Services complexes > Apache > .htaccess > La création du fichier /var/www/.htpasswd a échouéee."
+    error_handler $? "Apache > .htaccess > La création du fichier /var/www/.htpasswd a échouéee."
 
     sudo htpasswd -b /var/www/.htpasswd admin $WEB_HTACCESS_PASSWORD
-    error_handler $? "Services complexes > Apache > .htaccess > L'écriture dans le fichier /var/www/.htpasswd avec la commande htpasswd a échouée."
+    error_handler $? "Apache > .htaccess > L'écriture dans le fichier /var/www/.htpasswd avec la commande htpasswd a échouée."
 
-logs_success "Services complexes > Apache > .htaccess > Configuration terminée."
+logs_success "Apache > .htaccess > Configuration terminée."
 
 # Création de deux sites (siteA, siteB)
     for site_name in siteA siteB
     do
-    logs_info "Services complexes > Apache > $site_name > Configuration du site en cours ..."
+    logs_info "Apache > $site_name > Configuration du site en cours ..."
         
         sudo mkdir /var/www/$site_name
-        error_handler $? "Services complexes > Apache > $site_name > La création du dossier /var/www/$site_name a échouée."
+        error_handler $? "Apache > $site_name > La création du dossier /var/www/$site_name a échouée."
         
         sudo chmod -R 755 /var/www/$site_name
-        error_handler $? "Services complexes > Apache > $site_name > L'attribution des droits sur le dossier /var/www/$site_name a échouée."
+        error_handler $? "Apache > $site_name > L'attribution des droits sur le dossier /var/www/$site_name a échouée."
         
         sudo touch /var/www/$site_name/index.html
-        error_handler $? "Services complexes > Apache > $site_name > La création du fichier /var/www/$site_name/index.html a échouée."
+        error_handler $? "Apache > $site_name > La création du fichier /var/www/$site_name/index.html a échouée."
 
         echo "<!DOCTYPE html>
 <html>
@@ -723,13 +735,13 @@ body{
         <a href=\"https://$site_name.$DOMAIN_NAME:79/confidential/confidential.php\"><h2> Page confidentiel ici</h2></a>
     </body>
 </html>" > /var/www/$site_name/index.html
-        error_handler $? "Services complexes > Apache > $site_name > L'écriture dans le fichier /var/www/$site_name/index.html a échouée."
+        error_handler $? "Apache > $site_name > L'écriture dans le fichier /var/www/$site_name/index.html a échouée."
 
         sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt -keyout /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$site_name.$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
-        error_handler $? "Services complexes > Apache > $site_name > La génération de demande de signature de certifcat du site $site_name a échouée"
+        error_handler $? "Apache > $site_name > La génération de demande de signature de certifcat du site $site_name a échouée"
 
         openssl x509 -in /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt -text -noout
-        error_handler $? "Services complexes > Apache > $site_name > La vérification du certificat a échouée."
+        error_handler $? "Apache > $site_name > La vérification du certificat a échouée."
         
         sudo chmod 600 /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
         sudo chown root:root /etc/apache2/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
@@ -737,7 +749,7 @@ body{
 
         #Création des Virtual Host
         touch /etc/apache2/sites-available/$site_name.conf
-        error_handler $? "Services complexes > Apache > $site_name > La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
+        error_handler $? "Apache > $site_name > La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
 
         echo "<VirtualHost *:80>
@@ -790,20 +802,20 @@ body{
   ErrorLog \${APACHE_LOG_DIR}/$site_name-error.log
   CustomLog \${APACHE_LOG_DIR}/$site_name-access.log combined
 </VirtualHost>" > /etc/apache2/sites-available/$site_name.conf
-        error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
+        error_handler $? "Apache > $site_name > L'écriture du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
 # Création de la page confidentielle
         mkdir /var/www/$site_name/confidential
-        error_handler $? "Services complexes > Apache > $site_name > La création du dossier /var/www/$site_name/confidential a échouée."
+        error_handler $? "Apache > $site_name > La création du dossier /var/www/$site_name/confidential a échouée."
         
         chmod -R 755 /var/www/$site_name/confidential
-        error_handler $? "Services complexes > Apache > $site_name > L'attribution des droits au dossier /var/www/$site_name/confidential a échouée."
+        error_handler $? "Apache > $site_name > L'attribution des droits au dossier /var/www/$site_name/confidential a échouée."
 
         touch /var/www/$site_name/confidential/confidential.php
-        error_handler $? "Services complexes > Apache > $site_name > La création du fichier /var/www/$site_name/confidential/confidential.php a échouée."
+        error_handler $? "Apache > $site_name > La création du fichier /var/www/$site_name/confidential/confidential.php a échouée."
         
         chmod -R 755 /var/www/$site_name/confidential/confidential.php
-        error_handler $? "Services complexes > Apache > $site_name > L'attribution des droits au fichier /var/www/$site_name/confidential/confidential.php a échouée."
+        error_handler $? "Apache > $site_name > L'attribution des droits au fichier /var/www/$site_name/confidential/confidential.php a échouée."
 
         echo "<!DOCTYPE html>
 <html>
@@ -892,80 +904,80 @@ table {
 ?>
     </body>
 </html>" > /var/www/$site_name/confidential/confidential.php
-        error_handler $? "Services complexes > Apache > $site_name > L'écriture dans le fichier /var/www/$site_name/confidential/confidential.php a échouée."
+        error_handler $? "Apache > $site_name > L'écriture dans le fichier /var/www/$site_name/confidential/confidential.php a échouée."
 
 # Configuration de la page confidentielle (.htaccess et .htpasswd)
 
         touch /var/www/$site_name/confidential/.htaccess
-        error_handler $? "Services complexes > Apache > $site_name > La création du fichier /var/www/$site_name/confidential/.htaccess a échouée."
+        error_handler $? "Apache > $site_name > La création du fichier /var/www/$site_name/confidential/.htaccess a échouée."
 
         echo "AuthType Basic
 AuthName \"Accès protégé\"
 AuthUserFile /var/www/.htpasswd
 require valid-user
 Options -Indexes" > /var/www/$site_name/confidential/.htaccess
-        error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /var/www/$site_name/confidential/.htaccess a échouée."
+        error_handler $? "Apache > $site_name > L'écriture du fichier /var/www/$site_name/confidential/.htaccess a échouée."
 
         sudo a2ensite $site_name.conf
-        error_handler $? "Services complexes > Apache > $site_name > Activation du site a échouée."
+        error_handler $? "Apache > $site_name > Activation du site a échouée."
 
         sudo systemctl reload apache2
-        error_handler $? "Services complexes > Apache > $site_name > Le redémarrage du service apache a échouée."
+        error_handler $? "Apache > $site_name > Le redémarrage du service apache a échouée."
 
         echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
-        error_handler $? "Services complexes > Apache > $site_name > L'écriture du fichier /etc/hosts a échouée."
+        error_handler $? "Apache > $site_name > L'écriture du fichier /etc/hosts a échouée."
 
-    logs_success "Services complexes > Apache > $site_name > $site_name.$DOMAIN_NAME créé et configuré."
+    logs_success "Apache > $site_name > $site_name.$DOMAIN_NAME créé et configuré."
     done
 
 #===================================================================#
 
-logs_info "Services complexes > Apache > Redémarrage du service en cours..."
+logs_info "Apache > Redémarrage du service en cours..."
 
     sudo systemctl restart apache2
-    error_handler $? "Services complexes > Apache > Le redémarrage du service apache a échoué."
+    error_handler $? "Apache > Le redémarrage du service apache a échoué."
         
-logs_success "Services complexes > Apache > Service redémarré."
+logs_success "Apache > Service redémarré."
 
-logs_success "Services complexes > Apache > Installation et configuration avancée terminée."
+logs_success "Apache > Installation et configuration avancée terminée."
 
 #===================================================================#
 # 7. Installation et configuration de PHP                           #
 #===================================================================#
 # Installer PHP et les extensions couramment utilisées
-logs_info "Services complexes > PHP > Installation et configuration en cours ..."
+logs_info "PHP > Installation et configuration en cours ..."
 
-    logs_info "Services complexes > PHP > Installation de php en cours ..."
+    logs_info "PHP > Installation de php en cours ..."
         sudo apt-get install -y php php-mysql php-xml php-mbstring php-curl php-zip php-gd php-json
-        error_handler $? "Services complexes > PHP > L'installation de php-mysql, php-xml, php-mbstring, php-curl, php-zip et php-gd a échouée."
-    logs_success "Services complexes > PHP > Installation de php terminée."
+        error_handler $? "PHP > L'installation de php-mysql, php-xml, php-mbstring, php-curl, php-zip et php-gd a échouée."
+    logs_success "PHP > Installation de php terminée."
 
     # Redémarrer Apache pour appliquer les changements
-    logs_info "Services complexes > PHP > Apache > Redémarrage en cours ..."
+    logs_info "PHP > Apache > Redémarrage en cours ..."
         sudo systemctl restart apache2
-        error_handler $? "Services complexes > PHP > Apache > Le redémarrage a échouée."
-    logs_success "Services complexes > PHP > Apache > Redémarrage en terminé."
+        error_handler $? "PHP > Apache > Le redémarrage a échouée."
+    logs_success "PHP > Apache > Redémarrage en terminé."
 
     # Vérifier la version de PHP installée
-    logs_info "Services complexes > PHP > Vérification en cours ..."
+    logs_info "PHP > Vérification en cours ..."
         php -v
-        error_handler $? "Services complexes > PHP > L'installation de php a échouée."
-    logs_success "Services complexes > PHP > Vérification terminée."
+        error_handler $? "PHP > L'installation de php a échouée."
+    logs_success "PHP > Vérification terminée."
 
-logs_success "Services complexes > PHP > Installation et configuration avancée terminée."
+logs_success "PHP > Installation et configuration avancée terminée."
 
 #===================================================================#
 # 8. Installation et configuration de mysql                         #
 #===================================================================#
-logs_info "Services complexes > MySQL > Installation et configuration avancée en cours ..."
+logs_info "MySQL > Installation et configuration avancée en cours ..."
 
-    logs_info "Services complexes > MySQL > Installation en cours ..."
+    logs_info "MySQL > Installation en cours ..."
         sudo apt-get install -y mysql-server
-        error_handler $? "Services complexes > MySQL > L'installation a échouée."
-    logs_success "Services complexes > MySQL > Installation terminée."
+        error_handler $? "MySQL > L'installation a échouée."
+    logs_success "MySQL > Installation terminée."
 
     # Configuration sécurisée de mysql
-    logs_info "Services complexes > MySQL > Configuration sécurisée en cours ..."
+    logs_info "MySQL > Configuration sécurisée en cours ..."
         sudo mysql_secure_installation <<EOF
 
 Y
@@ -976,23 +988,23 @@ Y
 Y
 Y
 EOF
-        error_handler $? "Services complexes > MySQL > Changement du port par défaut a échoué."
-    logs_success "Services complexes > MySQL > Configuration sécurisée terminée."
+        error_handler $? "MySQL > Changement du port par défaut a échoué."
+    logs_success "MySQL > Configuration sécurisée terminée."
 
     # Changer le port MySQL
-    logs_info "Services complexes > MySQL > Configuration du port en cours ..."
+    logs_info "MySQL > Configuration du port en cours ..."
         sudo sed -i "s/^port\s*=\s*3306/port = $DB_PORT/" /etc/mysql/mysql.conf.d/mysqld.cnf
-        error_handler $? "Services complexes > MySQL > Changement du port par défaut a échoué."
-    logs_success "Services complexes > MySQL > Configuration du port terminée."
+        error_handler $? "MySQL > Changement du port par défaut a échoué."
+    logs_success "MySQL > Configuration du port terminée."
 
     # Redémarrer MySQL pour appliquer les changements
-    logs_info "Services complexes > MySQL > Redémarrage du service en cours ..."
+    logs_info "MySQL > Redémarrage du service en cours ..."
         sudo systemctl restart mysql
-        error_handler $? "Services complexes > MySQL > Le redémarrage du service a échoué."
-    logs_success "Services complexes > MySQL > Redémarrage du service terminée."
+        error_handler $? "MySQL > Le redémarrage du service a échoué."
+    logs_success "MySQL > Redémarrage du service terminée."
 
     # Créer la base de données et l'utilisateur admin
-    logs_info "Services complexes > MySQL > Initialisation de la base de données $DB_NAME et création des utilisateurs en cours ..."
+    logs_info "MySQL > Initialisation de la base de données $DB_NAME et création des utilisateurs en cours ..."
 
         sudo mysql -u root -p$DB_ADMIN_PASSWORD <<EOF
 CREATE DATABASE IF NOT EXISTS $DB_NAME;
@@ -1017,65 +1029,65 @@ CREATE USER 'phpmyadmin'@'localhost' IDENTIFIED BY '$PHPMYADMIN_PASSWORD';
 GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost';
 FLUSH PRIVILEGES;
 EOF
-        error_handler $? "Services complexes > MySQL > Le lancement de l'initialisation de $DB_NAME et création des utilisateurs a échoué."
+        error_handler $? "MySQL > Le lancement de l'initialisation de $DB_NAME et création des utilisateurs a échoué."
 
-    logs_success "Services complexes > MySQL > Initialisation de la base de données $DB_NAME et création des utilisateurs terminée."
+    logs_success "MySQL > Initialisation de la base de données $DB_NAME et création des utilisateurs terminée."
 
-logs_success "Services complexes > MySQL > Installation et configuration avancée terminée."
+logs_success "MySQL > Installation et configuration avancée terminée."
 
 #===================================================================#
 # 9. Installation de PhpMyAdmin                                     #
 #===================================================================#
 
-logs_info "Services complexes > PhpMyAdmin > Installation et configuration en cours ..."
+logs_info "PhpMyAdmin > Installation et configuration en cours ..."
 
     # Installer phpMyAdmin
-    logs_info "Services complexes > PhpMyAdmin > Installation en cours ..."
+    logs_info "PhpMyAdmin > Installation en cours ..."
         # sudo DEBIAN_FRONTEND=noninteractive apt-get install -y phpmyadmin
         sudo apt-get install -y phpmyadmin
-        error_handler $? "Services complexes > PhpMyAdmin > L'installation a échouée."
-    logs_success "Services complexes > PhpMyAdmin > Installation terminée."
+        error_handler $? "PhpMyAdmin > L'installation a échouée."
+    logs_success "PhpMyAdmin > Installation terminée."
 
     # Configurer phpMyAdmin avec Apache
-    logs_info "Services complexes > PhpMyAdmin > Activation du module mbstring en cours ..."
+    logs_info "PhpMyAdmin > Activation du module mbstring en cours ..."
         sudo phpenmod mbstring
-        error_handler $? "Services complexes > PhpMyAdmin > Activation du module mbstring a échouée."
-    logs_success "Services complexes > PhpMyAdmin > Activation du module terminée."
+        error_handler $? "PhpMyAdmin > Activation du module mbstring a échouée."
+    logs_success "PhpMyAdmin > Activation du module terminée."
 
     # Redémarrer Apache pour appliquer les changements
-    logs_info "Services complexes > PhpMyAdmin > Apache > Redémarrage en cours ..."
+    logs_info "PhpMyAdmin > Apache > Redémarrage en cours ..."
         sudo systemctl restart apache2
-        error_handler $? "Services complexes > PhpMyAdmin > Apache > Le redémarrage a échouée."
-    logs_success "Services complexes > PhpMyAdmin > Apache > Redémarrage terminé."
+        error_handler $? "PhpMyAdmin > Apache > Le redémarrage a échouée."
+    logs_success "PhpMyAdmin > Apache > Redémarrage terminé."
 
     # Configurer phpMyAdmin pour utiliser la base de données créée
-    logs_info "Services complexes > PhpMyAdmin > Configuration basique en cours ..."
+    logs_info "PhpMyAdmin > Configuration basique en cours ..."
 
         sudo sed -i "s/^.*\$cfg\['Servers'\]\[\$i\]\['auth_type'\] = 'cookie';/\$cfg['Servers'][\$i]['auth_type'] = 'cookie';/" /etc/phpmyadmin/config.inc.php
-        error_handler $? "Services complexes > PhpMyAdmin > La configuration de l'authentification a échouée."
+        error_handler $? "PhpMyAdmin > La configuration de l'authentification a échouée."
 
         sudo sed -i "s/^.*\$cfg\['Servers'\]\[\$i\]\['user'\] = 'root';/\$cfg['Servers'][\$i]['user'] = 'phpmyadmin';/" /etc/phpmyadmin/config.inc.php
-        error_handler $? "Services complexes > PhpMyAdmin > La configuration de l'utilisateur a échouée."
+        error_handler $? "PhpMyAdmin > La configuration de l'utilisateur a échouée."
 
         sudo sed -i "s/^.*\$cfg\['Servers'\]\[\$i\]\['password'\] = '';/\$cfg['Servers'][\$i]['password'] = '$PHPMYADMIN_PASSWORD';/" /etc/phpmyadmin/config.inc.php
-        error_handler $? "Services complexes > PhpMyAdmin > La configuration du mot de passe a échouée."
+        error_handler $? "PhpMyAdmin > La configuration du mot de passe a échouée."
         
         sudo sed -i "s/^.*\$cfg\['Servers'\]\[\$i\]\['password'\] = '';/\$cfg['Servers'][\$i]['password'] = '$PHPMYADMIN_PASSWORD';/" /etc/phpmyadmin/config.inc.php
-        error_handler $? "Services complexes > PhpMyAdmin > La configuration du mot de passe a échouée."
+        error_handler $? "PhpMyAdmin > La configuration du mot de passe a échouée."
  
         sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
-        # error_handler $? "Services complexes > PhpMyAdmin > La création du symlink /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf a échouée."
+        # error_handler $? "PhpMyAdmin > La création du symlink /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf a échouée."
 
-    logs_success "Services complexes > PhpMyAdmin > Configuration basique terminée."
-    logs_info "Services complexes > PhpMyAdmin > Sécurisation > Configuration avancée en cours ..."
+    logs_success "PhpMyAdmin > Configuration basique terminée."
+    logs_info "PhpMyAdmin > Sécurisation > Configuration avancée en cours ..."
 
-    logs_info "Services complexes > PhpMyAdmin > Sécurisation > HTTPS > Génération du certificat et de la clé privée en cours ..."
+    logs_info "PhpMyAdmin > Sécurisation > HTTPS > Génération du certificat et de la clé privée en cours ..."
 
         sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt -keyout /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=phpmyadmin.$DOMAIN_NAME/emailAddress=$PHPMYADMIN_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
-        error_handler $? "Services complexes > Apache > HTTPS > La génération de demande de signature de certifcat du site phpmyadmin.$DOMAIN_NAME a échouée"
+        error_handler $? "Apache > HTTPS > La génération de demande de signature de certifcat du site phpmyadmin.$DOMAIN_NAME a échouée"
 
         openssl x509 -in /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt -text -noout
-        error_handler $? "Services complexes > Apache > HTTPS > La vérification du certificat a échouée."
+        error_handler $? "Apache > HTTPS > La vérification du certificat a échouée."
         
         sudo chmod 600 /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.key
         sudo chown root:root /etc/apache2/certificate/phpmyadmin."$DOMAIN_NAME"_server.crt
@@ -1083,11 +1095,11 @@ logs_info "Services complexes > PhpMyAdmin > Installation et configuration en co
 
         #Création des Virtual Host
         touch /etc/apache2/sites-available/phpmyadmin.conf
-        error_handler $? "Services complexes > Apache > HTTPS > La création du fichier /etc/apache2/sites-available/phpmyadmin.conf a échouée."
+        error_handler $? "Apache > HTTPS > La création du fichier /etc/apache2/sites-available/phpmyadmin.conf a échouée."
 
-    logs_success "Services complexes > PhpMyAdmin > Sécurisation > HTTPS > Génération du certificat et de la clé privée terminée."
+    logs_success "PhpMyAdmin > Sécurisation > HTTPS > Génération du certificat et de la clé privée terminée."
     
-    logs_info "Services complexes > PhpMyAdmin > Sécurisation > Configuration de la page phpmyadmin.$DOMAIN_NAME en cours ..."
+    logs_info "PhpMyAdmin > Sécurisation > Configuration de la page phpmyadmin.$DOMAIN_NAME en cours ..."
 
         echo "<VirtualHost *:80>
   ServerAdmin $PHPMYADMIN_ADMIN_ADDRESS
@@ -1140,54 +1152,54 @@ logs_info "Services complexes > PhpMyAdmin > Installation et configuration en co
     ErrorLog ${APACHE_LOG_DIR}/phpmyadmin_error.log
     CustomLog ${APACHE_LOG_DIR}/phpmyadmin_access.log combined
 </VirtualHost>" > /etc/apache2/sites-available/phpmyadmin.conf
-        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > L'écriture du fichier /etc/apache2/sites-available/phpmyadmin.conf a échouée."
+        error_handler $? "PhpMyAdmin > Sécurisation > L'écriture du fichier /etc/apache2/sites-available/phpmyadmin.conf a échouée."
 
         # sudo ufw allow $PHPMYADMIN_PORT/tcp
-        # error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > L'autorisation du port personnalisé pour phpMyAdmin a échouée."
+        # error_handler $? "PhpMyAdmin > Sécurisation > L'autorisation du port personnalisé pour phpMyAdmin a échouée."
         
         # sudo ufw reload
-        # error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > Le redémarrage du pare-feu a échoué."
+        # error_handler $? "PhpMyAdmin > Sécurisation > Le redémarrage du pare-feu a échoué."
 
         sudo a2ensite phpmyadmin.conf
-        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > Activation du site a échouée."
+        error_handler $? "PhpMyAdmin > Sécurisation > Activation du site a échouée."
 
         echo "127.0.0.1 phpmyadmin.$DOMAIN_NAME" >> /etc/hosts
-        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > L'écriture dans /etc/hosts échouée."
+        error_handler $? "PhpMyAdmin > Sécurisation > L'écriture dans /etc/hosts échouée."
 
-    logs_success "Services complexes > PhpMyAdmin > Sécurisation > Configuration de la page phpmyadmin.$DOMAIN_NAME terminée."
-    logs_info "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > Configuration en cours ..."
+    logs_success "PhpMyAdmin > Sécurisation > Configuration de la page phpmyadmin.$DOMAIN_NAME terminée."
+    logs_info "PhpMyAdmin > Sécurisation > .htaccess > Configuration en cours ..."
 
         sudo touch /usr/share/phpmyadmin/.htaccess
-        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > La création du fichier /usr/share/phpmyadmin/.htaccess a échouée."
+        error_handler $? "PhpMyAdmin > Sécurisation > .htaccess > La création du fichier /usr/share/phpmyadmin/.htaccess a échouée."
 
         echo "AuthType Basic
 AuthName \"Accès protégé\"
 AuthUserFile /var/www/.htpasswd
 require valid-user
 Options -Indexes" > /usr/share/phpmyadmin/.htaccess
-        error_handler $? "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > L'écriture dans /usr/share/phpmyadmin/.htaccess a échouée."
+        error_handler $? "PhpMyAdmin > Sécurisation > .htaccess > L'écriture dans /usr/share/phpmyadmin/.htaccess a échouée."
 
-    logs_success "Services complexes > PhpMyAdmin > Sécurisation > .htaccess > Configuration terminée."
+    logs_success "PhpMyAdmin > Sécurisation > .htaccess > Configuration terminée."
 
-    logs_success "Services complexes > PhpMyAdmin > Sécurisation > Configuration avancée terminée."
+    logs_success "PhpMyAdmin > Sécurisation > Configuration avancée terminée."
 
     # Redémarrer Apache pour appliquer les changements
-    logs_info "Services complexes > PhpMyAdmin > Apache > Redémarrage en cours ..."
+    logs_info "PhpMyAdmin > Apache > Redémarrage en cours ..."
 
         sudo systemctl reload apache2
-        error_handler $? "Services complexes > PhpMyAdmin > Apache > Le redémarrage a échouée."
+        error_handler $? "PhpMyAdmin > Apache > Le redémarrage a échouée."
 
-    logs_success "Services complexes > PhpMyAdmin > Apache > Redémarrage terminé."
+    logs_success "PhpMyAdmin > Apache > Redémarrage terminé."
 
-logs_end "Services complexes > PhpMyAdmin > Installation et configuration avancée terminée."
+logs_end "PhpMyAdmin > Installation et configuration avancée terminée."
 
 #===================================================================#
-logs_info "Services complexes > Redémarrage en cours ..."
+logs_info "Redémarrage en cours ..."
 
     sudo systemctl restart apache2
-    error_handler $? "Services complexes > Le redémarrage a échouée."
+    error_handler $? "Le redémarrage a échouée."
 
-logs_success "Services complexes > Redémarrage terminé."
+logs_success "Redémarrage terminé."
 #===================================================================#
 
 # sudo apt-get clean
@@ -1195,4 +1207,4 @@ logs_success "Services complexes > Redémarrage terminé."
 
 #===================================================================#
 
-logs_end "Services complexes > Script terminée."
+logs_end "Script terminée."

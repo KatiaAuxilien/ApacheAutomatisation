@@ -2,12 +2,13 @@
 
 #===================================================================#
 
-# Variables de couleurs ansii.
+# Variables de couleurs ansii 256
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 RESET='\033[0m'
+PINK='\033[38;5;206m'
 
 # Variable pour contrôler le mode verbose.
 verbose=false
@@ -25,9 +26,9 @@ logs()
     date_formated=$(date +"%d-%m-%Y %H:%M:%S")
 
     if [ "$verbose" = true ]; then
-        echo -e "${color}[$date_formated] $1 ${RESET}"
+        echo -e "${PINK}[🍋 PAMPLUSS]${RESET}[$date_formated]${color} $1 ${RESET}"
     fi
-    echo "[$date_formated] $1" >> /var/log/ApacheAutomatisation.log
+    echo -e "${PINK}[🍋 PAMPLUSS]${RESET}[$date_formated]${color} $1 ${RESET}" >> /var/log/ApacheAutomatisation.log
 }
 
 logs_error()
@@ -35,8 +36,8 @@ logs_error()
     local color="$1"
     shift
     date_formated=$(date +"%d-%m-%Y %H:%M:%S")
-    echo -e "${RED}[$date_formated] $1 ${RESET}"
-    echo "[$date_formated] $1" >> /var/log/ApacheAutomatisation.log
+    echo -e "${PINK}[🍋 PAMPLUSS]${RESET}[$date_formated]${RED}[$date_formated] $1 ${RESET}"
+    echo -e "${PINK}[🍋 PAMPLUSS]${RESET}[$date_formated]${RED}[$date_formated] $1 ${RESET}" >> /var/log/ApacheAutomatisation.log
 }
 
 logs_info()
@@ -72,7 +73,7 @@ check_variable()
 {
   local var_name=$1
   if [ -z "${!var_name+x}" ]; then
-    logs_error "Services complexes > La variable $var_name n'est pas définie."
+    logs_error "La variable $var_name n'est pas définie."
     exit 2
   fi
 }

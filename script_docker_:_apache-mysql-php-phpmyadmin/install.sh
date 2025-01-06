@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# .·:'''''''''''''''''''''''''''''''''''''''''''''':·.
+# : :  ____                       _                : :
+# : : |  _ \ __ _ _ __ ___  _ __ | |_   _ ___ ___  : :
+# : : | |_) / _` | '_ ` _ \| '_ \| | | | / __/ __| : :
+# : : |  __/ (_| | | | | | | |_) | | |_| \__ \__ \ : :
+# : : |_|  _\__,_|_| |_|_|_| .__/|_|\__,_|___/___/ : :
+# : :   __| | ___   ___| | |_|__ _ __              : :
+# : :  / _` |/ _ \ / __| |/ / _ \ '__|             : :
+# : : | (_| | (_) | (__|   <  __/ |                : :
+# : :  \__,_|\___/ \___|_|\_\___|_|                : :
+# '·:..............................................:·'
+
 #===================================================================#
 #                            Sommaire                               #
 #===================================================================#
@@ -62,44 +74,44 @@ source ./.common.sh
 # 2. Préparation de l'arborescence                                  #
 #===================================================================#
 
-logs_info "Services complexes > Préparation de l'arborescence en cours ..."
+logs_info "Préparation de l'arborescence en cours ..."
 
   run_command mkdir apache apache/www mysql
-  error_handler $? "Services complexes > La création des dossiers a échouée."
+  error_handler $? "La création des dossiers a échouée."
 
   run_command chmod -R 755 apache
-  error_handler $? "Services complexes > L'attribution des droits au dosser apache a échouée."
+  error_handler $? "L'attribution des droits au dosser apache a échouée."
 
   run_command chmod -R 755 apache/www
-  error_handler $? "Services complexes > L'attribution des droits au dossier apache/www a échouée."
+  error_handler $? "L'attribution des droits au dossier apache/www a échouée."
 
   run_command chmod -R 755 mysql
-  error_handler $? "Services complexes > L'attribution des droits au dossier mysql a échouée."
+  error_handler $? "L'attribution des droits au dossier mysql a échouée."
 
-logs_success "Services complexes > Préparation de l'arborescence terminée."
+logs_success "Préparation de l'arborescence terminée."
 
 #===================================================================#
 # 3. Préparation pour docker                                        #
 #===================================================================#
 
-logs_info "Services complexes > Docker > Préparation de docker en cours ..."
+logs_info "Docker > Préparation de docker en cours ..."
 
   run_command sudo docker network create $NETWORK_NAME --driver bridge
-  error_handler $? "Services complexes > Docker > La création du réseau docker $NETWORK_NAME a échouée."
+  error_handler $? "Docker > La création du réseau docker $NETWORK_NAME a échouée."
 
   run_command touch docker-compose.yml
-  error_handler $? "Services complexes > Docker > La création du fichier docker-compose.yml a échouée."
+  error_handler $? "Docker > La création du fichier docker-compose.yml a échouée."
 
   run_command chmod -R 755 docker-compose.yml
-  error_handler $? "Services complexes > Docker > L'attribution des droits fichier docker-compose.ym a échouée."
+  error_handler $? "Docker > L'attribution des droits fichier docker-compose.ym a échouée."
 
-logs_success "Services complexes > Docker > Préparation de docker terminée."
+logs_success "Docker > Préparation de docker terminée."
 
 #===================================================================#
 # 4. Installation de PhpMyAdmin et mysql                            #
 #===================================================================#
 
-logs_info "Services complexes > Docker > Préparation de la configuration du docker-compose.yml pour PhpMyAdmin et mysql en cours ..."
+logs_info "Docker > Préparation de la configuration du docker-compose.yml pour PhpMyAdmin et mysql en cours ..."
 
   run_command echo "services:
   $DB_CONTAINER_NAME:
@@ -138,23 +150,23 @@ volumes:
 networks:
   $NETWORK_NAME:
     external: true" > docker-compose.yml
-  error_handler $? "Services complexes > Docker > L'écriture du fichier docker-compose.yml a échouée."
+  error_handler $? "Docker > L'écriture du fichier docker-compose.yml a échouée."
 
-logs_success "Services complexes > Docker > La préparation de la configuration du docker-compose.yml pour PhpMyAdmin et mysql est terminée."
+logs_success "Docker > La préparation de la configuration du docker-compose.yml pour PhpMyAdmin et mysql est terminée."
 
 #===================================================================#
 # 5. Configuration de PhpMyAdmin                                    #
 #===================================================================#
 
-# logs_info "Services complexes > PhpMyAdmin > Préparation de la configuration en cours ..."
+# logs_info "PhpMyAdmin > Préparation de la configuration en cours ..."
 #TODO : Configurer PhpMyAdmin pour le TLS. (Page en HTTPS + .htaccess + modevasive + modsecurity)
-# logs_success "Services complexes > PhpMyAdmin > Préparation de la configuration terminée."
+# logs_success "PhpMyAdmin > Préparation de la configuration terminée."
 
 #===================================================================#
 # 6. Configuration de mysql                                         #
 #===================================================================#
 
-logs_info "Services complexes > mysql > Préparation de la requête d'initialisation de la base de données en cours ..."
+logs_info "mysql > Préparation de la requête d'initialisation de la base de données en cours ..."
 
 # Créer une base de données d'intro
   DB_INIT_SQL_QUERIES=$(cat <<EOF
@@ -173,16 +185,16 @@ INSERT INTO todo_list (content, statut) VALUES
 EOF
 )
 
-logs_success "Services complexes > mysql > La préparation de la requête d'initialisation de la base de données est terminée."
+logs_success "mysql > La préparation de la requête d'initialisation de la base de données est terminée."
 
 #===================================================================#
 # 7. Installation de Apache (+ des modules) et PHP                  #
 #===================================================================#
 
-logs_info "Services complexes > Apache & PHP > Préparation de la configuration d'installation en cours ..."
+logs_info "Apache & PHP > Préparation de la configuration d'installation en cours ..."
 
   run_command touch apache/Dockerfile
-  error_handler $? "Services complexes > Apache & PHP > La création du fichier apache/Dockerfile a échouée."
+  error_handler $? "Apache & PHP > La création du fichier apache/Dockerfile a échouée."
 
   run_command echo "FROM debian:latest
 RUN apt update -y
@@ -237,29 +249,29 @@ RUN a2ensite siteB.conf
 
 
 CMD [\"apache2ctl\",\"-D\",\"FOREGROUND\"]" > apache/Dockerfile
-  error_handler $? "Services complexes > Apache & PHP > L'écriture dans le fichier apache/Dockerfile a échouée."
+  error_handler $? "Apache & PHP > L'écriture dans le fichier apache/Dockerfile a échouée."
 
-logs_success "Services complexes > Apache & PHP > Préparation de la configuration d'installation terminée."
+logs_success "Apache & PHP > Préparation de la configuration d'installation terminée."
 
 #===================================================================#
 # 8. Configuration de PHP                                           #
 #===================================================================#
 
-# logs_info "Services complexes > PHP > Préparation de la configuration en cours ..."
+# logs_info "PHP > Préparation de la configuration en cours ..."
 
-# logs_success "Services complexes > PHP > Préparation de la configuration terminée."
+# logs_success "PHP > Préparation de la configuration terminée."
 
 #===================================================================#
 # 9. Configuration de Apache                                        #
 #===================================================================#
 
-logs_info "Services complexes > Apache > Préparation de la configuration en cours ..."
+logs_info "Apache > Préparation de la configuration en cours ..."
 
   run_command touch apache/apache2.conf
-  error_handler $? "Services complexes > Apache > La création du fichier apache/apache2.conf a échouée."
+  error_handler $? "Apache > La création du fichier apache/apache2.conf a échouée."
 
   run_command chmod -R 755 apache/apache2.conf
-  error_handler $? "Services complexes > Apache > L'attribution des droits sur le fichier apache/apache2.conf a échouée."
+  error_handler $? "Apache > L'attribution des droits sur le fichier apache/apache2.conf a échouée."
 
   run_command echo "ServerRoot \"/etc/apache2\"
 
@@ -328,15 +340,15 @@ LogFormat \"%{User-agent}i\" agent
 IncludeOptional conf-enabled/*.conf
 
 IncludeOptional sites-enabled/*.conf" > apache/apache2.conf
-  error_handler $? "Services complexes > Apache > L'écriture du fichier de configuration apache/apache2.conf a échouée."
+  error_handler $? "Apache > L'écriture du fichier de configuration apache/apache2.conf a échouée."
 
 # Configuration du port par défaut & HTTPS
-  logs_info "Services complexes > Apache > Page d'accueil > Préparation de la configuration en cours ..."
+  logs_info "Apache > Page d'accueil > Préparation de la configuration en cours ..."
 
     CERT_NAME="servicescomplexe"
 
     run_command touch apache/000-default.conf
-    error_handler $? "Services complexes > Apache > Page d'accueil > La création du fichier apache/000-default.conf a échouée."
+    error_handler $? "Apache > Page d'accueil > La création du fichier apache/000-default.conf a échouée."
 
     run_command echo "<VirtualHost *:80>
   ServerAdmin $WEB_ADMIN_ADDRESS
@@ -388,10 +400,10 @@ IncludeOptional sites-enabled/*.conf" > apache/apache2.conf
   ErrorLog \${APACHE_LOG_DIR}/error.log
   CustomLog \${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>" > apache/000-default.conf
-    error_handler $? "Services complexes > Apache > Page d'accueil > L'écriture dans le fichier apache/000-default.conf a échouée."
+    error_handler $? "Apache > Page d'accueil > L'écriture dans le fichier apache/000-default.conf a échouée."
 
     run_command touch apache/ports.conf
-    error_handler $? "Services complexes > Apache > Page d'accueil > La création du fichier apache/ports.conf a échouée."
+    error_handler $? "Apache > Page d'accueil > La création du fichier apache/ports.conf a échouée."
 
     run_command echo "
 # If you just change the port or add more ports here, you will likely also
@@ -407,17 +419,17 @@ Listen $WEB_PORT
 <IfModule mod_gnutls.c>
   Listen 443
 </IfModule>" > apache/ports.conf
-    error_handler $? "Services complexes > Apache > Page d'accueil > L'écriture dans le fichier apache/ports.conf a échouée."
+    error_handler $? "Apache > Page d'accueil > L'écriture dans le fichier apache/ports.conf a échouée."
 
 # Création de la page principale
     run_command mkdir apache/www/html/
-    error_handler $? "Services complexes > Apache > Page d'accueil > La création du dossier apache/www/html/ a échouée."
+    error_handler $? "Apache > Page d'accueil > La création du dossier apache/www/html/ a échouée."
     
     run_command touch apache/www/html/index.html
-    error_handler $? "Services complexes > Apache > Page d'accueil > La création du fichier apache/www/html/index.html a échouée."
+    error_handler $? "Apache > Page d'accueil > La création du fichier apache/www/html/index.html a échouée."
     
     run_command chmod -R 755 apache/www/html/index.html
-    error_handler $? "Services complexes > Apache > Page d'accueil > L'attribution des droits au fichier apache/www/html/index.html a échouée."
+    error_handler $? "Apache > Page d'accueil > L'attribution des droits au fichier apache/www/html/index.html a échouée."
 
     run_command echo "<!DOCTYPE html>
 <html>
@@ -437,68 +449,68 @@ body{
     <p> ✨ <a href=\"https://siteB.$DOMAIN_NAME:$WEB_PORT\">Visiter siteB.$DOMAIN_NAME</a> </p>
   </body>
 </html> " > apache/www/html/index.html
-    error_handler $? "Services complexes > Apache > Page d'accueil > L'écriture du fichier apache/www/html/index.html a échouée."
+    error_handler $? "Apache > Page d'accueil > L'écriture du fichier apache/www/html/index.html a échouée."
 
-  logs_success "Services complexes > Apache > Page d'accueil > Préparation de la configuration en terminée."
+  logs_success "Apache > Page d'accueil > Préparation de la configuration en terminée."
   
 # Configuration du .htaccess
-  logs_info "Services complexes > Apache > Sécurisation > .htaccess > Préparation de la configuration en cours ..."
+  logs_info "Apache > Sécurisation > .htaccess > Préparation de la configuration en cours ..."
 
     run_command sudo apt install -y apache2-utils
-    error_handler $? "Services complexes > Apache > Sécurisation > .htaccess > L'installation de apache2-utils a échouée."
+    error_handler $? "Apache > Sécurisation > .htaccess > L'installation de apache2-utils a échouée."
 
     run_command touch apache/.htpasswd
-    error_handler $? "Services complexes > Apache > Sécurisation > .htaccess > La création du fichier apache/.htpasswd a échouée."
+    error_handler $? "Apache > Sécurisation > .htaccess > La création du fichier apache/.htpasswd a échouée."
 
     run_command sudo htpasswd -b apache/.htpasswd admin $WEB_HTACCESS_PASSWORD
-    error_handler $? "Services complexes > Apache > Sécurisation > .htaccess > L'ajout d'un utilisateur admin dans le fichier apache/.htpasswd a échouée."
+    error_handler $? "Apache > Sécurisation > .htaccess > L'ajout d'un utilisateur admin dans le fichier apache/.htpasswd a échouée."
 
-  logs_info "Services complexes > Apache > Sécurisation > .htaccess > Préparation de la configuration terminée."
+  logs_info "Apache > Sécurisation > .htaccess > Préparation de la configuration terminée."
 # Installation d'openssl
-  logs_info "Services complexes > Apache > Sécurisation > HTTPS > Génération du certificat et de la clé en cours ..."
+  logs_info "Apache > Sécurisation > HTTPS > Génération du certificat et de la clé en cours ..."
 
     run_command sudo apt-get install -y openssl
-    error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > L'installation d'openssl a échouée."
+    error_handler $? "Apache > Sécurisation > HTTPS > L'installation d'openssl a échouée."
 
 # Génération du certificat et de la clé pour le HTTPS
 
     run_command mkdir apache/certificate
-    error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > La création du dossier /apache/certificate a échouée."
+    error_handler $? "Apache > Sécurisation > HTTPS > La création du dossier /apache/certificate a échouée."
 
     run_command sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out apache/certificate/"$CERT_NAME"_server.crt -keyout apache/certificate/"$CERT_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
-    error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > La génération de demande de signature de certificat a échouée."
+    error_handler $? "Apache > Sécurisation > HTTPS > La génération de demande de signature de certificat a échouée."
 
     run_command openssl x509 -in apache/certificate/"$CERT_NAME"_server.crt -text -noout
-    error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > La vérification du certificat a échouée."
+    error_handler $? "Apache > Sécurisation > HTTPS > La vérification du certificat a échouée."
 
     run_command sudo chmod 600 apache/certificate/"$CERT_NAME"_server.key
-    error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > L'attribution des droits au fichier apache/certificate/"$CERT_NAME"_server.key a échouée."
+    error_handler $? "Apache > Sécurisation > HTTPS > L'attribution des droits au fichier apache/certificate/"$CERT_NAME"_server.key a échouée."
 
     run_command sudo chown root:root apache/certificate/"$CERT_NAME"_server.crt
-    error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > L'attribution des droits au fichier apache/certificate/"$CERT_NAME"_server.crt a échouée."
+    error_handler $? "Apache > Sécurisation > HTTPS > L'attribution des droits au fichier apache/certificate/"$CERT_NAME"_server.crt a échouée."
 
     run_command sudo chmod 440 apache/certificate/"$CERT_NAME"_server.crt
-    error_handler $? "Services complexes > Apache > Sécurisation > HTTPS > L'attribution des droits au fichier apache/certificate/"$CERT_NAME"_server.crt a échouée."
+    error_handler $? "Apache > Sécurisation > HTTPS > L'attribution des droits au fichier apache/certificate/"$CERT_NAME"_server.crt a échouée."
 
-  logs_success "Services complexes > Apache > Sécurisation > HTTPS > Génération du certificat et de la clé terminée."
+  logs_success "Apache > Sécurisation > HTTPS > Génération du certificat et de la clé terminée."
 
-logs_info "Services complexes > Apache > Sites > Préparation de la configuration en cours ..."
+logs_info "Apache > Sites > Préparation de la configuration en cours ..."
 # Création de deux sites (siteA, siteB)
   run_command mkdir apache/sites-available
-  error_handler $? "Services complexes > Apache > Sites > La création du dossier apache/sites-available a échouée."
+  error_handler $? "Apache > Sites > La création du dossier apache/sites-available a échouée."
 
     for site_name in siteA siteB
     do
-      logs_info "Services complexes > Apache > Sites > $site_name > Création du site $site_name en cours ..."
+      logs_info "Apache > Sites > $site_name > Création du site $site_name en cours ..."
         
         run_command mkdir apache/www/$site_name
-        error_handler $? "Services complexes > Apache > Sites > $site_name > La création du dossier apache/www/$site_name a échouée."
+        error_handler $? "Apache > Sites > $site_name > La création du dossier apache/www/$site_name a échouée."
 
         run_command chmod -R 755 apache/www/$site_name
-        error_handler $? "Services complexes > Apache > Sites > $site_name > L'attribution des droits sur le dossier www/$site_name a échouée."
+        error_handler $? "Apache > Sites > $site_name > L'attribution des droits sur le dossier www/$site_name a échouée."
         
         run_command sudo touch apache/www/$site_name/index.html
-        error_handler $? "Services complexes > Apache > Sites > $site_name > La création du fichier apache/www/$site_name/index.html a échouée."
+        error_handler $? "Apache > Sites > $site_name > La création du fichier apache/www/$site_name/index.html a échouée."
 
         run_command echo "<!DOCTYPE html>
 <html>
@@ -518,26 +530,26 @@ body{
         <a href=\"https://$site_name.$DOMAIN_NAME:79/confidential/confidential.php\"><h2> Page confidentiel ici</h2></a>
     </body>
 </html>" > apache/www/$site_name/index.html
-        error_handler $? "Services complexes > Apache > Sites > $site_name > L'écriture dans le fichier apache/www/$site_name/index.html a échouée."
+        error_handler $? "Apache > Sites > $site_name > L'écriture dans le fichier apache/www/$site_name/index.html a échouée."
 
         run_command sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -sha256 -out apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt -keyout apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.key -subj "/C=FR/ST=Occitanie/L=Montpellier/O=IUT/OU=Herault/CN=$site_name.$DOMAIN_NAME/emailAddress=$WEB_ADMIN_ADDRESS" -passin pass:"$SSL_KEY_PASSWORD"
-        error_handler $? "Services complexes > Apache > Sites > $site_name > La génération de demande de signature de certifcat du site $site_name a échouée"
+        error_handler $? "Apache > Sites > $site_name > La génération de demande de signature de certifcat du site $site_name a échouée"
 
         run_command openssl x509 -in apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt -text -noout
-        error_handler $? "Services complexes > Apache > Sites > $site_name > La vérification du certificat a échouée."
+        error_handler $? "Apache > Sites > $site_name > La vérification du certificat a échouée."
         
         run_command sudo chmod 600 apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.key
-        error_handler $? "Services complexes > Apache > Sites > $site_name > L'attribution des droits au fichier apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.key a échouée."
+        error_handler $? "Apache > Sites > $site_name > L'attribution des droits au fichier apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.key a échouée."
 
         run_command sudo chown root:root apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
-        error_handler $? "Services complexes > Apache > Sites > $site_name > L'attribution des droits au fichier apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt a échouée."
+        error_handler $? "Apache > Sites > $site_name > L'attribution des droits au fichier apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt a échouée."
 
         run_command sudo chmod 440 apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt
-        error_handler $? "Services complexes > Apache > Sites > $site_name > L'attribution des droits au fichier apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt a échouée."
+        error_handler $? "Apache > Sites > $site_name > L'attribution des droits au fichier apache/certificate/"$site_name"".""$DOMAIN_NAME"_server.crt a échouée."
 
         #Création des Virtual Host
         run_command touch apache/sites-available/$site_name.conf
-        error_handler $? "Services complexes > Apache > Sites > $site_name > La création du fichier apache/sites-available/$site_name.conf a échouée."
+        error_handler $? "Apache > Sites > $site_name > La création du fichier apache/sites-available/$site_name.conf a échouée."
 
         run_command echo "
 <VirtualHost *:80>
@@ -590,23 +602,23 @@ body{
   ErrorLog \${APACHE_LOG_DIR}/$site_name-error.log
   CustomLog \${APACHE_LOG_DIR}/$site_name-access.log combined
 </VirtualHost>" > apache/sites-available/$site_name.conf
-        error_handler $? "Services complexes > Apache > Sites > $site_name > L'écriture du fichier apache/sites-available/$site_name.conf a échouée."
+        error_handler $? "Apache > Sites > $site_name > L'écriture du fichier apache/sites-available/$site_name.conf a échouée."
 
-  logs_success "Services complexes > Apache > Sites > $site_name > Création du site $site_name terminée."
+  logs_success "Apache > Sites > $site_name > Création du site $site_name terminée."
 # Création de la page confidentielle
-  logs_info "Services complexes > Apache > Sites > $site_name > .htaccess > Création de la page confidentielle en cours ..."
+  logs_info "Apache > Sites > $site_name > .htaccess > Création de la page confidentielle en cours ..."
 
         run_command mkdir apache/www/$site_name/confidential
-        error_handler $? "Services complexes > Apache > Sites > $site_name > .htaccess > La création du dossier apache/www/$site_name/confidential a échouée."
+        error_handler $? "Apache > Sites > $site_name > .htaccess > La création du dossier apache/www/$site_name/confidential a échouée."
         
         run_command chmod -R 755 apache/www/$site_name/confidential
-        error_handler $? "Services complexes > Apache > Sites > $site_name > .htaccess > L'attribution des droits sur le dossier apache/www/$site_name/confidential a échouée."
+        error_handler $? "Apache > Sites > $site_name > .htaccess > L'attribution des droits sur le dossier apache/www/$site_name/confidential a échouée."
 
         run_command touch apache/www/$site_name/confidential/confidential.php
-        error_handler $? "Services complexes > Apache > Sites > $site_name > .htaccess > La création du fichier apache/www/$site_name/confidential/confidential.php a échouée."
+        error_handler $? "Apache > Sites > $site_name > .htaccess > La création du fichier apache/www/$site_name/confidential/confidential.php a échouée."
         
         run_command chmod -R 755 apache/www/$site_name/confidential/confidential.php
-        error_handler $? "Services complexes > Apache > Sites > $site_name > .htaccess > L'attribution des droits sur le dossier apache/www/$site_name/confidential/confidential.php a échouée."
+        error_handler $? "Apache > Sites > $site_name > .htaccess > L'attribution des droits sur le dossier apache/www/$site_name/confidential/confidential.php a échouée."
 
         run_command echo "<!DOCTYPE html>
 <html>
@@ -695,38 +707,38 @@ table {
 ?>
     </body>
 </html>" > apache/www/$site_name/confidential/confidential.php
-        error_handler $? "Services complexes > Apache > Sites > $site_name > .htaccess > L'écriture dans le fichier apache/www/$site_name/confidential/confidential.php a échouée."
+        error_handler $? "Apache > Sites > $site_name > .htaccess > L'écriture dans le fichier apache/www/$site_name/confidential/confidential.php a échouée."
 
 # Configuration de la page confidentielle (.htaccess et .htpasswd)
 
         run_command touch apache/www/$site_name/confidential/.htaccess
-        error_handler $? "Services complexes > Apache > Sites > $site_name > .htaccess > La création du fichier apache/www/$site_name/confidential/.htaccess a échouée."
+        error_handler $? "Apache > Sites > $site_name > .htaccess > La création du fichier apache/www/$site_name/confidential/.htaccess a échouée."
 
         run_command echo "AuthType Basic
         AuthName \"Accès protégé\"
         AuthUserFile /var/www/.htpasswd
         require valid-user
         Options -Indexes" > apache/www/$site_name/confidential/.htaccess
-        error_handler $? "Services complexes > Apache > Sites > $site_name > .htaccess > L'écriture du fichier apache/www/$site_name/confidential/.htaccess a échouée."
+        error_handler $? "Apache > Sites > $site_name > .htaccess > L'écriture du fichier apache/www/$site_name/confidential/.htaccess a échouée."
   
-      logs_success "Services complexes > Apache > Sites > $site_name > .htaccess > Création de la page confidentielle terminée."
+      logs_success "Apache > Sites > $site_name > .htaccess > Création de la page confidentielle terminée."
     done
-logs_success "Services complexes > Apache > Sites > Préparation de la configuration terminée."
+logs_success "Apache > Sites > Préparation de la configuration terminée."
 
 #===================================================================#
 # 10. Sécurisation de Apache                                        #
 #===================================================================#
 
-logs_info "Services complexes > Apache > Sécurisation > Préparation de la configuration avancée en cours ..."
+logs_info "Apache > Sécurisation > Préparation de la configuration avancée en cours ..."
 
   run_command mkdir apache/mods
-  error_handler $? "Services complexes > Apache > Sécurisation > La création du dossier apache/mods a échouée."
+  error_handler $? "Apache > Sécurisation > La création du dossier apache/mods a échouée."
 
 # Sécurisation - Installation et configuration de ModSecurity
-  logs_info "Services complexes > Apache > Sécurisation > ModSecurity > Préparation de la configuration en cours ..."
+  logs_info "Apache > Sécurisation > ModSecurity > Préparation de la configuration en cours ..."
 
     run_command touch apache/mods/modsecurity.conf
-    error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > La création du fichier apache/mods/modsecurity.conf a échoué."
+    error_handler $? "Apache > Sécurisation > ModSecurity > La création du fichier apache/mods/modsecurity.conf a échoué."
 
     run_command echo "
 # -- Rule engine initialization ----------------------------------------------
@@ -968,10 +980,10 @@ SecUnicodeMapFile unicode.mapping 20127
 # NB: As of April 2022, there is no longer any advantage to turning this
 # setting On, as there is no active receiver for the information.
 SecStatusEngine Off" > apache/mods/modsecurity.conf
-    error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > L'écriture du fichier apache/mods/modsecurity.conf a échoué."
+    error_handler $? "Apache > Sécurisation > ModSecurity > L'écriture du fichier apache/mods/modsecurity.conf a échoué."
 
     run_command touch apache/mods/security2.conf
-    error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > La création du fichier apache/mods/security2.conf a échoué."
+    error_handler $? "Apache > Sécurisation > ModSecurity > La création du fichier apache/mods/security2.conf a échoué."
 
     run_command echo "<IfModule security2_module>
   # Default Debian dir for modsecurity's persistent data
@@ -987,39 +999,39 @@ SecStatusEngine Off" > apache/mods/modsecurity.conf
   IncludeOptional /etc/apache2/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf
   IncludeOptional /etc/apache2/modsecurity-crs/coreruleset-3.3.0/rules/*.conf
 </IfModule>" > apache/mods/security2.conf
-    error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > L'écriture du fichier apache/mods/security2.conf a échoué."
+    error_handler $? "Apache > Sécurisation > ModSecurity > L'écriture du fichier apache/mods/security2.conf a échoué."
 
 #  ModSecurity : Règles de base OWASP (CRS)
 
-    logs_info "Services complexes > Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) : Préparation de la configuration en cours ..."
+    logs_info "Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) : Préparation de la configuration en cours ..."
 
       run_command wget https://github.com/coreruleset/coreruleset/archive/v3.3.0.tar.gz
-      error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > wget https://github.com/coreruleset/coreruleset/archive/v3.3.0.tar.gz a échoué."
+      error_handler $? "Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > wget https://github.com/coreruleset/coreruleset/archive/v3.3.0.tar.gz a échoué."
 
       run_command tar xvf v3.3.0.tar.gz
-      error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > tar xvf v3.3.0.tar.gz a échoué."
+      error_handler $? "Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > tar xvf v3.3.0.tar.gz a échoué."
 
       run_command rm -rf v3.3.0.tar.gz
-      error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > rm -rf v3.3.0.tar.gz a échoué."
+      error_handler $? "Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > rm -rf v3.3.0.tar.gz a échoué."
 
       run_command mkdir apache/mods/modsecurity-crs/
-      error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > mv coreruleset-3.3.0/ apache/mods/modsecurity-crs/ a échoué."
+      error_handler $? "Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > mv coreruleset-3.3.0/ apache/mods/modsecurity-crs/ a échoué."
 
       run_command sudo mv coreruleset-3.3.0/ apache/mods/modsecurity-crs/
-      error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > mv coreruleset-3.3.0/ apache/mods/modsecurity-crs/ a échoué."
+      error_handler $? "Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > mv coreruleset-3.3.0/ apache/mods/modsecurity-crs/ a échoué."
 
       run_command sudo mv apache/mods/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf.example apache/mods/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf
-      error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > mv crs-setup.conf.example crs-setup.conf a échoué."
+      error_handler $? "Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > mv crs-setup.conf.example crs-setup.conf a échoué."
 
-    logs_success  "Services complexes > Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > Préparation de la configuration terminée."
+    logs_success  "Apache > Sécurisation > ModSecurity > Règles OWASP (CRS) > Préparation de la configuration terminée."
 
-  logs_success "Services complexes > Apache > Sécurisation > ModSecurity > Préparation de la configuration terminée."
+  logs_success "Apache > Sécurisation > ModSecurity > Préparation de la configuration terminée."
 
 # Sécurisation - Installation et configuration de ModEvasive
-  logs_info "Services complexes > Apache > Sécurisation > ModEvasive > Préparation de la configuration en cours ..."
+  logs_info "Apache > Sécurisation > ModEvasive > Préparation de la configuration en cours ..."
 
     run_command touch apache/mods/evasive.conf
-    error_handler $? "Services complexes > Apache > Sécurisation > ModEvasive > La création /apache/mods/evasive.conf a échouée."
+    error_handler $? "Apache > Sécurisation > ModEvasive > La création /apache/mods/evasive.conf a échouée."
 
     run_command echo "
     <IfModule mod_evasive20.c>
@@ -1033,30 +1045,30 @@ SecStatusEngine Off" > apache/mods/modsecurity.conf
         DOSLogDir           \"/var/log/mod_evasive\"
     </IfModule>
     " > apache/mods/evasive.conf
-    error_handler $? "Services complexes > Apache > Sécurisation > ModEvasive > L'écriture du fichier /apache/mods/evasive.conf a échouée."
+    error_handler $? "Apache > Sécurisation > ModEvasive > L'écriture du fichier /apache/mods/evasive.conf a échouée."
 
-  logs_success "Services complexes > Apache > Sécurisation > ModEvasive > Préparation de la configuration terminée."
+  logs_success "Apache > Sécurisation > ModEvasive > Préparation de la configuration terminée."
 
 #TODO BONUS : Sécurisation - Installation et configuration de ModRatelimit
 
-logs_success "Services complexes > Apache > Sécurisation > Préparation de la configuration avancée terminée."
+logs_success "Apache > Sécurisation > Préparation de la configuration avancée terminée."
 
 #===================================================================#
 # 11. Lancement des services                                        #
 #===================================================================#
 
-logs_info "Services complexes > Docker > Lancement des services phpmyadmin et mysql."
+logs_info "Docker > Lancement des services phpmyadmin et mysql."
   run_command sudo docker-compose up -d
-  error_handler $? "Services complexes > Docker > Le lancement des services phpmyadmin et mysql a échoué."
-logs_success "Services complexes > Docker > Services phpmyadmin et mysql lancés."
+  error_handler $? "Docker > Le lancement des services phpmyadmin et mysql a échoué."
+logs_success "Docker > Services phpmyadmin et mysql lancés."
 
-logs_info "Services complexes > Docker > Lancement des services php et apache."
+logs_info "Docker > Lancement des services php et apache."
   run_command docker build -t web-php-apache ./apache/.
-  error_handler $? "Services complexes > Docker > La construction de l'image web-php-apache a échouée."
+  error_handler $? "Docker > La construction de l'image web-php-apache a échouée."
 
   run_command docker run -d --name $WEB_CONTAINER_NAME --network $NETWORK_NAME -p $WEB_PORT:$WEB_PORT web-php-apache
-  error_handler $? "Services complexes > Docker > Le lancement de $WEB_CONTAINER_NAME a échoué."
-logs_success "Services complexes > Docker > Services php et apache lancés."
+  error_handler $? "Docker > Le lancement de $WEB_CONTAINER_NAME a échoué."
+logs_success "Docker > Services php et apache lancés."
 
 sleep 10
 
@@ -1064,28 +1076,28 @@ sleep 10
 # 12. Lancement du script d'initialisation de mysql                     #
 #===================================================================#
 
-logs_info "Services complexes > MySQL > Initialisation de la base de données $DB_NAME en cours ..."
+logs_info "MySQL > Initialisation de la base de données $DB_NAME en cours ..."
 
   run_command docker exec -i $DB_CONTAINER_NAME mysql -u$DB_ADMIN_USERNAME -p$DB_ADMIN_PASSWORD -e "$DB_INIT_SQL_QUERIES" $DB_NAME
   error_handler $? "Le lancement de l'initialisation de $DB_NAME a échoué."
 
-logs_success "Services complexes > MySQL > Base de données $DB_NAME initialisée."
+logs_success "MySQL > Base de données $DB_NAME initialisée."
 
 #===================================================================#
 # 13. Nettoyage                                                     #
 #===================================================================#
 
-logs_info "Services complexes > Nettoyage des dossiers et fichiers de configuration sur la machine hôte en cours ..."
+logs_info "Nettoyage des dossiers et fichiers de configuration sur la machine hôte en cours ..."
 
 # Suppression des fichiers de configuration de Apache, configuration HTTPS, configuration des deux sites (siteA, siteB), configuration de la page confidentielle (.htaccess et .htpasswd), fichiers de configuration de ModSecurity
   run_command sudo rm -rf apache
-  error_handler $? "Services complexes > La suppression du dossier apache a échoué."
+  error_handler $? "La suppression du dossier apache a échoué."
 
 # Suppression des fichiers de configuration de PHP, mysql
   run_command sudo rm -rf docker-compose.yml
-  error_handler $? "Services complexes > La suppression du fichier docker-compose.yml a échoué."
+  error_handler $? "La suppression du fichier docker-compose.yml a échoué."
 
-logs_success "Services complexes > Nettoyage des dossiers et fichiers de configuration sur la machine hôte terminée."
+logs_success "Nettoyage des dossiers et fichiers de configuration sur la machine hôte terminée."
 
 #===================================================================#
 # 14. Affichage des adresses IP des conteneurs                      #
@@ -1101,21 +1113,21 @@ DB_CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAdd
 PHPMYADMIN_CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $PHPMYADMIN_CONTAINER_NAME)
 
 # Mettre à jour le fichier /etc/hosts
-logs_info "Services complexes > Mise à jour du fichier /etc/hosts en cours ..."
+logs_info "Mise à jour du fichier /etc/hosts en cours ..."
 
   run_command echo "$WEB_CONTAINER_IP $DOMAIN_NAME" >> /etc/hosts
-  error_handler $? "Services complexes > L'écriture de $WEB_CONTAINER_IP $DOMAIN_NAME dans /etc/hosts échouée."
+  error_handler $? "L'écriture de $WEB_CONTAINER_IP $DOMAIN_NAME dans /etc/hosts échouée."
 
   run_command echo "$WEB_CONTAINER_IP siteA.$DOMAIN_NAME" >> /etc/hosts
-  error_handler $? "Services complexes > L'écriture de $WEB_CONTAINER_IP siteA.$DOMAIN_NAME dans /etc/hosts échouée."
+  error_handler $? "L'écriture de $WEB_CONTAINER_IP siteA.$DOMAIN_NAME dans /etc/hosts échouée."
 
   run_command echo "$WEB_CONTAINER_IP siteB.$DOMAIN_NAME" >> /etc/hosts
-  error_handler $? "Services complexes > L'écriture de $WEB_CONTAINER_IP siteB.$DOMAIN_NAME dans /etc/hosts échouée."
+  error_handler $? "L'écriture de $WEB_CONTAINER_IP siteB.$DOMAIN_NAME dans /etc/hosts échouée."
 
   run_command echo "$PHPMYADMIN_CONTAINER_IP phpmyadmin.$DOMAIN_NAME" >> /etc/hosts
-  error_handler $? "Services complexes > L'écriture de $PHPMYADMIN_CONTAINER_IP phpmyadmin.$DOMAIN_NAME dans /etc/hosts échouée."
+  error_handler $? "L'écriture de $PHPMYADMIN_CONTAINER_IP phpmyadmin.$DOMAIN_NAME dans /etc/hosts échouée."
 
-logs_success "Services complexes > Mise à jour du fichier /etc/hosts terminée."
+logs_success "Mise à jour du fichier /etc/hosts terminée."
 
 # Afficher les adresses IP des conteneurs
 run_command echo "Adresses IP des conteneurs du réseau docker $NETWORK_NAME :"
@@ -1128,15 +1140,15 @@ run_command echo "   $DB_CONTAINER_IP:$DB_PORT"
 
 #===================================================================#
 
-logs_end "Services complexes > Installation et configuration des services apache, mysql, php et phpmyadmin sous docker terminée."
+logs_end "Installation et configuration des services apache, mysql, php et phpmyadmin sous docker terminée."
 
 #===================================================================#
 # 15. Création d'un script de gestion des services                  #
 #===================================================================#
-logs_info "Services complexes > Génération du script de gestion des services phpmyadmin, mysql et php:apache sous docker."
+logs_info "Génération du script de gestion des services phpmyadmin, mysql et php:apache sous docker."
 
   run_command touch manage_services.sh
-  error_handler $? "Services complexes > La création du fichier manage_services.sh a échouée."
+  error_handler $? "La création du fichier manage_services.sh a échouée."
 
   run_command echo "#!/bin/bash
 source ./../.common.sh
@@ -1251,14 +1263,14 @@ case \$1 in
         exit 1
         ;;
 esac" > manage_services.sh
-  error_handler $? "Services complexes > L'écriture du fichier manage_services.sh a échouée."
+  error_handler $? "L'écriture du fichier manage_services.sh a échouée."
 
   run_command chmod +x manage_services.sh
-  error_handler $? "Services complexes > L'attribution des droits au fichier manage_services.sh a échouée."
+  error_handler $? "L'attribution des droits au fichier manage_services.sh a échouée."
 
-logs_success "Services complexes > Génération du script de gestion des services phpmyadmin, mysql et php:apache sous docker terminée."
+logs_success "Génération du script de gestion des services phpmyadmin, mysql et php:apache sous docker terminée."
 
 #===================================================================#
 
-logs_end "Services complexes > Services apache, mysql, php et phpmyadmin sous docker prêts à l'emploi."
+logs_end "Services apache, mysql, php et phpmyadmin sous docker prêts à l'emploi."
 exit 0
