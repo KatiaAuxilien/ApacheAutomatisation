@@ -34,6 +34,30 @@
 
 #===================================================================#
 source ../.common.sh
+
+#===================================================================#
+
+# Vérification de la configuration de la machine hôte.
+if [ "$EUID" -ne 0 ]
+then
+    logs_error "Ce script doit être exécuté avec des privilèges root."
+    exit 1
+fi
+
+# Analyse des options de ligne de commande.
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --verbose)
+            verbose=true
+            shift
+            ;;
+        *)
+            logs_error "Erreur : option invalide : $1"
+            exit 1
+            ;;
+    esac
+done
+
 #===================================================================#
 
 welcome ".·:'''''''''''''''''''''''''''''''''''''''''''''':·."
@@ -1206,6 +1230,16 @@ logs_info "Génération du script de gestion des services phpmyadmin, mysql et p
   error_handler $? "La création du fichier manage_services.sh a échouée."
 
   run_command echo "#!/bin/bash
+
+# .·:'''''''''''''''''''''''''''''''''''''''''''''':·.
+# : :  ____                       _                : :
+# : : |  _ \ __ _ _ __ ___  _ __ | |_   _ ___ ___  : :
+# : : | |_) / _\` | '_ \` _ \| '_ \| | | | / __/ __| : :
+# : : |  __/ (_| | | | | | | |_) | | |_| \__ \__ \ : :
+# : : |_|   \__,_|_| |_| |_| .__/|_|\__,_|___/___/ : :
+# : :                      |_|                     : :
+# '·:..............................................:·'
+
 source ./../.common.sh
 
 # Fonction pour démarrer les services
