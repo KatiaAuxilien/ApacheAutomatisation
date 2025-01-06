@@ -36,6 +36,21 @@
 source ../.common.sh
 #===================================================================#
 
+# echo -e "${PINK}[🍋 PAMPLUSS]${RESET}"
+# .·:'''''''''''''''''''''''''''''''''''''''''''''':·.
+# : :  ____                       _                : :
+# : : |  _ \ __ _ _ __ ___  _ __ | |_   _ ___ ___  : :
+# : : | |_) / _` | '_ ` _ \| '_ \| | | | / __/ __| : :
+# : : |  __/ (_| | | | | | | |_) | | |_| \__ \__ \ : :
+# : : |_|  _\__,_|_| |_|_|_| .__/|_|\__,_|___/___/ : :
+# : :   __| | ___   ___| | |_|__ _ __              : :
+# : :  / _` |/ _ \ / __| |/ / _ \ '__|             : :
+# : : | (_| | (_) | (__|   <  __/ |                : :
+# : :  \__,_|\___/ \___|_|\_\___|_|                : :
+# '·:..............................................:·'
+
+#===================================================================#
+
 required_vars_start=(
 "DOMAIN_NAME"
 "NETWORK_NAME"
@@ -69,6 +84,34 @@ required_vars_start=(
 #===================================================================#
 
 source ./.common.sh
+
+logs_info "Vérification des services déjà installés ..."
+
+  if [ $mysql_installed -eq 1 ]; then
+      logs_error "Un conteneur avec l'image bitnami/mysql existe déjà."
+  fi
+
+  if [ $phpmyadmin_installed -eq 1 ]; then
+      logs_error "Un conteneur avec l'image phpmyadmin/phpmyadmin existe déjà."
+  fi
+
+  if [ $apache_installed -eq 1 ]; then
+      logs_error "Un conteneur avec l'image debian existe déjà."
+  fi
+
+  if [ $db_container_name_exists -eq 1 ]; then
+      logs_error "Un conteneur avec le nom $DB_CONTAINER_NAME existe déjà."
+  fi
+
+  if [ $phpmyadmin_container_name_exists -eq 1 ]; then
+      logs_error "Un conteneur avec le nom $PHPMYADMIN_CONTAINER_NAME existe déjà."
+  fi
+
+  if [ $web_container_name_exists -eq 1 ]; then
+      logs_error "Un conteneur avec le nom $WEB_CONTAINER_NAME existe déjà."
+  fi
+
+logs_success "Vérification réussie, les services ne sont pas déjà installés."
 
 #===================================================================#
 # 2. Préparation de l'arborescence                                  #

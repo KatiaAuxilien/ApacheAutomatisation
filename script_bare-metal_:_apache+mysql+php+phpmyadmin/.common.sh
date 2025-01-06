@@ -1,28 +1,6 @@
 #!/bin/bash
 
-
-if [ "$EUID" -ne 0 ]
-then
-    logs_error -e "${RED}Ce script doit être exécuté avec des privilèges root.${RESET}"
-    exit 1
-fi
-
-# Analyse des options de ligne de commande.
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --verbose)
-            verbose=true
-            shift
-            ;;
-        *)
-            logs_error "Erreur : option invalide : $1"
-            exit 1
-            ;;
-    esac
-done
-
-# Vérifier si les services sont installés.
-
+#===================================================================#
 
 # Vérifier le format valide des variables
 
@@ -67,3 +45,38 @@ logs_info "Vérification des variables .env..."
     done
 
 logs_success "Les variables .env ont été vérifiées."
+
+#===================================================================#
+
+# Fonction pour vérifier si un service est installé
+check_service_installed() {
+    local service_name="$1"
+    if ! command -v "$service_name" &> /dev/null; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+# Fonction pour vérifier si phpMyAdmin est installé
+check_phpmyadmin_installed() {
+    if dpkg -l | grep -q phpmyadmin; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+check_service_installed "apache"
+apache_installed=$?
+
+check_service_installed "php"
+php_installed=$?
+
+check_service_installed "mysql"
+mysql_installed=$?
+
+check_phpmyadmin_installed
+phpmyadmin_installed=$?
+
+#===================================================================#

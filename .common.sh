@@ -14,7 +14,10 @@ PINK='\033[38;5;206m'
 verbose=false
 
 # Variable pour la vérification de l'installation ou non des services.
-installed=false
+apache_installed=0
+phpmyadmin_installed=0
+mysql_installed=0
+php_installed=0
 
 #===================================================================#
 
@@ -85,3 +88,28 @@ run_command()
         "$@" 2>&1 | tee -a /var/log/ApacheAutomatisation.log &>/dev/null
     fi
 }
+
+#===================================================================#
+
+# Vérification de la configuration de la machine hôte.
+if [ "$EUID" -ne 0 ]
+then
+    logs_error "Ce script doit être exécuté avec des privilèges root."
+    exit 1
+fi
+
+# Analyse des options de ligne de commande.
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --verbose)
+            verbose=true
+            shift
+            ;;
+        *)
+            logs_error "Erreur : option invalide : $1"
+            exit 1
+            ;;
+    esac
+done
+
+#===================================================================#

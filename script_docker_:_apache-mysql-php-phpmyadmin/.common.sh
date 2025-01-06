@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# Vérification de la configuration de la machine hôte.
-if [ "$EUID" -ne 0 ]
-then
-    logs_error "Ce script doit être exécuté avec des privilèges root."
-    exit 1
-fi
+#===================================================================#
 
+# Vérification de la configuration de la machine hôte.
 if ! command -v docker &> /dev/null; then
     logs_error "Docker n'est pas installé. Veuillez l'installer avant de continuer."
     exit 1
@@ -17,22 +13,7 @@ if ! command -v docker-compose &> /dev/null; then
     exit 1
 fi
 
-# Analyse des options de ligne de commande.
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --verbose)
-            verbose=true
-            shift
-            ;;
-        *)
-            logs_error "Erreur : option invalide : $1"
-            exit 1
-            ;;
-    esac
-done
-
-# Vérifier si les services sont installés.
-
+#===================================================================#
 
 # Vérifier le format valide des variables.
 
@@ -90,3 +71,56 @@ logs_info "Vérification des variables .env..."
     done
 
 logs_success "Les variables .env ont été vérifiées."
+
+#===================================================================#
+
+# Vérifier si les services sont installés.
+
+# Fonction pour vérifier si un conteneur avec une image spécifique existe
+check_container_by_image() {
+    local image_name="$1"
+    local container_id=$(docker ps -aq --filter "ancestor=$image_name")
+
+    if [ -n "$container_id" ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+# Fonction pour vérifier si un conteneur avec un nom spécifique existe
+check_container_by_name() {
+    local container_name="$1"
+    local container_id=$(docker ps -aq --filter "name=$container_name")
+
+    if [ -n "$container_id" ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+# Vérifier si les conteneurs spécifiques existent
+check_container_by_image "bitnami/mysql"
+mysql_installed=$?
+
+check_container_by_image "phpmyadmin/phpmyadmin"
+phpmyadmin_installed=$?
+
+check_container_by_image "debian"
+apache_installed=$?
+php_installed=$apache_installed
+
+# Vérifier si les noms des conteneurs ne sont pas déjà utilisés.
+
+check_container_by_name "$DB_CONTAINER_NAME"
+db_container_name_exists=$?
+
+check_container_by_name "$PHPMYADMIN_CONTAINER_NAME"
+phpmyadmin_container_name_exists=$?
+
+check_container_by_name "$WEB_CONTAINER_NAME"
+web_container_name_exists=$?
+
+
+#===================================================================#
