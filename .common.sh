@@ -104,11 +104,10 @@ run_command()
 {
     if [ "$verbose" = "true" ]; then
         "$@" 2>&1 | tee -a /var/log/ApacheAutomatisation.log
-        return $?
     else
         "$@" 2>&1 | tee -a /var/log/ApacheAutomatisation.log &>/dev/null
-        return $?
     fi
+    return $?
 }
 
 #===================================================================#
