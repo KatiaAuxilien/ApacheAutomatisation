@@ -206,7 +206,7 @@ volumes:
 networks:
   $NETWORK_NAME:
     external: true" > docker-compose.yml
-  # error_handler $? "Docker > L'écriture du fichier docker-compose.yml a échouée."
+  error_handler $? "Docker > L'écriture du fichier docker-compose.yml a échouée."
 
 logs_success "Docker > La préparation de la configuration du docker-compose.yml pour PhpMyAdmin et mysql est terminée."
 
@@ -252,7 +252,7 @@ logs_info "Apache & PHP > Préparation de la configuration d'installation en cou
   run_command touch apache/Dockerfile
   error_handler $? "Apache & PHP > La création du fichier apache/Dockerfile a échouée."
 
-  run_command echo "FROM debian:latest
+  echo "FROM debian:latest
 RUN apt update -y
 RUN apt-get install -y apache2 apache2-utils
 RUN apt-get install -y php libapache2-mod-php php-mysql
@@ -329,7 +329,7 @@ logs_info "Apache > Préparation de la configuration en cours ..."
   run_command chmod -R 755 apache/apache2.conf
   error_handler $? "Apache > L'attribution des droits sur le fichier apache/apache2.conf a échouée."
 
-  run_command echo "ServerRoot \"/etc/apache2\"
+  echo "ServerRoot \"/etc/apache2\"
 
 ServerName $DOMAIN_NAME
 
@@ -406,7 +406,7 @@ IncludeOptional sites-enabled/*.conf" > apache/apache2.conf
     run_command touch apache/000-default.conf
     error_handler $? "Apache > Page d'accueil > La création du fichier apache/000-default.conf a échouée."
 
-    run_command echo "<VirtualHost *:80>
+    echo "<VirtualHost *:80>
   ServerAdmin $WEB_ADMIN_ADDRESS
   ServerName $DOMAIN_NAME
 
@@ -461,7 +461,7 @@ IncludeOptional sites-enabled/*.conf" > apache/apache2.conf
     run_command touch apache/ports.conf
     error_handler $? "Apache > Page d'accueil > La création du fichier apache/ports.conf a échouée."
 
-    run_command echo "
+    echo "
 # If you just change the port or add more ports here, you will likely also
 # have to change the VirtualHost statement in
 # /etc/apache2/sites-enabled/000-default.conf
@@ -487,7 +487,7 @@ Listen $WEB_PORT
     run_command chmod -R 755 apache/www/html/index.html
     error_handler $? "Apache > Page d'accueil > L'attribution des droits au fichier apache/www/html/index.html a échouée."
 
-    run_command echo "<!DOCTYPE html>
+    echo "<!DOCTYPE html>
 <html>
   <head>
     <title>Accueil de $DOMAIN_NAME</title>
@@ -568,7 +568,7 @@ logs_info "Apache > Sites > Préparation de la configuration en cours ..."
         run_command sudo touch apache/www/$site_name/index.html
         error_handler $? "Apache > Sites > $site_name > La création du fichier apache/www/$site_name/index.html a échouée."
 
-        run_command echo "<!DOCTYPE html>
+        echo "<!DOCTYPE html>
 <html>
     <head>
         <title>$site_name</title>
@@ -607,7 +607,7 @@ body{
         run_command touch apache/sites-available/$site_name.conf
         error_handler $? "Apache > Sites > $site_name > La création du fichier apache/sites-available/$site_name.conf a échouée."
 
-        run_command echo "
+        echo "
 <VirtualHost *:80>
   ServerAdmin $WEB_ADMIN_ADDRESS
   ServerName $site_name.$DOMAIN_NAME
@@ -676,7 +676,7 @@ body{
         run_command chmod -R 755 apache/www/$site_name/confidential/confidential.php
         error_handler $? "Apache > Sites > $site_name > .htaccess > L'attribution des droits sur le dossier apache/www/$site_name/confidential/confidential.php a échouée."
 
-        run_command echo "<!DOCTYPE html>
+        echo "<!DOCTYPE html>
 <html>
     <head>
         <title>Page protégée du site $site_name</title>
@@ -770,7 +770,7 @@ table {
         run_command touch apache/www/$site_name/confidential/.htaccess
         error_handler $? "Apache > Sites > $site_name > .htaccess > La création du fichier apache/www/$site_name/confidential/.htaccess a échouée."
 
-        run_command echo "AuthType Basic
+        echo "AuthType Basic
         AuthName \"Accès protégé\"
         AuthUserFile /var/www/.htpasswd
         require valid-user
@@ -796,7 +796,7 @@ logs_info "Apache > Sécurisation > Préparation de la configuration avancée en
     run_command touch apache/mods/modsecurity.conf
     error_handler $? "Apache > Sécurisation > ModSecurity > La création du fichier apache/mods/modsecurity.conf a échoué."
 
-    run_command echo "
+    echo "
 # -- Rule engine initialization ----------------------------------------------
 
 # Enable ModSecurity, attaching it to every transaction. Use detection
@@ -1041,7 +1041,7 @@ SecStatusEngine Off" > apache/mods/modsecurity.conf
     run_command touch apache/mods/security2.conf
     error_handler $? "Apache > Sécurisation > ModSecurity > La création du fichier apache/mods/security2.conf a échoué."
 
-    run_command echo "<IfModule security2_module>
+    echo "<IfModule security2_module>
   # Default Debian dir for modsecurity's persistent data
   SecDataDir /var/cache/modsecurity
 
@@ -1089,7 +1089,7 @@ SecStatusEngine Off" > apache/mods/modsecurity.conf
     run_command touch apache/mods/evasive.conf
     error_handler $? "Apache > Sécurisation > ModEvasive > La création /apache/mods/evasive.conf a échouée."
 
-    run_command echo "
+    echo "
     <IfModule mod_evasive20.c>
         DOSHashTableSize    3097
         DOSPageCount        2
@@ -1171,28 +1171,28 @@ PHPMYADMIN_CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}
 # Mettre à jour le fichier /etc/hosts
 logs_info "Mise à jour du fichier /etc/hosts en cours ..."
 
-  run_command echo "$WEB_CONTAINER_IP $DOMAIN_NAME" >> /etc/hosts
+  echo "$WEB_CONTAINER_IP $DOMAIN_NAME" >> /etc/hosts
   error_handler $? "L'écriture de $WEB_CONTAINER_IP $DOMAIN_NAME dans /etc/hosts échouée."
 
-  run_command echo "$WEB_CONTAINER_IP siteA.$DOMAIN_NAME" >> /etc/hosts
+  echo "$WEB_CONTAINER_IP siteA.$DOMAIN_NAME" >> /etc/hosts
   error_handler $? "L'écriture de $WEB_CONTAINER_IP siteA.$DOMAIN_NAME dans /etc/hosts échouée."
 
-  run_command echo "$WEB_CONTAINER_IP siteB.$DOMAIN_NAME" >> /etc/hosts
+  echo "$WEB_CONTAINER_IP siteB.$DOMAIN_NAME" >> /etc/hosts
   error_handler $? "L'écriture de $WEB_CONTAINER_IP siteB.$DOMAIN_NAME dans /etc/hosts échouée."
 
-  run_command echo "$PHPMYADMIN_CONTAINER_IP phpmyadmin.$DOMAIN_NAME" >> /etc/hosts
+  echo "$PHPMYADMIN_CONTAINER_IP phpmyadmin.$DOMAIN_NAME" >> /etc/hosts
   error_handler $? "L'écriture de $PHPMYADMIN_CONTAINER_IP phpmyadmin.$DOMAIN_NAME dans /etc/hosts échouée."
 
 logs_success "Mise à jour du fichier /etc/hosts terminée."
 
 # Afficher les adresses IP des conteneurs
-run_command echo "Adresses IP des conteneurs du réseau docker $NETWORK_NAME :"
-run_command echo "$WEB_CONTAINER_NAME :"
-run_command echo "   $WEB_CONTAINER_IP:$WEB_PORT $DOMAIN_NAME"
-run_command echo "$PHPMYADMIN_CONTAINER_NAME : "
-run_command echo "   $PHPMYADMIN_CONTAINER_IP:$PHPMYADMIN_PORT phpmyadmin.$DOMAIN_NAME"
-run_command echo "$DB_CONTAINER_NAME :"
-run_command echo "   $DB_CONTAINER_IP:$DB_PORT"
+echo "Adresses IP des conteneurs du réseau docker $NETWORK_NAME :"
+echo "$WEB_CONTAINER_NAME :"
+echo "   $WEB_CONTAINER_IP:$WEB_PORT $DOMAIN_NAME"
+echo "$PHPMYADMIN_CONTAINER_NAME : "
+echo "   $PHPMYADMIN_CONTAINER_IP:$PHPMYADMIN_PORT phpmyadmin.$DOMAIN_NAME"
+echo "$DB_CONTAINER_NAME :"
+echo "   $DB_CONTAINER_IP:$DB_PORT"
 
 #===================================================================#
 
@@ -1206,7 +1206,7 @@ logs_info "Génération du script de gestion des services phpmyadmin, mysql et p
   run_command touch manage_services.sh
   error_handler $? "La création du fichier manage_services.sh a échouée."
 
-  run_command echo "#!/bin/bash
+  echo "#!/bin/bash
 
 # .·:'''''''''''''''''''''''''''''''''''''''''''''':·.
 # : :  ____                       _                : :

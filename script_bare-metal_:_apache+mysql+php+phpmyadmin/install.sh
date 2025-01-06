@@ -140,7 +140,7 @@ logs_success "Apache > Service lancé."
 #===================================================================#
 logs_info "Apache > Configuration basique du service en cours ..."
 
-    run_command echo "ServerRoot \"/etc/apache2\"
+    echo "ServerRoot \"/etc/apache2\"
 
 ServerName $DOMAIN_NAME
 
@@ -213,7 +213,7 @@ IncludeOptional sites-enabled/*.conf" > /etc/apache2/apache2.conf
 
 CERT_NAME="servicescomplexe"
 
-    run_command echo "<VirtualHost *:80>
+    echo "<VirtualHost *:80>
   ServerAdmin $WEB_ADMIN_ADDRESS
   ServerName $DOMAIN_NAME
 
@@ -265,10 +265,10 @@ CERT_NAME="servicescomplexe"
 </VirtualHost>" > /etc/apache2/sites-enabled/000-default.conf
     error_handler $? "Apache > L'écriture du fichier de configuration du site par défaut a échouée."
 
-    run_command echo "127.0.0.1 $DOMAIN_NAME" >> /etc/hosts
+    echo "127.0.0.1 $DOMAIN_NAME" >> /etc/hosts
     error_handler $? "Apache > L'écriture du fichier /etc/hosts a échouée."
 
-    run_command echo "# If you just change the port or add more ports here, you will likely also
+    echo "# If you just change the port or add more ports here, you will likely also
 # have to change the VirtualHost statement in
 # /etc/apache2/sites-enabled/000-default.conf
 
@@ -366,7 +366,7 @@ logs_info "Apache > Sécurisation du service en cours..."
           exit 1
         fi
 
-        run_command echo "# -- Rule engine initialization ----------------------------------------------
+        echo "# -- Rule engine initialization ----------------------------------------------
 
 # Enable ModSecurity, attaching it to every transaction. Use detection
 # only to start with, because that minimises the chances of post-installation
@@ -611,7 +611,7 @@ SecRule REMOTE_ADDR \"^$IP\$\" \"phase:1,pass,nolog,id:1000001\"
         error_handler $? "Apache > Sécurisation > ModSecurity > La configuration de /etc/modsecurity/modsecurity.conf a échouée."
 logs_success "Apache > Sécurisation > ModSecurity > L'adresse IP $IP a été ajoutée à la configuration de ModSecurity."
 
-        run_command echo "<IfModule security2_module>
+        echo "<IfModule security2_module>
   # Default Debian dir for modsecurity's persistent data
   SecDataDir /var/cache/modsecurity
 
@@ -668,7 +668,7 @@ logs_success "Apache > Sécurisation > ModSecurity > L'adresse IP $IP a été aj
 
         run_command sudo mkdir /var/log/mod_evasive
 
-        run_command echo "<IfModule mod_evasive20.c>
+        echo "<IfModule mod_evasive20.c>
     DOSHashTableSize    3097
     DOSPageCount        2
     DOSSiteCount        50
@@ -714,7 +714,7 @@ logs_info "Apache > Site page d'accueil > Création et configuration de la page 
     run_command chmod -R 755 /var/www/html/index.html
     error_handler $? "Apache > Site page d'accueil > L'attribution des droits sur le fichier /var/www/html/index.html a échoué."
 
-    run_command echo "<!DOCTYPE html>
+    echo "<!DOCTYPE html>
 <html>
   <head>
     <title>Accueil de $DOMAIN_NAME</title>
@@ -764,7 +764,7 @@ logs_success "Apache > .htaccess > Configuration terminée."
         run_command sudo touch /var/www/$site_name/index.html
         error_handler $? "Apache > $site_name > La création du fichier /var/www/$site_name/index.html a échouée."
 
-        run_command echo "<!DOCTYPE html>
+        echo "<!DOCTYPE html>
 <html>
     <head>
         <title>$site_name</title>
@@ -799,7 +799,7 @@ body{
         error_handler $? "Apache > $site_name > La création du fichier /etc/apache2/sites-available/$site_name.conf a échouée."
 
 
-        run_command echo "<VirtualHost *:80>
+        echo "<VirtualHost *:80>
   ServerAdmin $WEB_ADMIN_ADDRESS
   ServerName $site_name.$DOMAIN_NAME
 
@@ -864,7 +864,7 @@ body{
         run_command chmod -R 755 /var/www/$site_name/confidential/confidential.php
         error_handler $? "Apache > $site_name > L'attribution des droits au fichier /var/www/$site_name/confidential/confidential.php a échouée."
 
-        run_command echo "<!DOCTYPE html>
+        echo "<!DOCTYPE html>
 <html>
     <head>
         <title>Page protégée du site $site_name</title>
@@ -958,7 +958,7 @@ table {
         run_command touch /var/www/$site_name/confidential/.htaccess
         error_handler $? "Apache > $site_name > La création du fichier /var/www/$site_name/confidential/.htaccess a échouée."
 
-        run_command echo "AuthType Basic
+        echo "AuthType Basic
 AuthName \"Accès protégé\"
 AuthUserFile /var/www/.htpasswd
 require valid-user
@@ -971,7 +971,7 @@ Options -Indexes" > /var/www/$site_name/confidential/.htaccess
         run_command sudo systemctl reload apache2
         error_handler $? "Apache > $site_name > Le redémarrage du service apache a échouée."
 
-        run_command echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
+        echo "127.0.0.1 $site_name.$DOMAIN_NAME" >> /etc/hosts
         error_handler $? "Apache > $site_name > L'écriture du fichier /etc/hosts a échouée."
 
     logs_success "Apache > $site_name > $site_name.$DOMAIN_NAME créé et configuré."
@@ -1148,7 +1148,7 @@ logs_info "PhpMyAdmin > Installation et configuration en cours ..."
     
     logs_info "PhpMyAdmin > Sécurisation > Configuration de la page phpmyadmin.$DOMAIN_NAME en cours ..."
 
-        run_command echo "<VirtualHost *:80>
+        echo "<VirtualHost *:80>
   ServerAdmin $PHPMYADMIN_ADMIN_ADDRESS
   ServerName phpmyadmin.$DOMAIN_NAME
 
@@ -1210,7 +1210,7 @@ logs_info "PhpMyAdmin > Installation et configuration en cours ..."
         run_command sudo a2ensite phpmyadmin.conf
         error_handler $? "PhpMyAdmin > Sécurisation > Activation du site a échouée."
 
-        run_command echo "127.0.0.1 phpmyadmin.$DOMAIN_NAME" >> /etc/hosts
+        echo "127.0.0.1 phpmyadmin.$DOMAIN_NAME" >> /etc/hosts
         error_handler $? "PhpMyAdmin > Sécurisation > L'écriture dans /etc/hosts échouée."
 
     logs_success "PhpMyAdmin > Sécurisation > Configuration de la page phpmyadmin.$DOMAIN_NAME terminée."
@@ -1219,7 +1219,7 @@ logs_info "PhpMyAdmin > Installation et configuration en cours ..."
         run_command sudo touch /usr/share/phpmyadmin/.htaccess
         error_handler $? "PhpMyAdmin > Sécurisation > .htaccess > La création du fichier /usr/share/phpmyadmin/.htaccess a échouée."
 
-        run_command echo "AuthType Basic
+        echo "AuthType Basic
 AuthName \"Accès protégé\"
 AuthUserFile /var/www/.htpasswd
 require valid-user
