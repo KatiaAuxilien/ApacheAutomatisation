@@ -147,7 +147,7 @@ logs_success "Services complexes > Docker > La préparation de la configuration 
 #===================================================================#
 
 # logs_info "Services complexes > PhpMyAdmin > Préparation de la configuration en cours ..."
-#TODO : Configurer PhpMyAdmin pour le TLS.
+#TODO : Configurer PhpMyAdmin pour le TLS. (Page en HTTPS + .htaccess + modevasive + modsecurity)
 # logs_success "Services complexes > PhpMyAdmin > Préparation de la configuration terminée."
 
 #===================================================================#
@@ -173,7 +173,6 @@ INSERT INTO todo_list (content, statut) VALUES
 EOF
 )
 
-#TODO : Configurer mysql pour le TLS.
 logs_success "Services complexes > mysql > La préparation de la requête d'initialisation de la base de données est terminée."
 
 #===================================================================#
@@ -262,7 +261,7 @@ logs_info "Services complexes > Apache > Préparation de la configuration en cou
   run_command chmod -R 755 apache/apache2.conf
   error_handler $? "Services complexes > Apache > L'attribution des droits sur le fichier apache/apache2.conf a échouée."
 
-echo "ServerRoot \"/etc/apache2\"
+  run_command echo "ServerRoot \"/etc/apache2\"
 
 ServerName $DOMAIN_NAME
 
@@ -1136,7 +1135,7 @@ logs_end "Services complexes > Installation et configuration des services apache
 #===================================================================#
 logs_info "Services complexes > Génération du script de gestion des services phpmyadmin, mysql et php:apache sous docker."
 
-  touch manage_services.sh
+  run_command touch manage_services.sh
   error_handler $? "Services complexes > La création du fichier manage_services.sh a échouée."
 
   run_command echo "#!/bin/bash
@@ -1146,14 +1145,15 @@ source ./../.common.sh
 start_services()
 {
   logs_info \"Démarrage des services...\"
-  run_command docker start $DB_CONTAINER_NAME
-  error_handler \$? \"Le démarrage du service $DB_CONTAINER_NAME a échouée.\"
 
-  run_command docker start $PHPMYADMIN_CONTAINER_NAME
-  error_handler \$? \"Le démarrage du service $PHPMYADMIN_CONTAINER_NAME a échouée.\"
+    run_command docker start $DB_CONTAINER_NAME
+    error_handler \$? \"Le démarrage du service $DB_CONTAINER_NAME a échouée.\"
 
-  run_command docker start $WEB_CONTAINER_NAME
-  error_handler \$? \"Le démarrage du service $WEB_CONTAINER_NAME a échouée.\"
+    run_command docker start $PHPMYADMIN_CONTAINER_NAME
+    error_handler \$? \"Le démarrage du service $PHPMYADMIN_CONTAINER_NAME a échouée.\"
+
+    run_command docker start $WEB_CONTAINER_NAME
+    error_handler \$? \"Le démarrage du service $WEB_CONTAINER_NAME a échouée.\"
 
   logs_success \"Services démarrés.\"
 }
@@ -1162,14 +1162,15 @@ start_services()
 stop_services()
 {
   logs_info \"Arrêt des services...\"
-  run_command docker stop $DB_CONTAINER_NAME
-  error_handler \$? \"L'arrêt du service $DB_CONTAINER_NAME a échouée.\"
 
-  run_command docker stop $PHPMYADMIN_CONTAINER_NAME
-  error_handler \$? \"L'arrêt du service $PHPMYADMIN_CONTAINER_NAME a échouée.\"
+    run_command docker stop $DB_CONTAINER_NAME
+    error_handler \$? \"L'arrêt du service $DB_CONTAINER_NAME a échouée.\"
 
-  run_command docker stop $WEB_CONTAINER_NAME
-  error_handler \$? \"L'arrêt du service $WEB_CONTAINER_NAME a échouée.\"
+    run_command docker stop $PHPMYADMIN_CONTAINER_NAME
+    error_handler \$? \"L'arrêt du service $PHPMYADMIN_CONTAINER_NAME a échouée.\"
+
+    run_command docker stop $WEB_CONTAINER_NAME
+    error_handler \$? \"L'arrêt du service $WEB_CONTAINER_NAME a échouée.\"
 
   logs_success \"Services arrêtés.\"
 }
@@ -1178,14 +1179,15 @@ stop_services()
 restart_services()
 {
   logs_info \"Redémarrage des services...\"
-  run_command docker stop $DB_CONTAINER_NAME
-  error_handler \$? \"Le redémarrage du service $DB_CONTAINER_NAME a échouée.\"
+  
+    run_command docker stop $DB_CONTAINER_NAME
+    error_handler \$? \"Le redémarrage du service $DB_CONTAINER_NAME a échouée.\"
 
-  run_command docker stop $PHPMYADMIN_CONTAINER_NAME
-  error_handler \$? \"Le redémarrage du service $PHPMYADMIN_CONTAINER_NAME a échouée.\"
+    run_command docker stop $PHPMYADMIN_CONTAINER_NAME
+    error_handler \$? \"Le redémarrage du service $PHPMYADMIN_CONTAINER_NAME a échouée.\"
 
-  run_command docker stop $WEB_CONTAINER_NAME
-  error_handler \$? \"Le redémarrage du service $WEB_CONTAINER_NAME a échouée.\"
+    run_command docker stop $WEB_CONTAINER_NAME
+    error_handler \$? \"Le redémarrage du service $WEB_CONTAINER_NAME a échouée.\"
 
   logs_success \"Services redémarrés.\"
 }

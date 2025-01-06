@@ -46,8 +46,6 @@ required_vars_start=(
 # Vérification du lancement en droits admin
 source ./.common.sh
 
-#TODO : Vérification des variables fournies dans le .env
-
 #===================================================================#
 # 2. Préparation de l'arborescence                                  #
 #===================================================================#

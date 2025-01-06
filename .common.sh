@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #===================================================================#
+
 # Variables de couleurs ansii.
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -12,6 +13,7 @@ RESET='\033[0m'
 verbose=false
 
 #===================================================================#
+
 # Fonction de gestion de l'affichage des erreurs.
 error_handler()
 {
@@ -50,6 +52,7 @@ logs_end()
     logs "$BLUE" "$*"
 }
 #===================================================================#
+
 # Fonction pour vérifier si une variable est définie.
 check_variable() 
 {
