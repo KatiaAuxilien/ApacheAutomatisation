@@ -1,7 +1,6 @@
 #!/bin/bash
 
-mkdir /logs
-
+# Vérification de la configuration de la machine hôte.
 if [ "$EUID" -ne 0 ]
 then
     echo -e "${RED}Services complexes > Ce script doit être exécuté avec des privilèges root.${RESET}"
@@ -18,7 +17,21 @@ if ! command -v docker-compose &> /dev/null; then
     exit 1
 fi
 
-#TODO : Vérifier le format valide des variables
+# Analyse des options de ligne de commande.
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --verbose)
+            verbose=true
+            shift
+            ;;
+        *)
+            echo -e "${RED}Services complexes > Option invalide : $1 ${RESET}" >&2
+            exit 1
+            ;;
+    esac
+done
+
+# Vérifier le format valide des variables.
 
 logs_info "Vérification des variables .env..."
 
@@ -51,7 +64,7 @@ logs_info "Vérification des variables .env..."
         port_values[$port_value]=1
     done
 
-    # Vérifier que les noms de conteneurs sont uniques
+    # Vérifier que les noms de conteneurs sont uniques.
     container_vars=("WEB_CONTAINER_NAME" "PHPMYADMIN_CONTAINER_NAME" "DB_CONTAINER_NAME")
     declare -A container_values
 
@@ -64,7 +77,7 @@ logs_info "Vérification des variables .env..."
         container_values[$container_value]=1
     done
 
-    # Vérifier que les autres variables ont au moins 4 caractères
+    # Vérifier que les autres variables ont au moins 4 caractères.
     for var in "${required_vars_start[@]}"; do
         value="${!var}"
         if [[ ! "$var" =~ _PORT$ ]] && [ ${#value} -lt 4 ]; then

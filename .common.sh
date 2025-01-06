@@ -24,13 +24,15 @@ error_handler()
 
 # Fonctions d'affichage.
 logs()
-{
+{   
+    local color="$1"
+    shift
+    date_formated=$(date +"%d-%m-%Y %H:%M:%S")
+
     if [ "$verbose" = true ]; then
-        local color="$1"
-        shift
-        date_formated=$(date +"%d-%m-%Y %H:%M:%S")
-        echo -e "${color}[$date_formated] $1 ${RESET}" | tee -a /var/log/ApacheAutomatisation.log
+        echo -e "${color}[$date_formated] $1 ${RESET}"
     fi
+    echo "[$date_formated] $1" >> /var/log/ApacheAutomatisation.log
 }
 
 logs_info()
@@ -49,7 +51,8 @@ logs_end()
 }
 #===================================================================#
 # Fonction pour vérifier si une variable est définie.
-check_variable() {
+check_variable() 
+{
   local var_name=$1
   if [ -z "${!var_name+x}" ]; then
     echo "Services complexes > La variable $var_name n'est pas définie."
@@ -58,7 +61,8 @@ check_variable() {
 }
 
 # Fonction pour exécuter des commandes avec redirection conditionnelle.
-run_command() {
+run_command() 
+{
     if [ "$verbose" = true ]; then
         "$@"
     else

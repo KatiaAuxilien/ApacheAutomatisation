@@ -1,6 +1,5 @@
 #!/bin/bash
 
-mkdir /logs
 
 if [ "$EUID" -ne 0 ]
 then
