@@ -158,13 +158,13 @@ logs_success "Docker > Suppression des données de la base de données terminée
 logs_info "Docker > Arrêts des conteneurs en cours ..."
 
 	run_command docker stop $PHPMYADMIN_CONTAINER_NAME
-	error_handler $? "Docker > Arrêt du conteneur $PHPMYADMIN_CONTAINER_NAME a échoué."
+	# error_handler $? "Docker > Arrêt du conteneur $PHPMYADMIN_CONTAINER_NAME a échoué."
 
 	run_command docker stop $DB_CONTAINER_NAME
-	error_handler $? "Docker > Arrêt du conteneur $DB_CONTAINER_NAME a échoué."
+	# error_handler $? "Docker > Arrêt du conteneur $DB_CONTAINER_NAME a échoué."
 
 	run_command docker stop $WEB_CONTAINER_NAME
-	error_handler $? "Docker > Arrêt du conteneur $WEB_CONTAINER_NAME a échoué."
+	# error_handler $? "Docker > Arrêt du conteneur $WEB_CONTAINER_NAME a échoué."
 
 logs_success "Docker > Arrêts des conteneurs terminé."
 
