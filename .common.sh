@@ -33,11 +33,9 @@ logs()
 
 logs_error()
 {
-    local color="$1"
-    shift
     date_formated=$(date +"%d-%m-%Y %H:%M:%S")
-    echo -e "${PINK}[🍋 PAMPLUSS]${RESET}[$date_formated]${RED}[$date_formated] $1 ${RESET}"
-    echo -e "${PINK}[🍋 PAMPLUSS]${RESET}[$date_formated]${RED}[$date_formated] $1 ${RESET}" >> /var/log/ApacheAutomatisation.log
+    echo -e "${PINK}[🍋 PAMPLUSS]${RESET}[$date_formated]${RED} $1 ${RESET}"
+    echo -e "${PINK}[🍋 PAMPLUSS]${RESET}[$date_formated]${RED} $1 ${RESET}" >> /var/log/ApacheAutomatisation.log
 }
 
 logs_info()
