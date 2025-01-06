@@ -25,7 +25,7 @@ error_handler()
 # Fonctions d'affichage.
 logs()
 {
-    if ["$verbose" = true]; then
+    if [ "$verbose" = true ]; then
         local color="$1"
         shift
         date_formated=$(date +"%d-%m-%Y %H:%M:%S")
