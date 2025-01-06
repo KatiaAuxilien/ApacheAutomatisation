@@ -43,7 +43,6 @@ required_vars_start=(
 # 1. Vérifications de l'environnement et des variables              #
 #===================================================================#
 
-# Vérification du lancement en droits admin
 source ./.common.sh
 
 #===================================================================#
@@ -304,7 +303,7 @@ logs_info "Services complexes > Apache > Sécurisation du service en cours..."
 
         # Vérifier si l'adresse IP a été récupérée correctement
         if [ -z "$IP" ]; then
-          echo "Services complexes > Apache > Sécurisation > ModSecurity > Impossible de récupérer l'adresse IP."
+          logs_error "Services complexes > Apache > Sécurisation > ModSecurity > Impossible de récupérer l'adresse IP."
           exit 1
         fi
 
@@ -550,8 +549,8 @@ SecStatusEngine Off
 
 SecRule REMOTE_ADDR \"^$IP\$\" \"phase:1,pass,nolog,id:1000001\"
 " > /etc/modsecurity/modsecurity.conf
-        error_handler $? "Apache > Sécurisation > ModSecurity > La configuration de /etc/modsecurity/modsecurity.conf a échouée."
-echo "Apache > Sécurisation > ModSecurity > L'adresse IP $IP a été ajoutée à la configuration de ModSecurity."
+        error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > La configuration de /etc/modsecurity/modsecurity.conf a échouée."
+logs_success "Services complexes > Apache > Sécurisation > ModSecurity > L'adresse IP $IP a été ajoutée à la configuration de ModSecurity."
 
         echo "<IfModule security2_module>
   # Default Debian dir for modsecurity's persistent data
@@ -567,7 +566,7 @@ echo "Apache > Sécurisation > ModSecurity > L'adresse IP $IP a été ajoutée �
   IncludeOptional /etc/apache2/modsecurity-crs/coreruleset-3.3.0/crs-setup.conf
   IncludeOptional /etc/apache2/modsecurity-crs/coreruleset-3.3.0/rules/*.conf
 </IfModule>" > /etc/apache2/mods-enabled/security2.conf
-        error_handler $? "Apache > Sécurisation > ModSecurity > La configuration de /etc/apache2/mods-enabled/security2.conf a échouée."
+        error_handler $? "Services complexes > Apache > Sécurisation > ModSecurity > La configuration de /etc/apache2/mods-enabled/security2.conf a échouée."
 
         # ModSecurity : Règles de base OWASP (CRS)
 

@@ -3,17 +3,17 @@
 # Vérification de la configuration de la machine hôte.
 if [ "$EUID" -ne 0 ]
 then
-    echo -e "${RED}Services complexes > Ce script doit être exécuté avec des privilèges root.${RESET}"
+    logs_error "Services complexes > Ce script doit être exécuté avec des privilèges root."
     exit 1
 fi
 
 if ! command -v docker &> /dev/null; then
-    echo -e "${RED}Services complexes > Docker n'est pas installé. Veuillez l'installer avant de continuer.${RESET}"
+    logs_error "Services complexes > Docker n'est pas installé. Veuillez l'installer avant de continuer."
     exit 1
 fi
 
 if ! command -v docker-compose &> /dev/null; then
-    echo -e "${RED}Services complexes > Docker n'est pas installé. Veuillez l'installer avant de continuer.${RESET}"
+    logs_error "Services complexes > Docker n'est pas installé. Veuillez l'installer avant de continuer."
     exit 1
 fi
 
@@ -25,11 +25,14 @@ while [[ "$#" -gt 0 ]]; do
             shift
             ;;
         *)
-            echo -e "${RED}Services complexes > Option invalide : $1 ${RESET}" >&2
+            logs_error "Services complexes > Option invalide : $1"
             exit 1
             ;;
     esac
 done
+
+# Vérifier si les services sont installés.
+
 
 # Vérifier le format valide des variables.
 
@@ -37,7 +40,7 @@ logs_info "Vérification des variables .env..."
 
     # Charger les variables depuis le fichier .env
     if [ ! -f ../.env ]; then
-        echo "Services complexes > Erreur : fichier .env non trouvé."
+        logs_error "Services complexes > Erreur : fichier .env non trouvé."
         exit 1
     fi
     
@@ -54,11 +57,11 @@ logs_info "Vérification des variables .env..."
     for port_var in "${port_vars[@]}"; do
         port_value="${!port_var}"
         if ! [[ "$port_value" =~ ^[0-9]+$ ]] || [ "$port_value" -lt 1 ] || [ "$port_value" -gt 65535 ]; then
-            echo "Services complexes > Erreur : La variable $port_var doit être un nombre entre 1 et 65535."
+            logs_error "Services complexes > Erreur : La variable $port_var doit être un nombre entre 1 et 65535."
             exit 1
         fi
         if [ "${port_values[$port_value]}" ]; then
-            echo "Services complexes > Erreur : La valeur du port $port_value est utilisée par plusieurs variables."
+            logs_error "Services complexes > Erreur : La valeur du port $port_value est utilisée par plusieurs variables."
             exit 1
         fi
         port_values[$port_value]=1
@@ -71,7 +74,7 @@ logs_info "Vérification des variables .env..."
     for container_var in "${container_vars[@]}"; do
         container_value="${!container_var}"
         if [ "${container_values[$container_value]}" ]; then
-            echo "Services complexes > Erreur : La valeur du conteneur $container_value est utilisée par plusieurs variables."
+            logs_error "Services complexes > Erreur : La valeur du conteneur $container_value est utilisée par plusieurs variables."
             exit 1
         fi
         container_values[$container_value]=1
@@ -81,7 +84,7 @@ logs_info "Vérification des variables .env..."
     for var in "${required_vars_start[@]}"; do
         value="${!var}"
         if [[ ! "$var" =~ _PORT$ ]] && [ ${#value} -lt 4 ]; then
-            echo "Services complexes > Erreur : La variable $var doit avoir au moins 4 caractères."
+            logs_error "Services complexes > Erreur : La variable $var doit avoir au moins 4 caractères."
             exit 1
         fi
     done

@@ -12,17 +12,10 @@ RESET='\033[0m'
 # Variable pour contrôler le mode verbose.
 verbose=false
 
-#===================================================================#
+# Variable pour la vérification de l'installation ou non des services.
+installed=false
 
-# Fonction de gestion de l'affichage des erreurs.
-error_handler()
-{
-    if [ $1 -ne 0 ]
-    then
-        echo -e "${RED}Erreur : $2 ${RESET}"
-        exit $1
-    fi
-}
+#===================================================================#
 
 # Fonctions d'affichage.
 logs()
@@ -35,6 +28,11 @@ logs()
         echo -e "${color}[$date_formated] $1 ${RESET}"
     fi
     echo "[$date_formated] $1" >> /var/log/ApacheAutomatisation.log
+}
+
+logs_error()
+{
+    logs "$RED" "$*"
 }
 
 logs_info()
@@ -51,6 +49,18 @@ logs_end()
 {
     logs "$BLUE" "$*"
 }
+
+
+# Fonction de gestion de l'affichage des erreurs.
+error_handler()
+{
+    if [ $1 -ne 0 ]
+    then
+        logs_error "$2"
+        exit $1
+    fi
+}
+
 #===================================================================#
 
 # Fonction pour vérifier si une variable est définie.
@@ -58,7 +68,7 @@ check_variable()
 {
   local var_name=$1
   if [ -z "${!var_name+x}" ]; then
-    echo "Services complexes > La variable $var_name n'est pas définie."
+    logs_error "Services complexes > La variable $var_name n'est pas définie."
     exit 2
   fi
 }
