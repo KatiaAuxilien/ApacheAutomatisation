@@ -81,7 +81,7 @@ logs_end()
 error_handler()
 {
 
-    echo "Debug: error_handler received code $1 and message '$2'"
+    # echo "Debug: error_handler received code $1 and message '$2'" # Debug message
     if [ $1 -ne 0 ]
     then
         logs_error "$2"
