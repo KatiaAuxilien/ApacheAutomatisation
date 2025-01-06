@@ -1076,6 +1076,13 @@ logs_info "PhpMyAdmin > Installation et configuration en cours ..."
 
     # Installer phpMyAdmin
     logs_info "PhpMyAdmin > Installation en cours ..."
+
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/dbconfig-install boolean true"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/app-password-confirm password your_password"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/admin-pass password your_password"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/app-pass password your_password"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2"
+
         # sudo DEBIAN_FRONTEND=noninteractive apt-get install -y phpmyadmin
         run_command sudo apt-get install -y phpmyadmin
         error_handler $? "PhpMyAdmin > L'installation a échouée."

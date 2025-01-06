@@ -200,7 +200,7 @@ logs_info "Désinstallation en cours ..."
 	logs_info "PhpMyAdmin >  Désinstallation en cours ..."
 		
 		# Désinstaller phpMyAdmin
-		run_command sudo DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y phpmyadmin*
+		sudo DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y phpmyadmin*
 		error_handler $? "PhpMyAdmin > La désinstallation de phpmyadmin* a échouée."
 
 		run_command sudo DEBIAN_FRONTEND=noninteractive apt-get purge -y phpmyadmin
