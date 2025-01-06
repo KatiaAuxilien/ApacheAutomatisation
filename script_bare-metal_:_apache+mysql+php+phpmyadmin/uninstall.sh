@@ -28,29 +28,6 @@
 source ./../.common.sh
 #===================================================================#
 
-# Vérification de la configuration de la machine hôte.
-if [ "$EUID" -ne 0 ]
-then
-    logs_error "Ce script doit être exécuté avec des privilèges root."
-    exit 1
-fi
-
-# Analyse des options de ligne de commande.
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --verbose)
-            verbose=true
-            shift
-            ;;
-        *)
-            logs_error "Erreur : option invalide : $1"
-            exit 1
-            ;;
-    esac
-done
-
-#===================================================================#
-
 welcome ".·:'''''''''''''''''''''''''''''''''''''''''''''''''''''''':·."
 welcome ": :  ____                       _                          : :"
 welcome ": : |  _ \ __ _ _ __ ___  _ __ | |_   _ ___ ___            : :"

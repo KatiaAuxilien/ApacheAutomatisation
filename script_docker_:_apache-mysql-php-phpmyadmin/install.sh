@@ -34,30 +34,6 @@
 
 #===================================================================#
 source ../.common.sh
-
-#===================================================================#
-
-# Vérification de la configuration de la machine hôte.
-if [ "$EUID" -ne 0 ]
-then
-    logs_error "Ce script doit être exécuté avec des privilèges root."
-    exit 1
-fi
-
-# Analyse des options de ligne de commande.
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --verbose)
-            verbose=true
-            shift
-            ;;
-        *)
-            logs_error "Erreur : option invalide : $1"
-            exit 1
-            ;;
-    esac
-done
-
 #===================================================================#
 
 welcome ".·:'''''''''''''''''''''''''''''''''''''''''''''':·."
@@ -1240,7 +1216,55 @@ logs_info "Génération du script de gestion des services phpmyadmin, mysql et p
 # : :                      |_|                     : :
 # '·:..............................................:·'
 
-source ./../.common.sh
+#===================================================================#
+
+# Variable pour contrôler le mode verbose.
+verbose=false
+
+# Variables de couleurs ansii 256
+RESET='\033[0m'
+PINK='\033[38;5;206m'
+RED='\033[0;31m'
+
+#===================================================================#
+
+welcome()
+{
+    echo -e \"\${PINK}\$1\${RESET}\"
+    echo -e \"\${PINK}\$1\${RESET}\" >> /var/log/ApacheAutomatisation.log
+}
+
+logs_error()
+{
+    date_formated=\$(date +\"%d-%m-%Y %H:%M:%S\")
+    echo -e \"\${PINK}[🍋 PAMPLUSS]\${RESET}[\$date_formated]\${RED} \$1 \${RESET}\"
+    echo -e \"\${PINK}[🍋 PAMPLUSS]\${RESET}[\$date_formated]\${RED} \$1 \${RESET}\" >> /var/log/ApacheAutomatisation.log
+}
+
+# Fonction de gestion de l'affichage des erreurs.
+error_handler()
+{
+    if [ \$1 -ne 0 ]
+    then
+        logs_error \"\$2\"
+        exit \$1
+    fi
+}
+
+# Fonction pour exécuter des commandes avec redirection conditionnelle.
+run_command() 
+{
+  \"\$@\" 2>&1 | tee -a /var/log/ApacheAutomatisation.log
+}
+
+# Vérification de la configuration de la machine hôte.
+if [ \"\$EUID\" -ne 0 ]
+then
+    logs_error \"Ce script doit être exécuté avec des privilèges root.\"
+    exit 1
+fi
+
+#===================================================================#
 
 # Fonction pour démarrer les services
 start_services()
@@ -1322,6 +1346,8 @@ show_help()
   echo \"  help      Afficher l'aide.\"
 }
 
+#===================================================================#
+
 # Vérifier le nombre d'arguments
 if [ \"\$#\" -ne 1 ]; then
     echo \"Erreur: Nombre d'arguments incorrect.\"
@@ -1351,7 +1377,8 @@ case \$1 in
         show_help
         exit 1
         ;;
-esac" > manage_services.sh
+esac
+#===================================================================#" > manage_services.sh
   error_handler $? "L'écriture du fichier manage_services.sh a échouée."
 
   run_command chmod +x manage_services.sh

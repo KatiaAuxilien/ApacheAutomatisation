@@ -119,7 +119,7 @@ mysql_installed=$?
 check_container_by_image "phpmyadmin/phpmyadmin"
 phpmyadmin_installed=$?
 
-check_container_by_image "debian"
+check_container_by_image "web-php-apache"
 apache_installed=$?
 php_installed=$apache_installed
 
