@@ -14,6 +14,20 @@
 
 #===================================================================#
 
+welcome ".·:'''''''''''''''''''''''''''''''''''''''''''''''''''''''':·."
+welcome ": :  ____                       _                          : :"
+welcome ": : |  _ \ __ _ _ __ ___  _ __ | |_   _ ___ ___            : :"
+welcome ": : | |_) / _\` | '_ \` _ \| '_ \| | | | / __/ __|           : :"
+welcome ": : |  __/ (_| | | | | | | |_) | | |_| \__ \__ \           : :"
+welcome ": : |_|   \__,_|_| |_| |_| .__/|_|\__,_|___/___/        _  : :"
+welcome ": : | |__   __ _ _ __ ___|_|    _ __ ___   ___| |_ __ _| | : :"
+welcome ": : | '_ \ / _\` | '__/ _ \_____| '_ \` _ \ / _ \ __/ _\` | | : :"
+welcome ": : | |_) | (_| | | |  __/_____| | | | | |  __/ || (_| | | : :"
+welcome ": : |_.__/ \__,_|_|  \___|     |_| |_| |_|\___|\__\__,_|_| : :"
+welcome "'·:........................................................:·'"
+
+#===================================================================#
+
 # Vérifier le format valide des variables
 
 logs_info "Vérification des variables .env..."
@@ -23,6 +37,7 @@ logs_info "Vérification des variables .env..."
         logs_error "Erreur : fichier .env non trouvé."
         exit 1
     fi
+    
     source ../.env
 
     for var in "${required_vars_start[@]}"; do
@@ -63,7 +78,7 @@ logs_success "Les variables .env ont été vérifiées."
 # Fonction pour vérifier si un service est installé
 check_service_installed() {
     local service_name="$1"
-    if ! command -v "$service_name" &> /dev/null; then
+    if ! "$service_name" -v  &> /dev/null; then
         return 1
     else
         return 0
