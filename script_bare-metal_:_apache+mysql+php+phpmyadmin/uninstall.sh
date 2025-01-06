@@ -89,7 +89,7 @@ error_count=0
 	  let error_count++
   fi
 
-if [ $error_count -ne 0 ]
+if [ $error_count -ne 0 ];then
   exit 1
 fi
 
