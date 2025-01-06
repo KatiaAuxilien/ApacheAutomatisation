@@ -129,6 +129,10 @@ logs_success "Vérification réussie, les services ne sont pas déjà installés
 # 2. Préparation de l'arborescence                                  #
 #===================================================================#
 
+
+run_command dqkzdqzodqzd
+error_handler $? "nimp."
+
 logs_info "Préparation de l'arborescence en cours ..."
 
   run_command mkdir apache apache/www mysql
