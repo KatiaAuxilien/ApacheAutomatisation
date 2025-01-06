@@ -80,6 +80,8 @@ logs_end()
 # Fonction de gestion de l'affichage des erreurs.
 error_handler()
 {
+
+    echo "Debug: error_handler received code $1 and message '$2'"
     if [ $1 -ne 0 ]
     then
         logs_error "$2"
@@ -102,13 +104,13 @@ check_variable()
 # Fonction pour exécuter des commandes avec redirection conditionnelle.
 run_command() 
 {
+    exit_code=$?
     if [ "$verbose" = "true" ]; then
         "$@" 2>&1 | tee -a /var/log/ApacheAutomatisation.log
     else
         "$@" 2>&1 | tee -a /var/log/ApacheAutomatisation.log &>/dev/null
     fi
-    # return $?
-    return ${PIPESTATUS[0]}
+    return $exit_code
 }
 
 #===================================================================#
