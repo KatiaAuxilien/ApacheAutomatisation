@@ -107,7 +107,8 @@ run_command()
     else
         "$@" 2>&1 | tee -a /var/log/ApacheAutomatisation.log &>/dev/null
     fi
-    return $?
+    # return $?
+    return ${PIPESTATUS[0]}
 }
 
 #===================================================================#
