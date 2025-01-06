@@ -88,11 +88,12 @@ check_service_installed() {
 # Fonction pour vérifier si phpMyAdmin est installé
 check_phpmyadmin_installed() {
     if dpkg -l | grep -q phpmyadmin; then
-        return 0
-    else
         return 1
+    else
+        return 0
     fi
 }
+
 
 check_service_installed "apache"
 apache_installed=$?
