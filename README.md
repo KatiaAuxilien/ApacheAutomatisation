@@ -93,11 +93,16 @@ Step 1 : Launch uninstall.sh (in script-baremetal or script-c).
 sudo ./uninstall.sh
 ```
 
+### Options
+
+- You can add `--verbose` to print all informations during installation or uninstallation.
+
+
 ## TODO (Pistes de progression)
 
 - Install ModRateLimit.
 - Improve phpmyadmin installlation to not have user interface.
-- 
+- Assign error code to each error situations.
 
 ## Sources
 

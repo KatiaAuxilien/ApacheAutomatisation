@@ -32,7 +32,11 @@ logs()
 
 logs_error()
 {
-    logs "$RED" "$*"
+    local color="$1"
+    shift
+    date_formated=$(date +"%d-%m-%Y %H:%M:%S")
+    echo -e "${RED}[$date_formated] $1 ${RESET}"
+    echo "[$date_formated] $1" >> /var/log/ApacheAutomatisation.log
 }
 
 logs_info()
