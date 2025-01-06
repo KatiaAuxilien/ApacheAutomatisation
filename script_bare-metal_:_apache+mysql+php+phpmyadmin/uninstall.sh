@@ -65,6 +65,19 @@ required_vars_start=(
 
 #===================================================================#
 
+# Demander la confirmation de désinstallation
+while true; do
+    read -p "Êtes-vous sûr de vouloir lancer la désinstallation ? Tapez 'yes' pour confirmer : " confirmation
+    if [[ "$confirmation" =~ ^[yY][eE][sS]$ ]]; then
+        break
+    else
+    		logs_end "Désinstallation annulée."
+        exit 0
+    fi
+done
+
+#===================================================================#
+
 logs_info "Vérification des services installés ..."
 
 error_count=0
@@ -90,22 +103,11 @@ error_count=0
   fi
 
 if [ $error_count -ne 0 ];then
+	logs_end "Désinstallation annulée."
   exit 1
 fi
 
 logs_success "Vérification réussie, les services sont installés."
-
-#===================================================================#
-
-# Demander la confirmation de désinstallation
-while true; do
-    read -p "Êtes-vous sûr de vouloir lancer la désinstallation ? Tapez 'yes' pour confirmer : " confirmation
-    if [[ "$confirmation" =~ ^[yY][eE][sS]$ ]]; then
-        break
-    else
-        exit 0
-    fi
-done
 
 #===================================================================#
 # 1. Vérifications de l'environnement et des variables              #

@@ -119,6 +119,7 @@ error_count=0
   fi
 
 if [ $error_count -ne 0 ];then
+    logs_end "Installation annulée."
   exit 1
 fi
 

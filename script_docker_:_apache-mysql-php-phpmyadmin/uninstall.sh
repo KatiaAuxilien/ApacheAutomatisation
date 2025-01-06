@@ -73,6 +73,7 @@ while true; do
     if [[ "$confirmation" =~ ^[yY][eE][sS]$ ]]; then
         break
     else
+    	logs_end "Désinstallation annulée."
         exit 0
     fi
 done
@@ -118,7 +119,8 @@ error_count=0
 	fi
 
 if [ $error_count -ne 0 ];then
-  exit 1
+	logs_end "Désinstallation annulée."
+  	exit 1
 fi
 
 logs_success "Vérification réussie, les services sont installés."

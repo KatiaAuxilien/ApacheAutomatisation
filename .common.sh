@@ -70,7 +70,10 @@ logs_success()
 
 logs_end()
 {
+    verbinit=$verbose
+    verbose=true
     logs "$BLUE" "$*"
+    verbose=$verbinit
 }
 
 
