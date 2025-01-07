@@ -80,6 +80,18 @@ done
 
 logs_info "Vérification des services installés ..."
 
+check_service_installed "apache"
+apache_installed=$?
+
+check_service_installed "php"
+php_installed=$?
+
+check_service_installed "mysql"
+mysql_installed=$?
+
+check_phpmyadmin_installed
+phpmyadmin_installed=$?
+
 error_count=0
 
   if [ $apache_installed -eq 0 ]; then

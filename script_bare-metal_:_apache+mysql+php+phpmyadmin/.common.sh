@@ -94,17 +94,4 @@ check_phpmyadmin_installed() {
     fi
 }
 
-
-check_service_installed "apache"
-apache_installed=$?
-
-check_service_installed "php"
-php_installed=$?
-
-check_service_installed "mysql"
-mysql_installed=$?
-
-check_phpmyadmin_installed
-phpmyadmin_installed=$?
-
 #===================================================================#
