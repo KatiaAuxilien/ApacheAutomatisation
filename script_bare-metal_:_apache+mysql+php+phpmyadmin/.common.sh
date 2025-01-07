@@ -77,21 +77,20 @@ logs_success "Les variables .env ont été vérifiées."
 
 # Fonction pour vérifier si un service est installé
 check_service_installed() {
-    local service_name="$1"
-    if ! $service_name -v  &> /dev/null; then
-        return 0
-    else
+    if dpkg -l | grep -q $1; then
         return 1
+    else
+        return 0
     fi
 }
 
 # Fonction pour vérifier si phpMyAdmin est installé
-check_phpmyadmin_installed() {
-    if dpkg -l | grep -q phpmyadmin; then
-        return 1
-    else
-        return 0
-    fi
-}
+# check_phpmyadmin_installed() {
+#     if dpkg -l | grep -q phpmyadmin; then
+#         return 1
+#     else
+#         return 0
+#     fi
+# }
 
 #===================================================================#
