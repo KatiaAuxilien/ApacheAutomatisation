@@ -77,6 +77,10 @@ while true; do
 done
 
 #===================================================================#
+# 1. Vérifications de l'environnement et des variables              #
+#===================================================================#
+
+source ./.common.sh
 
 logs_info "Vérification des services installés ..."
 
@@ -120,12 +124,6 @@ if [ $error_count -ne 0 ];then
 fi
 
 logs_success "Vérification réussie, les services sont installés."
-
-#===================================================================#
-# 1. Vérifications de l'environnement et des variables              #
-#===================================================================#
-
-source ./.common.sh
 
 #===================================================================#
 
