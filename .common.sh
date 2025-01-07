@@ -113,6 +113,13 @@ run_command()
     return $exit_code
 }
 
+# run_command_no_interactive() 
+# {
+#     eval "$1" &>/dev/null
+#     return $exit_code
+# }
+
+
 #===================================================================#
 
 # Vérification de la configuration de la machine hôte.

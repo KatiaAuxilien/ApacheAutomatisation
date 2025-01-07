@@ -84,13 +84,13 @@ source ./.common.sh
 
 logs_info "Vérification des services installés ..."
 
-check_service "apache"
+check_apache_installed
 apache_installed=$?
 
-check_service "php"
+check_php_installed
 php_installed=$?
 
-check_service "mysql"
+check_mysql_installed
 mysql_installed=$?
 
 check_phpmyadmin_installed
@@ -209,14 +209,16 @@ logs_info "Désinstallation en cours ..."
 #===================================================================#
 	logs_info "PhpMyAdmin >  Désinstallation en cours ..."
 		
+		export DEBIAN_FRONTEND="noninteractive"
+
 		# Désinstaller phpMyAdmin
-		sudo DEBIAN_FRONTEND=noninteractive apt-get remove --purge -y phpmyadmin*
+		run_command sudo apt-get remove --purge -yq phpmyadmin
 		error_handler $? "PhpMyAdmin > La désinstallation de phpmyadmin* a échouée."
 
-		run_command sudo DEBIAN_FRONTEND=noninteractive apt-get purge -y phpmyadmin
+		run_command sudo apt-get purge -y phpmyadmin
 		error_handler $? "PhpMyAdmin > La suppression des fichiers résiduels a échouée."
 
-		run_command sudo DEBIAN_FRONTEND=noninteractive apt-get remove -y phpmyadmin
+		run_command sudo apt-get remove -y phpmyadmin
 		error_handler $? "PhpMyAdmin > La suppression des dépendances inutilisées a échouée."
 
 		run_command sudo rm -rf /etc/phpmyadmin /usr/share/phpmyadmin /var/lib/phpmyadmin
