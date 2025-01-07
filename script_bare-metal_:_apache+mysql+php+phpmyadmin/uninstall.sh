@@ -89,7 +89,7 @@ php_installed=$?
 check_service_installed "mysql"
 mysql_installed=$?
 
-check_phpmyadmin_installed
+check_service_installed "phpmyadmin"
 phpmyadmin_installed=$?
 
 error_count=0
