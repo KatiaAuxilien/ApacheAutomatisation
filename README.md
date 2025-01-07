@@ -43,7 +43,7 @@ TODO
 
 Step 1 : Create a .env file in ApacheAutomatisation.
 ```sh
-touch ApacheAutomatisation/.env
+touch PAMPLUSS/.env
 ```
 
 Step 2 : Define environment variables. (Example :)
