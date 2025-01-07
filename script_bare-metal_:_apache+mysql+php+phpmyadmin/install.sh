@@ -59,16 +59,16 @@ source ./.common.sh
 
 logs_info "Vérification des services déjà installés ..."
 
-check_service_installed "apache"
+check_service "apache"
 apache_installed=$?
 
-check_service_installed "php"
+check_service "php"
 php_installed=$?
 
-check_service_installed "mysql"
+check_service "mysql"
 mysql_installed=$?
 
-check_service_installed "phpmyadmin"
+check_phpmyadmin_installed
 phpmyadmin_installed=$?
 
 error_count=0
