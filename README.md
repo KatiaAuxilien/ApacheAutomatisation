@@ -112,35 +112,60 @@ sudo ./uninstall.sh
 - Virtualization class  during my computer science studies.
 - Installation and configuration of complex services class during my computer science studies.
 
-https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-ubuntu-20-04-fr
-https://www.howtogeek.com/devops/how-to-host-multiple-websites-with-one-apache-server/
-https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-on-arch-linux
-https://wiki.archlinux.org/title/Apache_HTTP_Server
-https://www.digitalocean.com/community/tutorials/how-to-set-up-apache-virtual-hosts-on-arch-linux
-https://httpd.apache.org/docs/current/howto/htaccess.html
-https://httpd.apache.org/docs/current/mod/core.html#allowoverride
-https://blog.hubspot.fr/website/htaccess
-https://www.codeur.com/tuto/creation-de-site-internet/proteger-site-avec-mot-de-passe/
-https://httpd.apache.org/docs/current/mod/core.html#allowoverride
-https://htaccessbook.com/disable-directory-indexes/
-https://www.it-connect.fr/configurer-le-ssl-avec-apache-2/
-https://www.ssltrust.com/help/setup-guides/arch-linux-ssl-install-guide
-https://techexpert.tips/fr/apache-fr/activer-https-sur-apache/
-https://ubuntu.com/server/docs/how-to-install-and-configure-phpmyadmin
-https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-20-04
-https://ubuntu.com/server/docs/how-to-install-and-configure-php
-https://www.digitalocean.com/community/tutorials/how-to-install-php-8-1-and-set-up-a-local-development-environment-on-ubuntu-22-04
-https://ubuntu.com/server/docs/install-and-configure-a-mysql-server
-https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04
-https://ubuntu.com/tutorials/install-and-configure-apache#1-overview
-https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-ubuntu-20-04
+1. DigitalOcean, "How To Install the Apache Web Server on Ubuntu 20.04," DigitalOcean Community Tutorials, [Online]. Available: https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-ubuntu-20-04-fr. [Accessed: 14-Dec.-2024].
 
-https://fr.linux-terminal.com/?p=3240
-https://en.wikipedia.org/wiki/ModSecurity
-https://owasp.org/www-project-modsecurity/
+2. How-To Geek, "How to Host Multiple Websites with One Apache Server," How-To Geek, [Online]. Available: https://www.howtogeek.com/devops/how-to-host-multiple-websites-with-one-apache-server/. [Accessed: 14-Dec.-2024].
 
-https://bobcares.com/blog/configure-mod_evasive/
-https://www.linuxtricks.fr/wiki/apache-limiter-la-bande-passante-avec-ratelimit-ou-mod_bw
+3. DigitalOcean, "How To Install Linux, Apache, MySQL, PHP (LAMP) stack on Arch Linux," DigitalOcean Community Tutorials, [Online]. Available: https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-on-arch-linux. [Accessed: 14-Dec.-2024].
+
+4. ArchWiki, "Apache HTTP Server," ArchWiki, [Online]. Available: https://wiki.archlinux.org/title/Apache_HTTP_Server. [Accessed: 14-Dec.-2024].
+
+5. DigitalOcean, "How To Set Up Apache Virtual Hosts on Arch Linux," DigitalOcean Community Tutorials, [Online]. Available: https://www.digitalocean.com/community/tutorials/how-to-set-up-apache-virtual-hosts-on-arch-linux. [Accessed: 14-Dec.-2024].
+
+6. Apache HTTP Server Project, ".htaccess - How to," Apache HTTP Server Documentation, [Online]. Available: https://httpd.apache.org/docs/current/howto/htaccess.html. [Accessed: 14-Dec.-2024].
+
+7. Apache HTTP Server Project, "Core Features - AllowOverride," Apache HTTP Server Documentation, [Online]. Available: https://httpd.apache.org/docs/current/mod/core.html#allowoverride. [Accessed: 14-Dec.-2024].
+
+8. HubSpot, "Le fichier .htaccess : qu'est-ce que c'est et comment l'utiliser ?," HubSpot Blog, [Online]. Available: https://blog.hubspot.fr/website/htaccess. [Accessed: 14-Dec.-2024].
+
+9. Codeur, "Protéger un site avec un mot de passe," Codeur, [Online]. Available: https://www.codeur.com/tuto/creation-de-site-internet/proteger-site-avec-mot-de-passe/. [Accessed: 14-Dec.-2024].
+
+10. Apache HTTP Server Project, "Core Features - AllowOverride," Apache HTTP Server Documentation, [Online]. Available: https://httpd.apache.org/docs/current/mod/core.html#allowoverride. [Accessed: 14-Dec.-2024].
+
+11. Htaccess Book, "Disable Directory Indexes," Htaccess Book, [Online]. Available: https://htaccessbook.com/disable-directory-indexes/. [Accessed: 14-Dec.-2024].
+
+12. IT-Connect, "Configurer le SSL avec Apache 2," IT-Connect, [Online]. Available: https://www.it-connect.fr/configurer-le-ssl-avec-apache-2/. [Accessed: 14-Dec.-2024].
+
+13. SSL Trust, "Arch Linux SSL Install Guide," SSL Trust, [Online]. Available: https://www.ssltrust.com/help/setup-guides/arch-linux-ssl-install-guide. [Accessed: 14-Dec.-2024].
+
+14. TechExpert.tips, "Activer HTTPS sur Apache," TechExpert.tips, [Online]. Available: https://techexpert.tips/fr/apache-fr/activer-https-sur-apache/. [Accessed: 14-Dec.-2024].
+
+15. Ubuntu, "How to install and configure phpMyAdmin," Ubuntu Server Documentation, [Online]. Available: https://ubuntu.com/server/docs/how-to-install-and-configure-phpmyadmin. [Accessed: 14-Dec.-2024].
+
+16. DigitalOcean, "How To Install and Secure phpMyAdmin on Ubuntu 20.04," DigitalOcean Community Tutorials, [Online]. Available: https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-20-04. [Accessed: 14-Dec.-2024].
+
+17. Ubuntu, "How to install and configure PHP," Ubuntu Server Documentation, [Online]. Available: https://ubuntu.com/server/docs/how-to-install-and-configure-php. [Accessed: 14-Dec.-2024].
+
+18. DigitalOcean, "How To Install PHP 8.1 and Set Up a Local Development Environment on Ubuntu 22.04," DigitalOcean Community Tutorials, [Online]. Available: https://www.digitalocean.com/community/tutorials/how-to-install-php-8-1-and-set-up-a-local-development-environment-on-ubuntu-22-04. [Accessed: 14-Dec.-2024].
+
+19. Ubuntu, "Install and configure a MySQL server," Ubuntu Server Documentation, [Online]. Available: https://ubuntu.com/server/docs/install-and-configure-a-mysql-server. [Accessed: 14-Dec.-2024].
+
+20. DigitalOcean, "How To Install MySQL on Ubuntu 20.04," DigitalOcean Community Tutorials, [Online]. Available: https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04. [Accessed: 14-Dec.-2024].
+
+21. Ubuntu, "Install and configure Apache," Ubuntu Tutorials, [Online]. Available: https://ubuntu.com/tutorials/install-and-configure-apache#1-overview. [Accessed: 14-Dec.-2024].
+
+22. DigitalOcean, "How To Install the Apache Web Server on Ubuntu 20.04," DigitalOcean Community Tutorials, [Online]. Available: https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-ubuntu-20-04. [Accessed: 14-Dec.-2024].
+
+23. Linux-Terminal, "ModSecurity," Linux-Terminal, [Online]. Available: https://fr.linux-terminal.com/?p=3240. [Accessed: 14-Dec.-2024].
+
+24. Wikipedia, "ModSecurity," Wikipedia, [Online]. Available: https://en.wikipedia.org/wiki/ModSecurity. [Accessed: 14-Dec.-2024].
+
+25. OWASP, "ModSecurity," OWASP, [Online]. Available: https://owasp.org/www-project-modsecurity/. [Accessed: 14-Dec.-2024].
+
+26. Bobcares, "Configure mod_evasive," Bobcares Blog, [Online]. Available: https://bobcares.com/blog/configure-mod_evasive/. [Accessed: 14-Dec.-2024].
+
+27. LinuxTricks, "Apache : limiter la bande passante avec ratelimit ou mod_bw," LinuxTricks, [Online]. Available: https://www.linuxtricks.fr/wiki/apache-limiter-la-bande-passante-avec-ratelimit-ou-mod_bw. [Accessed: 14-Dec.-2024].
+
 
 ## Author
 
@@ -150,9 +175,9 @@ https://www.linuxtricks.fr/wiki/apache-limiter-la-bande-passante-avec-ratelimit-
 * Github: [@KatiaAuxilien](https://github.com/KatiaAuxilien)
 <!-- * LinkedIn: [@TODO](https://linkedin.com/in/TODO) -->
 
-<!--## 🤝 Contributing-->
+## 🤝 Contributing
 
-<!--Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/KatiaAuxilien/ApacheAutomatisation/issues). -->
+Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/KatiaAuxilien/ApacheAutomatisation/issues).
 
 ## Show your support
 
