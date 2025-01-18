@@ -1,2 +1,0 @@
-# ModSecurity : https://yourdomain.com/?id=3 or 'a'='a'
-# ModEvasive : perl /usr/share/doc/libapache2-mod-evasive/examples/test.pl
